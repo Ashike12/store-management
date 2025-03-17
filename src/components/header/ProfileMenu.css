@@ -1,0 +1,8 @@
+.profile-menu-override {
+  .MuiList-root {
+    padding: 0;
+  }
+  .MuiMenuItem-root.Mui-focusVisible {
+    background-color: var(--color-transparent-interaction-16);
+  }
+}

@@ -1,0 +1,6 @@
+.header-search-input {
+  .MuiInputBase-input {
+    color: var(--color-text-primary);
+    font-size: 14px;
+  }
+}
