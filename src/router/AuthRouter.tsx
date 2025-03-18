@@ -5,7 +5,7 @@ import {Routes, Route} from 'react-router-dom';
 export default function AuthRouter() {
   return (
     <Routes>
-      <Route key="sign-in" path={ROUTE_PATH.login.path} element={<Login />} />
+      <Route path={ROUTE_PATH.login.path} element={<Login />} />
     </Routes>
   );
 }

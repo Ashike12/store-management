@@ -13,7 +13,7 @@ const getToken = () => 'token';
 // Function to refresh the token
 const refreshAccessToken = async () => {
   try {
-    const response = await fetch(`${APP_CONFIG.baseUrl}/auth/refresh`, {
+    const response = await fetch(`${APP_CONFIG.businessUrl}/auth/refresh`, {
       method: 'POST',
       credentials: 'include', // Ensures cookies are sent (if needed)
     });

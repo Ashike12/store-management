@@ -1,3 +1,70 @@
+import { CustomButton } from "@components/button/CustomButton";
+import { useGetAuthDataMutation } from "@core/store/api/authAPI";
+import { TextField, Container, Typography, Box } from "@mui/material";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+
 export default function login() {
-  return <div>login</div>;
+  const [login, { isLoading }] = useGetAuthDataMutation();
+  const formik = useFormik({
+    initialValues: {
+      email: "",
+      password: "",
+    },
+    validationSchema: Yup.object({
+      email: Yup.string()
+        .email("Invalid email format")
+        .required("Email is required"),
+      password: Yup.string()
+        .min(6, "Password must be at least 6 characters")
+        .required("Password is required"),
+    }),
+    onSubmit: async (values) => {
+      console.log("Login Data:", values);
+      await login(values).unwrap();
+    },
+  });
+
+  return (
+    <Container maxWidth="xs">
+      <Box sx={{ mt: 5, p: 3, boxShadow: 3, borderRadius: 2 }}>
+        <Typography variant="h5" align="center" gutterBottom>
+          Login
+        </Typography>
+        <form onSubmit={formik.handleSubmit}>
+          <TextField
+            fullWidth
+            label="Email"
+            name="email"
+            variant="outlined"
+            margin="normal"
+            value={formik.values.email}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.email && Boolean(formik.errors.email)}
+            helperText={formik.touched.email && formik.errors.email}
+          />
+          <TextField
+            fullWidth
+            label="Password"
+            type="password"
+            name="password"
+            variant="outlined"
+            margin="normal"
+            value={formik.values.password}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.password && Boolean(formik.errors.password)}
+            helperText={formik.touched.password && formik.errors.password}
+          />
+          <CustomButton
+            className="w-full cursor-pointer"
+            text={'Button'}
+            iconAlign="left"
+            variant={'primary'}
+          />
+        </form>
+      </Box>
+    </Container>
+  );
 }

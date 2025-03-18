@@ -1,5 +1,5 @@
-import {Suspense} from 'react';
-import {Navigate, Outlet, Route, Routes} from 'react-router-dom';
+import {Suspense, useEffect} from 'react';
+import {Navigate, Outlet, Route, Routes, useLocation} from 'react-router-dom';
 import BASE_ROUTES from '@core/config/base-routes';
 import BaseLayout from '@layout/BaseLayout';
 import {LinearProgress, linearProgressClasses} from '@mui/material';
@@ -22,6 +22,12 @@ const renderFallback = (
 );
 
 export default function AppRouter() {
+  const location = useLocation();
+
+  useEffect(() => {
+    console.log('Current Route:', location.pathname);
+  }, [location]);
+
   return (
     <Routes>
       <Route
@@ -35,7 +41,7 @@ export default function AppRouter() {
         }>
         <Route
           index
-          element={<Navigate to={ROUTE_PATH.dashBoard.path} replace />}
+          element={<Navigate to='/dashboard' replace />}
         />
         {BASE_ROUTES.map(({path, Component}) => (
           <Route key={path} path={path} element={<Component />} />

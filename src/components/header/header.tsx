@@ -7,6 +7,9 @@ import TextWrapper from '@components/text/TextWrapper';
 import useGetHeaderTitle from '@core/hooks/useGetHeaderTitle';
 import BusinessLogoExpanded from '@assets/images/logo-business - expanded.png';
 import cn from '@core/utils/cn';
+import { CustomButton } from '@components/button/CustomButton';
+import { useAppDispatch } from '@core/store/hooks';
+import { removeLogin } from '@core/store/slices/auth.slice';
 
 interface AppBarProps {
   open?: boolean;
@@ -26,6 +29,10 @@ const AppBar = styled(MuiAppBar)<AppBarProps>(({ theme }) => ({
 
 export default function Header({ isLocked }: Readonly<IHeaderProps>) {
   const headerInfo = useGetHeaderTitle();
+  const dispatch = useAppDispatch();
+  const handleLogout = () => {
+    dispatch(removeLogin());
+  };
   return (
     <AppBar
       position={'sticky'}
@@ -49,8 +56,9 @@ export default function Header({ isLocked }: Readonly<IHeaderProps>) {
             )}
           </div>
         </div>
-        <div>
+        <div className='flex justify-end basis-3/10'>
           <img width={100} src={BusinessLogoExpanded} alt="expanded logo" />
+          <CustomButton onClick={() => handleLogout()} className='ml-4 mt-2 cursor-pointer' text={'LOGOUT'} variant={'primary'}></CustomButton>
         </div>
       </Toolbar>
     </AppBar>
