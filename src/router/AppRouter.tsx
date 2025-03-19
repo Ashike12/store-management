@@ -22,11 +22,6 @@ const renderFallback = (
 );
 
 export default function AppRouter() {
-  const location = useLocation();
-
-  useEffect(() => {
-    console.log('Current Route:', location.pathname);
-  }, [location]);
 
   return (
     <Routes>
@@ -48,7 +43,7 @@ export default function AppRouter() {
         ))}
       </Route>
       <Route path="404" element={<NotFoundView />} />
-      <Route path="*" element={<Navigate to="/404" replace />} />
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
 }

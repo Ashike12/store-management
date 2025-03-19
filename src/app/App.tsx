@@ -24,8 +24,6 @@ function AuthGuard({ isLogin, children }: { isLogin: boolean; children: React.Re
   useEffect(() => {
     if (!isLogin) {
       navigate('/login', { replace: true });
-    } else {
-      navigate('/dashboard', { replace: true });
     }
   }, [isLogin, navigate]);
 

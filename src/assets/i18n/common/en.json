@@ -3,5 +3,13 @@
   "DASHBOARD": "Dashboard",
   "PRODUCTS": "Products",
   "WHOLESALERS": "Whole salers",
-  "PROJECT_TITLE": "Laki Moshari Store​"
+  "PROJECT_TITLE": "Laki Moshari Store",
+  "LOGOUT": "Logout",
+  "ADD_PRODUCT": "Add Product",
+  "UPDATE_PRODUCT": "Update Product",
+  "PRODUCT_NAME": "Product Name",
+  "PRODUCT_DESCRIPTION": "Product Description",
+  "MAKING_COST": "Making Cost",
+  "SELLING_COST": "Selling Cost",
+  "QUANTITY": "Quantity"
 }

@@ -29,7 +29,19 @@ export const authApi = createApi({
         }
       },
     }),
+    getAuthDataByRefreshToken: builder.mutation<IAuthResponse, {refreshToken: string}>({
+      query: (mutation) => ({
+        url: `${APP_CONFIG.businessUrl}/auth/refresh`,
+        method: 'POST',
+        body: {
+          RefreshToken: mutation.refreshToken
+        },
+      }),
+      transformResponse: (response: IAuthResponse) => {
+        return response as IAuthResponse;
+      },
+    }),
   }),
 });
 
-export const {useGetAuthDataMutation} = authApi;
+export const {useGetAuthDataMutation, useGetAuthDataByRefreshTokenMutation} = authApi;
