@@ -1,7 +1,8 @@
 {
   "name": "store-management",
+  "homepage": "https://github.com/Ashike12/store-management-node",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
   "scripts": {
     "dev": "npm run dotenv:dev --  vite",
@@ -18,7 +19,9 @@
     "test": "vitest",
     "coverage": "vitest run --coverage",
     "format": "prettier --write ./src/**/*.{js,jsx,ts,tsx,json} --config ./.prettierrc.json",
-    "postinstall": "husky install"
+    "postinstall": "husky install",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "lint-staged": {
     "*{.ts,.tsx,.js,.json}": "prettier --config ./.prettierrc.json --write \"./src/**/*.{ts,tsx,js,json}\""
