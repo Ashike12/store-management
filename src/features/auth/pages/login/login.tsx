@@ -31,8 +31,9 @@ export default function login() {
         <Typography variant="h5" align="center" gutterBottom>
           Login
         </Typography>
-        <form onSubmit={formik.handleSubmit}>
+        <form className="p-5" onSubmit={formik.handleSubmit}>
           <TextField
+            autoComplete="off"
             fullWidth
             label="Email"
             name="email"
@@ -51,6 +52,7 @@ export default function login() {
             name="password"
             variant="outlined"
             margin="normal"
+            autoComplete="new-password"
             value={formik.values.password}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
@@ -58,8 +60,9 @@ export default function login() {
             helperText={formik.touched.password && formik.errors.password}
           />
           <CustomButton
+            disabled={!(formik.dirty && formik.isValid)}
             className="w-full cursor-pointer"
-            text={'Button'}
+            text={'LOGIN'}
             iconAlign="left"
             variant={'primary'}
           />

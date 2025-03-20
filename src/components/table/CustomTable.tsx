@@ -58,10 +58,10 @@ const CustomTable = <T extends Record<string, any>>({
                             {showActionButtons && (
                                 <td key={'action'+rowIndex} colSpan={columns.length} className="border border-grey-grey-200 px-4 py-2">
                                     <IconButton onClick={() => handleRowClick(row, false)} size={'small'} className="!ml-2 px-5">
-                                        <IconEdit />
+                                        <IconEdit color="green" />
                                     </IconButton>
                                     <IconButton onClick={() => handleRowClick(row, true)} size={'small'} className="!ml-2 px-5">
-                                        <IconTrash />
+                                        <IconTrash color="red" />
                                     </IconButton>
                                 </td>
                             )}

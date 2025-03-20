@@ -1,46 +1,75 @@
 import {createApi} from '@reduxjs/toolkit/query/react';
 import {ApiServiceBaseQuery} from './baseQueries';
+import {APP_CONFIG} from '@core/config/config';
+import {IAuthResponse} from '@core/interfaces/api/IAuthResponse';
+import { ICreateUserPayload, IUser, IUserResponse } from '@core/interfaces/api/IUser';
 
-// API Service with Empty `baseQuery`
-export const usersApi = createApi({
+export const userApi = createApi({
   reducerPath: 'userApi',
   baseQuery: ApiServiceBaseQuery, // Empty baseQuery (no base URL here)
-  tagTypes: ['users'],
-  keepUnusedDataFor: 120, //  Keep unused data in cache for 120 seconds (2 mins)
+  tagTypes: ['user'],
   endpoints: builder => ({
-    // GET User List
-    getUsers: builder.query<{id: number; name: string}[], void>({
-      query: () => ({
-        url: 'users', // Specify full URL for GET
-      }),
-      providesTags: ['users'],
-    }),
-
-    // CREATE USER
-    createUser: builder.mutation<{success: boolean}, {name: string}>({
-      query: body => ({
-        url: 'create', // Specify full URL for POST
+    createUser: builder.mutation<IAuthResponse, {payload: ICreateUserPayload}>({
+      query: (mutation) => ({
+        url: `${APP_CONFIG.businessUrl}/user/createCustomer`,
         method: 'POST',
-        body,
+        body: mutation.payload,
       }),
-      invalidatesTags: ['users'], // Refetch after creating
+      async onQueryStarted(id, {dispatch, queryFulfilled}) {
+        // `onStart` side-effectdispatch(messageCreated('Fetching post...'))
+        try {
+          const {data} = await queryFulfilled;
+          console.log('user-create-data', data);
+        } catch (err) {
+          // `onError` side-effectdispatch(messageCreated('Error fetching post!'))
+        }
+      },
     }),
-
-    // UPDATE USER
-    updateUser: builder.mutation<
-      {success: boolean},
-      {id: number; name: string}
-    >({
-      query: ({id, name}) => ({
-        url: 'update', // Specify full URL for PUT
-        method: 'PUT',
-        body: {id, name},
+    updateUser: builder.mutation<IAuthResponse, {payload: IUser}>({
+      query: (mutation) => ({
+        url: `${APP_CONFIG.businessUrl}/user/update`,
+        method: 'POST',
+        body: mutation.payload,
       }),
-      invalidatesTags: ['users'], // Refetch after updating
+      async onQueryStarted(id, {dispatch, queryFulfilled}) {
+        // `onStart` side-effectdispatch(messageCreated('Fetching post...'))
+        try {
+          const {data} = await queryFulfilled;
+          console.log('user-create-data', data);
+        } catch (err) {
+          // `onError` side-effectdispatch(messageCreated('Error fetching post!'))
+        }
+      },
     }),
+    deleteUser: builder.mutation<IAuthResponse, {id: string}>({
+      query: (mutation) => ({
+        url: `${APP_CONFIG.businessUrl}/user/delete`,
+        method: 'POST',
+        body: {
+          ItemId: mutation.id,
+        },
+      }),
+      async onQueryStarted(id, {dispatch, queryFulfilled}) {
+        // `onStart` side-effectdispatch(messageCreated('Fetching post...'))
+        try {
+          const {data} = await queryFulfilled;
+          console.log('user-delete-data', data);
+        } catch (err) {
+          // `onError` side-effectdispatch(messageCreated('Error fetching post!'))
+        }
+      },
+    }),
+    getUser: builder.query<IUserResponse, {pageNumber: number, pageSize: number, itemId: string}>({
+      query: (mutation) => ({
+        url: `${APP_CONFIG.businessUrl}/user/get?page=${mutation.pageNumber}&size=${mutation.pageSize}`,
+        method: 'GET',
+      }),
+      providesTags: (_result, _error) => [{type: 'user'}], // Cache by ID
+      transformResponse: (response: IUserResponse) => {
+        return response;
+      },
+    })
   }),
 });
 
-// Export hooks
-export const {useGetUsersQuery, useCreateUserMutation, useUpdateUserMutation} =
-  usersApi;
+export const {useCreateUserMutation, useUpdateUserMutation, useDeleteUserMutation, useGetUserQuery} = userApi;

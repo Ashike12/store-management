@@ -2,16 +2,18 @@ import TextWrapper from "@components/text/TextWrapper";
 import useLocalization from "@core/hooks/useLocalization";
 import { Modal, Box, TextField, Button } from "@mui/material";
 
-export interface IProductForm {
+export interface IUserForm {
     ItemId: string;
-    ProductName: string;
-    Description: string;
-    MakingPrice: string;
-    SellingPrice: string;
-    Quantity: string;
+    Active: boolean;
+    FirstName: string;
+    LastName: string;
+    Email: string;
+    Address: string;
+    Phone: string;
+    Password: string;
 }
 
-export default function ProductModal({
+export default function UserModal({
     isOpen,
     handleCancel,
     formData,
@@ -21,7 +23,7 @@ export default function ProductModal({
 }: {
     isOpen: boolean;
     handleCancel: () => void;
-    formData: IProductForm;
+    formData: IUserForm;
     handleFormData: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
     handleSubmit: () => void;
     isUpdate?: boolean;
@@ -44,49 +46,59 @@ export default function ProductModal({
                     borderRadius: 2,
                 }}
             >
-                <TextWrapper variant={'H5'} content = {!isUpdate ? 'ADD_PRODUCT' : 'UPDATE_PRODUCT'}/>
+                <TextWrapper variant={'H5'} content = {!isUpdate ? 'ADD_USER' : 'UPDATE_USER'}/>
 
                 {/* Form Fields */}
                 <Box display="flex" flexDirection="column" className="gap-5 mt-4">
                     <TextField
                         className="w-full"
-                        label={useTranslation({content:'PRODUCT_NAME'})}
-                        name="ProductName"
-                        value={formData?.ProductName}
+                        label={useTranslation({content:'FIRST_NAME'})}
+                        name="FirstName"
+                        value={formData?.FirstName}
                         onChange={handleFormData}
                         fullWidth
                     />
                     <TextField
-                        label={useTranslation({content:'PRODUCT_DESCRIPTION'})}
-                        name="Description"
-                        value={formData?.Description}
+                        label={useTranslation({content:'LAST_NAME'})}
+                        name="LastName"
+                        value={formData?.LastName}
                         onChange={handleFormData}
                         fullWidth
                     />
                     <TextField
-                        label={useTranslation({content:'MAKING_COST'})}
-                        name="MakingPrice"
-                        type="number"
-                        value={formData?.MakingPrice}
+                        label={useTranslation({content:'EMAIL'})}
+                        name="Email"
+                        type="string"
+                        value={formData?.Email}
                         onChange={handleFormData}
                         fullWidth
                     />
                     <TextField
-                        label={useTranslation({content:'SELLING_COST'})}
-                        name="SellingPrice"
-                        type="number"
-                        value={formData?.SellingPrice}
+                        label={useTranslation({content:'ADDRESS'})}
+                        name="Address"
+                        type="string"
+                        value={formData?.Address}
                         onChange={handleFormData}
                         fullWidth
                     />
                     <TextField
-                        label={useTranslation({content:'QUANTITY'})}
-                        name="Quantity"
-                        type="number"
-                        value={formData?.Quantity}
+                        label={useTranslation({content:'PHONE_NUMBER'})}
+                        name="Phone"
+                        type="string"
+                        value={formData?.Phone}
                         onChange={handleFormData}
                         fullWidth
                     />
+                    {!isUpdate && (<TextField
+                        label={useTranslation({content:'PASSWORD'})}
+                        name="Password"
+                        type="password"
+                        autoComplete="new-password"
+                        autoFocus={false}
+                        value={formData?.Password}
+                        onChange={handleFormData}
+                        fullWidth
+                    />)}
                 </Box>
 
                 {/* Buttons */}

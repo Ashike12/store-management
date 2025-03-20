@@ -68,6 +68,12 @@ export default function StoreManagement() {
     }
   }
 
+  const handleCancel = () => {
+    setIsOpen(false);
+    setIsUpdate(false);
+    setFormData(initialFormData);
+  }
+
   const handleRowClick = async (row: IProduct, isDelete: boolean) => {
     setFormData({
       ItemId: row.ItemId,
@@ -116,7 +122,7 @@ export default function StoreManagement() {
         </div>)}
       </div>
       {isOpen && (
-        <ProductModal isUpdate={isUpdate} handleSubmit={handleSubmit} formData={formData} isOpen={isOpen} handleFormData={handleSave} setIsOpen={setIsOpen} />
+        <ProductModal isUpdate={isUpdate} handleSubmit={handleSubmit} formData={formData} isOpen={isOpen} handleFormData={handleSave} handleCancel={handleCancel} />
       )}
 
       {isDelete && (

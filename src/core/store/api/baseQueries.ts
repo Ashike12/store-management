@@ -6,9 +6,10 @@ import {
   FetchBaseQueryMeta,
 } from '@reduxjs/toolkit/query';
 import { APP_CONFIG } from '@core/config/config';
-import { RootState } from '../store';
+import { persistor, RootState } from '../store';
 import { IAuthResponse } from '@core/interfaces/api/IAuthResponse';
 import { addLogin, removeLogin } from '../slices/auth.slice';
+import { useNavigate } from 'react-router-dom';
 
 // Function to refresh the token
 const refreshAccessToken = async (refreshToken: string): Promise<IAuthResponse | null> => {
@@ -21,8 +22,7 @@ const refreshAccessToken = async (refreshToken: string): Promise<IAuthResponse |
       body: JSON.stringify({ RefreshToken: refreshToken }),
     });
     if (!response.ok) {
-      removeLogin();
-      throw new Error("Failed to refresh token");
+      throw new Error("Failed to refresh tokensss");
     }
 
     const data = await response.json();
@@ -80,6 +80,9 @@ const customBaseQuery =
           result = await baseQuery(args, api, extraOptions);
         } else {
           console.error('Token refresh failed. Logging out...');
+          removeLogin();
+          // persistor.purge(); // Clear all state
+          window.location.href = '/login';
           // api.dispatch(fetchAllLogout()); // Dispatch logout action
         }
       }

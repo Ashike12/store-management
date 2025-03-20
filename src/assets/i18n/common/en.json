@@ -5,6 +5,7 @@
   "WHOLESALERS": "Whole salers",
   "PROJECT_TITLE": "Laki Moshari Store",
   "LOGOUT": "Logout",
+  "LOGIN": "Login",
   "ADD_PRODUCT": "Add Product",
   "UPDATE_PRODUCT": "Update Product",
   "PRODUCT_NAME": "Product Name",
@@ -12,5 +13,16 @@
   "MAKING_COST": "Making Cost",
   "SELLING_COST": "Selling Cost",
   "QUANTITY": "Quantity",
-  "ARE_YOU_SURE_TO_DELETE": "Are you sure to delete this product? Once deleted, it can not be recovered."
+  "ARE_YOU_SURE_TO_DELETE": "Are you sure to delete this product? Once deleted, it can not be recovered.",
+  "NAME": "Name",
+  "EMAIL": "Email",
+  "PHONE_NUMBER": "Phone Number",
+  "ADDRESS": "Address",
+  "DATE_OF_BIRTH": "Date of Creation",
+  "FIRST_NAME": "First Name",
+  "LAST_NAME": "Last Name",
+  "ADD_USER": "Add User",
+  "UPDATE_USER": "Update User",
+  "ACTION": "Action",
+  "PASSWORD": "Password"
 }

@@ -25,6 +25,7 @@ const authSlice = createSlice({
 });
 
 export const { addLogin, removeLogin } = authSlice.actions;
+
 export const selectAppIsLogin = (state: RootState) => {
   const login_token = state.persisted.auth.login_token;
   const refresh_token = state.persisted.auth.refresh_token;
