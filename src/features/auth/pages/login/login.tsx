@@ -26,8 +26,8 @@ export default function login() {
   });
 
   return (
-    <Container maxWidth="xs">
-      <Box sx={{ mt: 5, p: 3, boxShadow: 3, borderRadius: 2 }}>
+    <Container className="" maxWidth="xs">
+      <Box sx={{ mt: 5, p: 3, boxShadow: 3, borderRadius: 2, backgroundColor: "white" }}>
         <Typography variant="h5" align="center" gutterBottom>
           Login
         </Typography>
@@ -60,9 +60,10 @@ export default function login() {
             helperText={formik.touched.password && formik.errors.password}
           />
           <CustomButton
-            disabled={!(formik.dirty && formik.isValid)}
-            className="w-full cursor-pointer"
+            disabled={!(formik.dirty && formik.isValid && !isLoading)}
+            className="w-full cursor-pointer mt-4"
             text={'LOGIN'}
+            loading={isLoading}
             iconAlign="left"
             variant={'primary'}
           />
