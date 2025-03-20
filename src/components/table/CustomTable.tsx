@@ -1,4 +1,6 @@
 import TextWrapper from "@components/text/TextWrapper";
+import { IconButton } from "@mui/material";
+import { IconEdit, IconTrash } from "@tabler/icons-react";
 import { useState } from "react";
 
 // Define types for table columns and data
@@ -11,14 +13,16 @@ interface TableProps<T> {
     columns: Column[]; // Array of columns
     data: T[]; // Array of data objects
     rowsPerPage?: number; // Optional pagination setting
-    handleRowClick?: (row: T) => void; // Optional row click handler
+    handleRowClick?: (row: T, isDelete: boolean) => void; // Optional row click handler
+    showActionButtons?: boolean; // Optional flag to show actions column
 }
 
 const CustomTable = <T extends Record<string, any>>({
-    columns, 
+    columns,
     data,
     rowsPerPage = 5,
-    handleRowClick = (row: T) => { }
+    handleRowClick = (row: T, isDelete: boolean) => { },
+    showActionButtons = false
 }: TableProps<T>) => {
     const [currentPage, setCurrentPage] = useState(1);
     const totalPages = Math.ceil(data.length / rowsPerPage);
@@ -28,24 +32,39 @@ const CustomTable = <T extends Record<string, any>>({
 
     return (
         <div className="p-4 bg-white rounded-lg shadow-lg">
-            <table className="w-full border-collapse border border-gray-300">
+            <table className="w-full border rounded-sm border-grey-grey-200">
                 <thead className="bg-gray-200">
                     <tr>
                         {columns.map((col) => (
-                            <th key={col.key} className="border border-gray-300 px-4 py-2 text-left">
-                                <TextWrapper variant={'H6'} content = {col.label}/>
+                            <th key={col.key} className="border border-grey-grey-200 px-4 py-2 text-left">
+                                <TextWrapper variant={'H6'} content={col.label} />
                             </th>
                         ))}
+                        {showActionButtons && (
+                            <th colSpan={columns.length} className="border border-grey-grey-200 px-4 py-2">
+                                <TextWrapper variant={'H6'} content={'ACTION'} />
+                            </th>
+                        )}
                     </tr>
                 </thead>
                 <tbody>
                     {currentData.map((row, rowIndex) => (
-                        <tr onClick={() => handleRowClick(row)} key={rowIndex} className="cursor-pointer hover:bg-gray-100">
+                        <tr key={rowIndex} className="hover:bg-gray-100">
                             {columns.map((col) => (
-                                <td key={col.key} className="border border-gray-300 px-4 py-2">
-                                    <TextWrapper variant={'Body1'} content = {row[col.key]}/>
+                                <td key={col.key} className="border border-grey-grey-200 px-4 py-2">
+                                    <TextWrapper variant={'Body1'} content={row[col.key]} />
                                 </td>
                             ))}
+                            {showActionButtons && (
+                                <td key={'action'+rowIndex} colSpan={columns.length} className="border border-grey-grey-200 px-4 py-2">
+                                    <IconButton onClick={() => handleRowClick(row, false)} size={'small'} className="!ml-2 px-5">
+                                        <IconEdit />
+                                    </IconButton>
+                                    <IconButton onClick={() => handleRowClick(row, true)} size={'small'} className="!ml-2 px-5">
+                                        <IconTrash />
+                                    </IconButton>
+                                </td>
+                            )}
                         </tr>
                     ))}
                 </tbody>

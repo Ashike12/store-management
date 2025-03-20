@@ -1,9 +1,10 @@
 import { CustomButton } from '@components/button/CustomButton';
 import CustomTable from '@components/table/CustomTable';
 import { ICreateProductPayload, IProduct, IProductResponse } from '@core/interfaces/api/IProduct';
-import { useCreateProductMutation, useGetProductQuery, useUpdateProductMutation } from '@core/store/api/product';
+import { useCreateProductMutation, useDeleteProductMutation, useGetProductQuery, useUpdateProductMutation } from '@core/store/api/product';
 import { useState } from 'react';
 import ProductModal, { IProductForm } from '../components/productModal';
+import DeleteConfirmationModal from '@components/confirmation-modal/delete-confirmation.modal';
 
 // Define table columns
 const columns = [
@@ -26,7 +27,9 @@ export default function StoreManagement() {
   const { data, isLoading, refetch } = useGetProductQuery({ pageNumber: 1, pageSize: 10, itemId: '' });
   const [createProduct, { isLoading: isCreating }] = useCreateProductMutation();
   const [updateProduct, { isLoading: isUpdating }] = useUpdateProductMutation();
+  const [deleteProduct, { isLoading: isDeleting }] = useDeleteProductMutation();
   const [isOpen, setIsOpen] = useState(false);
+  const [isDelete, setIsDelete] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
   const [formData, setFormData] = useState<IProductForm>(initialFormData);
   const handleSave = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -35,9 +38,9 @@ export default function StoreManagement() {
       [e.target.name]: e.target.value,
     }));
   };
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (isUpdate) {
-      updateProduct({
+      await updateProduct({
         payload: {
           ItemId: formData.ItemId,
           ProductName: formData.ProductName,
@@ -51,7 +54,7 @@ export default function StoreManagement() {
       setIsUpdate(false);
       refetch();
     } else {
-      createProduct({
+      await createProduct({
         payload: {
           ProductName: formData.ProductName,
           Description: formData.Description,
@@ -65,7 +68,7 @@ export default function StoreManagement() {
     }
   }
 
-  const handleRowClick = (row: IProduct) => {
+  const handleRowClick = async (row: IProduct, isDelete: boolean) => {
     setFormData({
       ItemId: row.ItemId,
       ProductName: row.ProductName,
@@ -74,8 +77,22 @@ export default function StoreManagement() {
       SellingPrice: row.SellingPrice.toString(),
       Quantity: row.Quantity.toString(),
     });
-    setIsUpdate(true);
-    setIsOpen(true);
+    if (isDelete) {
+      setIsDelete(true);
+      // await deleteProduct({id: row.ItemId}).unwrap();
+      // refetch();
+    } else {
+      setIsUpdate(true);
+      setIsOpen(true);
+    }
+  }
+
+  const handleDelete = async (isConfirm: boolean) => {
+    setIsDelete(false);
+    if(isConfirm){
+      await deleteProduct({id: formData.ItemId}).unwrap();
+      refetch();
+    }
   }
 
   const resetForm = () => {
@@ -87,7 +104,12 @@ export default function StoreManagement() {
       <div className='w-full'>
         <CustomButton onClick={() => resetForm()} className='fixed bottom-4 right-4 ml-4 my-3 cursor-pointer' text={'ADD_PRODUCT'} variant={'primary'}></CustomButton>
         {data && data && data?.Data?.length > 0 && (<div className="p-10 w-full">
-          <CustomTable handleRowClick={handleRowClick} columns={columns} data={data?.Data || []} rowsPerPage={10} />
+          <CustomTable
+            showActionButtons={true}
+            handleRowClick={handleRowClick}
+            columns={columns}
+            data={data?.Data || []}
+            rowsPerPage={10} />
         </div>)}
         {(isLoading) && (<div className="p-10 w-full">
           Loading...
@@ -95,6 +117,10 @@ export default function StoreManagement() {
       </div>
       {isOpen && (
         <ProductModal isUpdate={isUpdate} handleSubmit={handleSubmit} formData={formData} isOpen={isOpen} handleFormData={handleSave} setIsOpen={setIsOpen} />
+      )}
+
+      {isDelete && (
+        <DeleteConfirmationModal handleConfirm={handleDelete} isOpen={true} />
       )}
     </>
   );

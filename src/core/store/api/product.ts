@@ -41,6 +41,24 @@ export const productApi = createApi({
         }
       },
     }),
+    deleteProduct: builder.mutation<IAuthResponse, {id: string}>({
+      query: (mutation) => ({
+        url: `${APP_CONFIG.businessUrl}/business/DeleteProduct`,
+        method: 'POST',
+        body: {
+          ItemId: mutation.id,
+        },
+      }),
+      async onQueryStarted(id, {dispatch, queryFulfilled}) {
+        // `onStart` side-effectdispatch(messageCreated('Fetching post...'))
+        try {
+          const {data} = await queryFulfilled;
+          console.log('product-delete-data', data);
+        } catch (err) {
+          // `onError` side-effectdispatch(messageCreated('Error fetching post!'))
+        }
+      },
+    }),
     getProduct: builder.query<IProductResponse, {pageNumber: number, pageSize: number, itemId: string}>({
       query: (mutation) => ({
         url: `${APP_CONFIG.businessUrl}/business/GetProducts?page=${mutation.pageNumber}&size=${mutation.pageSize}`,
@@ -57,4 +75,4 @@ export const productApi = createApi({
   }),
 });
 
-export const {useCreateProductMutation, useUpdateProductMutation, useGetProductQuery} = productApi;
+export const {useCreateProductMutation, useUpdateProductMutation, useDeleteProductMutation, useGetProductQuery} = productApi;

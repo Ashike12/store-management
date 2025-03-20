@@ -18,7 +18,7 @@ const refreshAccessToken = async (refreshToken: string): Promise<IAuthResponse |
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ refreshToken: refreshToken }),
+      body: JSON.stringify({ RefreshToken: refreshToken }),
     });
     if (!response.ok) {
       removeLogin();

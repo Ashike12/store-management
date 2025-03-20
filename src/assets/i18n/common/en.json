@@ -11,5 +11,6 @@
   "PRODUCT_DESCRIPTION": "Product Description",
   "MAKING_COST": "Making Cost",
   "SELLING_COST": "Selling Cost",
-  "QUANTITY": "Quantity"
+  "QUANTITY": "Quantity",
+  "ARE_YOU_SURE_TO_DELETE": "Are you sure to delete this product? Once deleted, it can not be recovered."
 }
