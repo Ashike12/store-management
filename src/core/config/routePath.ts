@@ -17,6 +17,12 @@ export const ROUTE_PATH = {
     title: 'WHOLESALERS',
     subTitle: '',
   },
+  invoice: {
+    path: '/invoice',
+    pathMatch: 'invoice',
+    title: 'INVOICE',
+    subTitle: '',
+  },
   login: {
     path: '/login',
   },

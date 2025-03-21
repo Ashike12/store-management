@@ -24,5 +24,12 @@
   "ADD_USER": "Add User",
   "UPDATE_USER": "Update User",
   "ACTION": "Action",
-  "PASSWORD": "Password"
+  "PASSWORD": "Password",
+  "WHOLE_SLAER_NAME": "Whole Saler Name",
+  "TOTAL_BILL": "Total Bill",
+  "PAID_AMOUNT": "Paid Amount",
+  "DUE_AMOUNT": "Due Amount",
+  "YOUR_PROFIT": "Your Profit",
+  "INVOICE": "Invoice",
+  "INVOICE_NUMBER": "Invoice Number"
 }

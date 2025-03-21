@@ -30,6 +30,11 @@ const useGetHeaderTitle = (): HeaderTitle => {
         setSubTitle(ROUTE_PATH.wholesalers.subTitle);
         return;
       }
+      case ROUTE_PATH.invoice.pathMatch: {
+        setTitle(ROUTE_PATH.invoice.title);
+        setSubTitle(ROUTE_PATH.invoice.subTitle);
+        return;
+      }
       default: {
         setTitle('');
         setSubTitle('');

@@ -15,6 +15,7 @@ interface TableProps<T> {
     rowsPerPage?: number; // Optional pagination setting
     handleRowClick?: (row: T, isDelete: boolean) => void; // Optional row click handler
     showActionButtons?: boolean; // Optional flag to show actions column
+    isRowClickable?: boolean; // Optional flag to make row clickable
 }
 
 const CustomTable = <T extends Record<string, any>>({
@@ -22,7 +23,8 @@ const CustomTable = <T extends Record<string, any>>({
     data,
     rowsPerPage = 5,
     handleRowClick = (row: T, isDelete: boolean) => { },
-    showActionButtons = false
+    showActionButtons = false,
+    isRowClickable = false
 }: TableProps<T>) => {
     const [currentPage, setCurrentPage] = useState(1);
     const totalPages = Math.ceil(data.length / rowsPerPage);
@@ -51,7 +53,7 @@ const CustomTable = <T extends Record<string, any>>({
                     {currentData.map((row, rowIndex) => (
                         <tr key={rowIndex} className="hover:bg-gray-100">
                             {columns.map((col) => (
-                                <td key={col.key} className="border border-grey-grey-200 px-4 py-2">
+                                <td key={col.key} className={`border border-grey-grey-200 px-4 py-2 ${isRowClickable ? 'cursor-pointer' : ''}`} onClick={() => isRowClickable && handleRowClick(row, false)}>
                                     <TextWrapper variant={'Body1'} content={row[col.key]} />
                                 </td>
                             ))}

@@ -4,14 +4,25 @@ export interface IInvoiceResponse {
     Data: IInvoice[];
 }
 
-export interface ICreateInvoicePayload {
-    WholesalerId: string;
+export interface IInvoice {
+    ItemId: string;
+    CreatedDate?: string;
+    WholeSalerId: string;
+    WholeSalerName: string;
     TotalAmount: number;
     PaymentAmount: number;
     ProfitMargin: number;
 }
 
-export interface IInvoice extends ICreateInvoicePayload {
-    ItemId: string;
-    CreatedDate?: string;
+export interface ICreateInvoicePayload {
+    PaymentAmount: number;
+    ProfitMargin: number;
+    ProductSellInfo: IProductSellInfo[];
+}
+
+export interface IProductSellInfo {
+    ProductId: string;
+    Quantity: number;
+    SellingPrice: number;
+    SellingDate: number;
 }

@@ -20,6 +20,12 @@ const BASE_ROUTES: IRoute[] = [
     path: ROUTE_PATH.wholesalers.path,
     exact: true,
     Component: React.lazy(() => import('@features/wholesalers/pages/wholesalers')),
+  },
+  {
+    title: ROUTE_PATH.invoice.title,
+    path: ROUTE_PATH.invoice.path,
+    exact: true,
+    Component: React.lazy(() => import('@features/invoice/pages/invoice')),
   }
 ];
 

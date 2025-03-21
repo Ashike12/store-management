@@ -3,20 +3,17 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import List from '@mui/material/List';
-import {styled, Theme, CSSObject} from '@mui/material/styles';
+import { styled, Theme, CSSObject } from '@mui/material/styles';
 import MuiDrawer from '@mui/material/Drawer';
-import {DRAWER_WIDTH} from '@core/config/constants';
-import {EnumLeftSidebarItem} from '@core/enums/left-sidebar-item.enum';
-import IconCirclesFourFilled from '@assets/icons/IconCirclesFourFilled';
-import IconCirclesFourOutline from '@assets/icons/IconCirclesFourOutline';
-import IconKanbanOutline from '@assets/icons/IconKanbanOutline';
-import IconKanbanFilled from '@assets/icons/IconKanbanFilled';
+import { DRAWER_WIDTH } from '@core/config/constants';
+import { EnumLeftSidebarItem } from '@core/enums/left-sidebar-item.enum';
 import BusinessLogo from '@assets/images/logo-business.png';
 import BASE_ROUTES from '@core/config/base-routes';
-import {useMatch, useNavigate} from 'react-router';
+import { useMatch, useNavigate } from 'react-router';
 import IconCaretDoubleLeft from '@assets/icons/IconCaretDoubleLeft';
 import TextWrapper from '@components/text/TextWrapper';
 import IconLock from '@assets/icons/IconLock';
+import { IconBox, IconBuildingStore, IconFileInvoice, IconLayoutDashboard } from '@tabler/icons-react';
 
 const drawerWidth = DRAWER_WIDTH;
 
@@ -43,22 +40,22 @@ const closedMixin = (theme: Theme): CSSObject => ({
   },
 });
 
-const Drawer = styled(MuiDrawer, {shouldForwardProp: prop => prop !== 'open'})(
-  ({theme}) => ({
+const Drawer = styled(MuiDrawer, { shouldForwardProp: prop => prop !== 'open' })(
+  ({ theme }) => ({
     width: drawerWidth,
     flexShrink: 0,
     whiteSpace: 'nowrap',
     boxSizing: 'border-box',
     variants: [
       {
-        props: ({open}) => open,
+        props: ({ open }) => open,
         style: {
           ...openedMixin(theme),
           '& .MuiDrawer-paper': openedMixin(theme),
         },
       },
       {
-        props: ({open}) => !open,
+        props: ({ open }) => !open,
         style: {
           ...closedMixin(theme),
           '& .MuiDrawer-paper': closedMixin(theme),
@@ -79,24 +76,31 @@ interface ISidebarProps {
 const menuItems = [
   {
     type: EnumLeftSidebarItem.DASHBOARD,
-    OutlineIcon: IconCirclesFourOutline,
-    FilledIcon: IconCirclesFourFilled,
+    OutlineIcon: IconLayoutDashboard,
+    FilledIcon: IconLayoutDashboard,
     text: BASE_ROUTES[0].title,
     path: BASE_ROUTES[0].path,
   },
   {
     type: EnumLeftSidebarItem.STORE,
-    OutlineIcon: IconKanbanOutline,
-    FilledIcon: IconKanbanFilled,
+    OutlineIcon: IconBox,
+    FilledIcon: IconBox,
     text: BASE_ROUTES[1].title,
     path: BASE_ROUTES[1].path,
   },
   {
     type: EnumLeftSidebarItem.WHOLESALERS,
-    OutlineIcon: IconKanbanOutline,
-    FilledIcon: IconKanbanFilled,
+    OutlineIcon: IconBuildingStore,
+    FilledIcon: IconBuildingStore,
     text: BASE_ROUTES[2].title,
     path: BASE_ROUTES[2].path,
+  },
+  {
+    type: EnumLeftSidebarItem.INVOICE,
+    OutlineIcon: IconFileInvoice,
+    FilledIcon: IconFileInvoice,
+    text: BASE_ROUTES[3].title,
+    path: BASE_ROUTES[3].path,
   },
 ];
 
@@ -165,7 +169,7 @@ export default function LeftSidebar({
               <ListItem
                 key={item.path}
                 disablePadding
-                sx={{display: 'block'}}
+                sx={{ display: 'block' }}
                 onClick={() => navigateTo(item.path)}>
                 <ListItemButton
                   sx={[
@@ -189,11 +193,11 @@ export default function LeftSidebar({
                     },
                     open
                       ? {
-                          justifyContent: 'initial',
-                        }
+                        justifyContent: 'initial',
+                      }
                       : {
-                          justifyContent: 'center',
-                        },
+                        justifyContent: 'center',
+                      },
                   ]}>
                   <ListItemIcon
                     sx={[
@@ -203,15 +207,17 @@ export default function LeftSidebar({
                       },
                       open
                         ? {
-                            mr: '8px',
-                          }
+                          mr: '8px',
+                        }
                         : {
-                            mr: 0,
-                          },
+                          mr: 0,
+                        },
                     ]}>
-                    {isActiveItem(item.type)
-                      ? item.FilledIcon({color: '#212B36', size: 20})
-                      : item.OutlineIcon({color: '#212B36', size: 20})}
+                    {isActiveItem(item.type) ? (
+                      <item.FilledIcon color="#212B36" size={20} />
+                    ) : (
+                      <item.OutlineIcon color="#212B36" size={20} />
+                    )}
                   </ListItemIcon>
                   <ListItemText
                     primary={
@@ -224,11 +230,11 @@ export default function LeftSidebar({
                     sx={[
                       open
                         ? {
-                            opacity: 1,
-                          }
+                          opacity: 1,
+                        }
                         : {
-                            opacity: 0,
-                          },
+                          opacity: 0,
+                        },
                     ]}
                   />
                 </ListItemButton>
@@ -256,7 +262,7 @@ export default function LeftSidebar({
             </>
           ) : (
             <div className="flex w-full flex-row items-center justify-center">
-              
+
             </div>
           )}
         </div>

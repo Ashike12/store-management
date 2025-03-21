@@ -61,7 +61,7 @@ export const invoiceApi = createApi({
     }),
     getInvoice: builder.query<IInvoiceResponse, {pageNumber: number, pageSize: number, itemId: string}>({
       query: (mutation) => ({
-        url: `${APP_CONFIG.businessUrl}/business/GetInvoices?page=${mutation.pageNumber}&size=${mutation.pageSize}`,
+        url: `${APP_CONFIG.businessUrl}/business/GetInvoice?page=${mutation.pageNumber}&size=${mutation.pageSize}`,
         method: 'POST',
         body: {
           ItemId: mutation.itemId
