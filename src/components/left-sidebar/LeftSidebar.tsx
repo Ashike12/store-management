@@ -75,28 +75,28 @@ interface ISidebarProps {
 
 const menuItems = [
   {
-    type: EnumLeftSidebarItem.DASHBOARD,
+    type: BASE_ROUTES[0].pathMatch,
     OutlineIcon: IconLayoutDashboard,
     FilledIcon: IconLayoutDashboard,
     text: BASE_ROUTES[0].title,
     path: BASE_ROUTES[0].path,
   },
   {
-    type: EnumLeftSidebarItem.STORE,
+    type: BASE_ROUTES[1].pathMatch,
     OutlineIcon: IconBox,
     FilledIcon: IconBox,
     text: BASE_ROUTES[1].title,
     path: BASE_ROUTES[1].path,
   },
   {
-    type: EnumLeftSidebarItem.WHOLESALERS,
+    type: BASE_ROUTES[2].pathMatch,
     OutlineIcon: IconBuildingStore,
     FilledIcon: IconBuildingStore,
     text: BASE_ROUTES[2].title,
     path: BASE_ROUTES[2].path,
   },
   {
-    type: EnumLeftSidebarItem.INVOICE,
+    type: BASE_ROUTES[3].pathMatch,
     OutlineIcon: IconFileInvoice,
     FilledIcon: IconFileInvoice,
     text: BASE_ROUTES[3].title,
