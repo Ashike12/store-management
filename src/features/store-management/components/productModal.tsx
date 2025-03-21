@@ -62,6 +62,7 @@ export default function ProductModal({
                         value={formData?.Description}
                         onChange={handleFormData}
                         fullWidth
+                        rows={2}
                     />
                     <TextField
                         label={useTranslation({content:'MAKING_COST'})}

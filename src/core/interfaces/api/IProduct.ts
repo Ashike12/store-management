@@ -14,4 +14,5 @@ export interface ICreateProductPayload {
 
 export interface IProduct extends ICreateProductPayload {
     ItemId: string;
+    CreatedDate?: string;
 }

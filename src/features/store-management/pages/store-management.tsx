@@ -117,6 +117,9 @@ export default function StoreManagement() {
             data={data?.Data || []}
             rowsPerPage={10} />
         </div>)}
+        {!isLoading && data && data && data?.Data?.length == 0 && (<div className="p-10 w-full">
+          No data found
+        </div>)}
         {(isLoading) && (<div className="p-10 w-full">
           Loading...
         </div>)}

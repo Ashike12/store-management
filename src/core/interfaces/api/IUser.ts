@@ -17,4 +17,5 @@ export interface IUser extends ICreateUserPayload {
     ItemId: string;
     Active: boolean;
     DisplayName: string;
+    CreatedDate?: string;
 }
