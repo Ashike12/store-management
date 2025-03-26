@@ -20,7 +20,6 @@ export default function App() {
 // 🔹 Redirect to /login if not authenticated
 function AuthGuard({ isLogin, children }: { isLogin: boolean; children: React.ReactNode }) {
   const navigate = useNavigate();
-
   useEffect(() => {
     if (!isLogin) {
       navigate('/login', { replace: true });

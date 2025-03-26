@@ -4,24 +4,49 @@ export const ROUTE_PATH = {
     pathMatch: 'dashboard',
     title: 'DASHBOARD',
     subTitle: '',
+    backButtonRoute: null
   },
   store: {
     path: '/products',
     pathMatch: 'products',
     title: 'PRODUCTS',
     subTitle: '',
+    backButtonRoute: null
   },
   wholesalers: {
     path: '/wholesalers',
     pathMatch: 'wholesalers',
     title: 'WHOLESALERS',
     subTitle: '',
+    backButtonRoute: null
   },
   invoice: {
     path: '/invoice',
     pathMatch: 'invoice',
     title: 'INVOICE',
     subTitle: '',
+    backButtonRoute: null
+  },
+  invoiceDetails: {
+    path: '/invoice/details/:id',
+    pathMatch: 'invoice/details',
+    title: 'INVOICE',
+    subTitle: 'DETAILS',
+    backButtonRoute: '/invoice'
+  },
+  invoiceUpdate: {
+    path: '/invoice/update/:id',
+    pathMatch: 'invoice/update',
+    title: 'INVOICE',
+    subTitle: 'UPDATE',
+    backButtonRoute: '/invoice'
+  },
+  invoiceAdd: {
+    path: '/invoice/add/:id',
+    pathMatch: 'invoice/add',
+    title: 'INVOICE',
+    subTitle: 'ADD',
+    backButtonRoute: '/invoice'
   },
   login: {
     path: '/login',

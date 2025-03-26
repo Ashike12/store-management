@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 import { IAuthResponse } from '@core/interfaces/api/IAuthResponse';
+import { localStorageService, storagePath } from '@core/services/localStorage.service';
 
 const namespace = 'auth';
 
@@ -18,6 +19,7 @@ const authSlice = createSlice({
       state.refresh_token = action.payload.refresh_token;
     },
     removeLogin: state => {
+      localStorageService.removeToken();
       state.login_token = '';
       state.refresh_token = '';
     },
@@ -27,8 +29,8 @@ const authSlice = createSlice({
 export const { addLogin, removeLogin } = authSlice.actions;
 
 export const selectAppIsLogin = (state: RootState) => {
-  const login_token = state.persisted.auth.login_token;
-  const refresh_token = state.persisted.auth.refresh_token;
+  const login_token = state.persisted.auth.login_token == '' ? localStorageService.getItemLocalStore(storagePath.AccessToken) : state.persisted.auth.login_token;
+  const refresh_token = state.persisted.auth.refresh_token == '' ? localStorageService.getItemLocalStore(storagePath.RefreshToken) : state.persisted.auth.refresh_token;
   if (login_token != '' && refresh_token != '') {
     return true;
   }

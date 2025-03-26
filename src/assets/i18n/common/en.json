@@ -10,8 +10,8 @@
   "UPDATE_PRODUCT": "Update Product",
   "PRODUCT_NAME": "Product Name",
   "PRODUCT_DESCRIPTION": "Product Description",
-  "MAKING_COST": "Making Cost",
-  "SELLING_COST": "Selling Cost",
+  "MAKING_COST": "Making Price",
+  "SELLING_COST": "Selling Price",
   "QUANTITY": "Quantity",
   "ARE_YOU_SURE_TO_DELETE": "Are you sure to delete this product? Once deleted, it can not be recovered.",
   "NAME": "Name",
@@ -31,5 +31,15 @@
   "DUE_AMOUNT": "Due Amount",
   "YOUR_PROFIT": "Your Profit",
   "INVOICE": "Invoice",
-  "INVOICE_NUMBER": "Invoice Number"
+  "INVOICE_NUMBER": "Invoice number",
+  "DETAILS": "Details",
+  "ADD": "Add",
+  "UPDATE": "Update",
+  "UPDATE_INVOICE": "Update Invoice",
+  "ADD_INVOICE": "Add invoice",
+  "WHOLESALER_NAME": "Whole saler name",
+  "PAYMENT_AMOUNT": "Payment amount",
+  "PROFIT_MARGIN": "Profit margin",
+  "TOTAL_AMOUNT": "Total amount",
+  "SELLING_DATE": "Selling date"
 }

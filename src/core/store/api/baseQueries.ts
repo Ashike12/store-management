@@ -10,6 +10,7 @@ import { persistor, RootState } from '../store';
 import { IAuthResponse } from '@core/interfaces/api/IAuthResponse';
 import { addLogin, removeLogin } from '../slices/auth.slice';
 import { useNavigate } from 'react-router-dom';
+import { localStorageService, storagePath } from '@core/services/localStorage.service';
 
 // Function to refresh the token
 const refreshAccessToken = async (refreshToken: string): Promise<IAuthResponse | null> => {
@@ -28,6 +29,7 @@ const refreshAccessToken = async (refreshToken: string): Promise<IAuthResponse |
     const data = await response.json();
     const updatedTokenData = data as IAuthResponse;
     updatedTokenData.refresh_token = refreshToken; // Preserve the refresh token
+    localStorageService.setToken(updatedTokenData.login_token, updatedTokenData.refresh_token);
     return updatedTokenData;
   } catch (error) {
     console.error('Token refresh failed:', error);
@@ -50,9 +52,8 @@ const customBaseQuery =
     async (args, api, extraOptions) => {
       const baseQuery = fetchBaseQuery({
         baseUrl,
-        prepareHeaders: async (headers, { getState }) => {
-          const state = getState() as RootState;
-          const token = state?.persisted?.auth?.login_token;
+        prepareHeaders: async (headers) => {
+          const token = localStorageService.getItemLocalStore(storagePath.AccessToken);
           if (token) {
             headers.set('Authorization', `Bearer ${token}`);
           }

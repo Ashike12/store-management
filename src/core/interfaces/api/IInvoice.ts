@@ -1,11 +1,12 @@
 export interface IInvoiceResponse {
     IsSuccess: boolean;
     TotalCount: number;
-    Data: IInvoice[];
+    Data: IInvoice[] | InvoiceDetailsResponse;
 }
 
 export interface IInvoice {
     ItemId: string;
+    InvoiceNumber?: string;
     CreatedDate?: string;
     WholeSalerId: string;
     WholeSalerName: string;
@@ -25,4 +26,17 @@ export interface IProductSellInfo {
     Quantity: number;
     SellingPrice: number;
     SellingDate: number;
+}
+
+export interface IProductSellInfoResponse extends IProductSellInfo {
+    CreatedDate: string;
+    ItemId: string;
+    ProductId: string;
+    ProductName: string;
+    WholeSalerId: string;
+    WholeSalerName: string;
+}
+
+export interface InvoiceDetailsResponse extends IInvoice {
+    ProductSellInfo: IProductSellInfoResponse[];
 }

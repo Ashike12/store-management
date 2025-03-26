@@ -30,6 +30,27 @@ const BASE_ROUTES: IRoute[] = [
     pathMatch: ROUTE_PATH.invoice.pathMatch,
     exact: true,
     Component: React.lazy(() => import('@features/invoice/pages/invoice')),
+  },
+  {
+    title: ROUTE_PATH.invoiceDetails.title,
+    path: ROUTE_PATH.invoiceDetails.path,
+    pathMatch: ROUTE_PATH.invoiceDetails.pathMatch,
+    exact: true,
+    Component: React.lazy(() => import('@features/invoice/pages/invoiceDetails')),
+  },
+  {
+    title: ROUTE_PATH.invoiceAdd.title,
+    path: ROUTE_PATH.invoiceAdd.path,
+    pathMatch: ROUTE_PATH.invoiceAdd.pathMatch,
+    exact: true,
+    Component: React.lazy(() => import('@features/invoice/pages/invoiceAdd')),
+  },
+  {
+    title: ROUTE_PATH.invoiceUpdate.title,
+    path: ROUTE_PATH.invoiceUpdate.path,
+    pathMatch: ROUTE_PATH.invoiceUpdate.pathMatch,
+    exact: true,
+    Component: React.lazy(() => import('@features/invoice/pages/invoiceUpdate')),
   }
 ];
 

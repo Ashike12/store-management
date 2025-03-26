@@ -1,4 +1,5 @@
 import {
+  IconButton,
   AppBar as MuiAppBar,
   Toolbar,
 } from '@mui/material';
@@ -10,6 +11,8 @@ import cn from '@core/utils/cn';
 import { CustomButton } from '@components/button/CustomButton';
 import { useAppDispatch } from '@core/store/hooks';
 import { removeLogin } from '@core/store/slices/auth.slice';
+import { IconChevronLeft } from '@tabler/icons-react';
+import { useNavigate } from 'react-router-dom';
 
 interface AppBarProps {
   open?: boolean;
@@ -30,6 +33,7 @@ const AppBar = styled(MuiAppBar)<AppBarProps>(({ theme }) => ({
 export default function Header({ isLocked }: Readonly<IHeaderProps>) {
   const headerInfo = useGetHeaderTitle();
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const handleLogout = () => {
     dispatch(removeLogin());
   };
@@ -49,7 +53,13 @@ export default function Header({ isLocked }: Readonly<IHeaderProps>) {
               variant={'H6'}
             />
           </div>)}
+          {headerInfo.backButtonPath && (
+            <div className='mt-2 mr-2'>
+              <IconButton onClick={() => navigate(headerInfo.backButtonPath)}><IconChevronLeft className="h-8 w-8 text-gray-400" /></IconButton>
+            </div>
+          )}
           <div className='flex flex-col justify-center'>
+
             <TextWrapper content={headerInfo.title} variant={'H4Medium'} />
             {headerInfo.subTitle != '' && (
               <TextWrapper content={headerInfo.subTitle} variant={'Body2'} />
