@@ -73,7 +73,7 @@ const customBaseQuery =
       ) {
         console.warn('Unauthorized! Attempting token refresh...');
         const state = api.getState() as RootState;
-        const refreshToken = state.persisted.auth?.refresh_token;
+        const refreshToken = localStorageService.getItemLocalStore(storagePath.RefreshToken);
         const newToken = await refreshAccessToken(refreshToken);
         if (newToken) {
           api.dispatch(addLogin(newToken));

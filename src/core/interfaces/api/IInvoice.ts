@@ -17,7 +17,7 @@ export interface IInvoice {
 
 export interface ICreateInvoicePayload {
     PaymentAmount: number;
-    ProfitMargin: number;
+    WholeSalerId: string;
     ProductSellInfo: IProductSellInfo[];
 }
 
@@ -25,7 +25,7 @@ export interface IProductSellInfo {
     ProductId: string;
     Quantity: number;
     SellingPrice: number;
-    SellingDate: number;
+    SellingDate: string;
 }
 
 export interface IProductSellInfoResponse extends IProductSellInfo {

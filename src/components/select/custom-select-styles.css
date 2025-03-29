@@ -1,0 +1,7 @@
+.custom-select-override {
+  .MuiSelect-select {
+    span {
+      font-size: 15px;
+    }
+  }
+}

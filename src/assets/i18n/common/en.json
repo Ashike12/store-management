@@ -41,5 +41,6 @@
   "PAYMENT_AMOUNT": "Payment amount",
   "PROFIT_MARGIN": "Profit margin",
   "TOTAL_AMOUNT": "Total amount",
-  "SELLING_DATE": "Selling date"
+  "SELLING_DATE": "Selling date",
+  "DETAILS_INVOICE": "Details invoice"
 }

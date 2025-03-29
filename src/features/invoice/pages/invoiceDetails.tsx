@@ -4,6 +4,7 @@ import TextWrapper from "@components/text/TextWrapper";
 import { InvoiceDetailsResponse } from "@core/interfaces/api/IInvoice";
 import { useGetInvoiceQuery } from "@core/store/api/invoiceApi";
 import { useNavigate, useParams } from "react-router-dom";
+import InvoiceBg from "@assets/images/invoice-bg.jpg";
 
 const columns = [
     { key: "ProductName", label: "PRODUCT_NAME" },
@@ -22,6 +23,9 @@ export default function invoiceDetails() {
     return (
         <>
             <div className='w-full'>
+                {/* <div className="fixed top-16 w-full h-64 bg-cover bg-center z-0">
+                    <img className="w-full h-[200px] object-cover"  src={InvoiceBg} alt="Invocie bg" />
+                </div> */}
                 <CustomButton onClick={() => handleButtonAction('add')} className='fixed bottom-4 right-4 ml-4 my-3 cursor-pointer' text={'ADD_INVOICE'} variant={'primary'}></CustomButton>
                 <CustomButton onClick={() => handleButtonAction('update')} className='fixed bottom-4 right-30 ml-4 my-3 cursor-pointer' text={'UPDATE_INVOICE'} variant={'primary'}></CustomButton>
 
@@ -32,18 +36,18 @@ export default function invoiceDetails() {
                     </h2>
 
                     <div className="mt-4 space-y-2">
-                        <p>
+                        <div>
                             <TextWrapper variant={'H6'} content={'INVOICE_NUMBER'}>
                             </TextWrapper>
                             <TextWrapper variant={'Body1'} content={': ' + (invoiceData.InvoiceNumber ?? 'N/A')}>
                             </TextWrapper>
-                        </p>
-                        <p>
+                        </div>
+                        <div>
                             <TextWrapper variant={'H6'} content={'WHOLESALER_NAME'}>
                             </TextWrapper>
                             <TextWrapper variant={'Body1'} content={': ' + (invoiceData.WholeSalerName ?? 'N/A')}>
                             </TextWrapper>
-                        </p>
+                        </div>
                         <p><strong>Wholesaler:</strong> {invoiceData.WholeSalerName}</p>
                         <p><strong>Payment Amount:</strong> {invoiceData.PaymentAmount} tk</p>
                         <p><strong>Profit Margin:</strong> {invoiceData.ProfitMargin} tk</p>
