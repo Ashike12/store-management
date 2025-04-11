@@ -11,6 +11,7 @@ import { IAuthResponse } from '@core/interfaces/api/IAuthResponse';
 import { addLogin, removeLogin } from '../slices/auth.slice';
 import { useNavigate } from 'react-router-dom';
 import { localStorageService, storagePath } from '@core/services/localStorage.service';
+import { set } from 'lodash';
 
 // Function to refresh the token
 const refreshAccessToken = async (refreshToken: string): Promise<IAuthResponse | null> => {
@@ -81,9 +82,11 @@ const customBaseQuery =
           result = await baseQuery(args, api, extraOptions);
         } else {
           console.error('Token refresh failed. Logging out...');
-          removeLogin();
+          api.dispatch(removeLogin());
           // persistor.purge(); // Clear all state
-          window.location.href = '/login';
+          setTimeout(() => {
+            window.location.href = '/login';
+          }, 300);
           // api.dispatch(fetchAllLogout()); // Dispatch logout action
         }
       }

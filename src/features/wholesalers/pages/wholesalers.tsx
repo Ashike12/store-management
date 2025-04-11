@@ -5,6 +5,7 @@ import DeleteConfirmationModal from '@components/confirmation-modal/delete-confi
 import UserModal, { IUserForm } from '../components/userModal';
 import { useCreateUserMutation, useDeleteUserMutation, useGetUserQuery, useUpdateUserMutation } from '@core/store/api';
 import { IUser } from '@core/interfaces/api/IUser';
+import { useNavigate } from 'react-router-dom';
 
 // Define table columns
 const columns = [
@@ -34,6 +35,7 @@ export default function StoreManagement() {
   const [isDelete, setIsDelete] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
   const [formData, setFormData] = useState<IUserForm>(initialFormData);
+  const navigate = useNavigate();
   const handleSave = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData((prev) => ({
       ...prev,
@@ -73,7 +75,7 @@ export default function StoreManagement() {
     }
   }
 
-  const handleRowClick = async (row: IUser, isDelete: boolean) => {
+  const handleRowClick = async (row: IUser, isDelete: boolean, isGoDetails?: boolean) => {
     console.log('row', row);
     setFormData({
       ItemId: row.ItemId,
@@ -89,6 +91,9 @@ export default function StoreManagement() {
       setIsDelete(true);
       // await deleteProduct({id: row.ItemId}).unwrap();
       // refetch();
+    }
+    else if(isGoDetails) {
+      navigate(`/wholesaler/invoice/${row.ItemId}`);
     } else {
       setIsUpdate(true);
       setIsOpen(true);
@@ -120,6 +125,7 @@ export default function StoreManagement() {
         {data && data && data?.Data?.length > 0 && (<div className="p-10 w-full">
           <CustomTable
             showActionButtons={true}
+            isRowClickable={true}
             handleRowClick={handleRowClick}
             columns={columns}
             data={data?.Data || []}

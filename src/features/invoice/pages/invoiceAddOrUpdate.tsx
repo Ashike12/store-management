@@ -1,17 +1,18 @@
 import { CustomButton } from "@components/button/CustomButton";
-import { ICreateInvoicePayload, IProductSellInfo } from "@core/interfaces/api/IInvoice";
+import { ICreateInvoicePayload, InvoiceDetailsResponse, IProductSellInfo, IUpdateInvoicePayload } from "@core/interfaces/api/IInvoice";
 import { useGetUserQuery } from "@core/store/api";
 import { useGetProductQuery } from "@core/store/api/product";
 import { Button, MenuItem, Select, TextField, FormControl, InputLabel, CircularProgress } from "@mui/material";
 import { Formik, Form, Field, FieldArray, ErrorMessage } from "formik";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { invoiceValidationSchema } from "../schemas/invoice-form.schema";
 import TextWrapper from "@components/text/TextWrapper";
-import React from "react";
+import { useCreateInvoiceMutation, useGetInvoiceQuery, useUpdateInvoiceMutation } from "@core/store/api/invoiceApi";
 
 const createInvoiceInitialValues: ICreateInvoicePayload = {
   PaymentAmount: 0,
   ProductSellInfo: [{
+    ItemId: '',
     ProductId: '',
     Quantity: 0,
     SellingPrice: 0,
@@ -20,19 +21,56 @@ const createInvoiceInitialValues: ICreateInvoicePayload = {
   WholeSalerId: ''
 }
 
-export default function invoiceAdd() {
+const initialValuesOnUpdate = (invoiceDetails: InvoiceDetailsResponse) => {
+  const productSellInfo = invoiceDetails.ProductSellInfo.map((product: IProductSellInfo) => {
+    return {
+      ItemId: product.ItemId,
+      ProductId: product.ProductId,
+      Quantity: product.Quantity,
+      SellingPrice: product.SellingPrice,
+      SellingDate: product.SellingDate
+    }
+  }
+  )
+  return {
+    PaymentAmount: invoiceDetails.PaymentAmount,
+    ProductSellInfo: productSellInfo,
+    WholeSalerId: invoiceDetails.WholeSalerId
+  }
+}
+
+export default function invoiceAddOrUpdate() {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const isUpdate = searchParams.get("isUpdate") === "true";
   const { data: productData, isLoading: isProductLoading } = useGetProductQuery({ pageNumber: 1, pageSize: 1000, itemId: '' });
   const { data: userData, isLoading: isUserLoading } = useGetUserQuery({ pageNumber: 1, pageSize: 10, itemId: '' });
+  const { data: invoiceData, isLoading: isInvoiceLoading } = useGetInvoiceQuery({ pageNumber: 1, pageSize: 10, itemId: id ?? '' });
+  const [createInvoice, { isLoading: isCreating }] = useCreateInvoiceMutation();
+  const [updateInvoice, { isLoading: isUpdating }] = useUpdateInvoiceMutation();
   const productList = productData?.Data || [];
   const wholesalerList = userData?.Data || [];
   if (isProductLoading || isUserLoading) {
     return <CircularProgress />;
   }
 
-  const { id } = useParams();
-  const handleButtonAction = (action: string) => {
+  console.log(invoiceData)
+
+  const handleRedirection = (action: string) => {
     navigate(`/invoice/${action}/${id}`);
+  }
+  const submitInvoice = async (values: ICreateInvoicePayload) => {
+    console.log("Form data", values);
+    if (isUpdate) {
+      const updatePayload = values as IUpdateInvoicePayload;
+      updatePayload.ItemId = id ?? '';
+      console.log("Update payload", updatePayload);
+      await updateInvoice({ payload: updatePayload }).unwrap();
+    } else {
+      await createInvoice({ payload: values }).unwrap();
+    }
+    navigate(`/invoice`);
   }
   return (
     <>
@@ -40,16 +78,17 @@ export default function invoiceAdd() {
         {/* <div className="fixed top-16 w-full h-64 bg-cover bg-center z-0">
                     <img className="w-full h-[200px] object-cover"  src={InvoiceBg} alt="Invocie bg" />
                 </div> */}
-        <CustomButton onClick={() => handleButtonAction('details')} className='fixed bottom-4 right-4 ml-4 my-3 cursor-pointer' text={'DETAILS_INVOICE'} variant={'primary'}></CustomButton>
-        <CustomButton onClick={() => handleButtonAction('update')} className='fixed bottom-4 right-36 ml-4 my-3 cursor-pointer' text={'UPDATE_INVOICE'} variant={'primary'}></CustomButton>
+        <CustomButton onClick={() => handleRedirection('details')} className='fixed bottom-4 right-4 ml-4 my-3 cursor-pointer' text={'DETAILS_INVOICE'} variant={'primary'}></CustomButton>
+        {/* {isUpdate ? (<CustomButton onClick={() => handleRedirection('add')} className='fixed bottom-4 right-36 ml-4 my-3 cursor-pointer' text={'ADD_INVOICE'} variant={'primary'}></CustomButton>) :
+        (<CustomButton onClick={() => handleRedirection('update')} className='fixed bottom-4 right-36 ml-4 my-3 cursor-pointer' text={'UPDATE_INVOICE'} variant={'primary'}></CustomButton>)} */}
 
         <div className="max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-xl mt-10">
           <h2 className="text-2xl font-bold text-gray-800 border-b pb-3">
-            Invoice Add
+            {!isUpdate ? 'Invoice Add' : 'Invoice Update'}
           </h2>
           <div className="mt-4 space-y-2">
             <Formik
-              initialValues={createInvoiceInitialValues}
+              initialValues={!isUpdate ? createInvoiceInitialValues : initialValuesOnUpdate(invoiceData?.Data as InvoiceDetailsResponse)}
               validationSchema={invoiceValidationSchema}
               onSubmit={(values) => {
                 console.log("Form data", values);
@@ -67,7 +106,7 @@ export default function invoiceAdd() {
                   return total;
                 };
                 const totalAmount = calculateTotalAmount();
-                
+
                 return (
                   <Form>
                     {/* Wholesaler Dropdown */}
@@ -196,14 +235,14 @@ export default function invoiceAdd() {
                         <ErrorMessage name="PaymentAmount" component="div" className="text-red-500" />
                       </div>
                       <div className="basis-1/2 border flex items-center border-transparent-grey-24 rounded-md px-4 mb-4">
-                        <TextWrapper variant={"Body1"} content={'TOTAL_AMOUNT'}></TextWrapper>: 
-                         <TextWrapper variant={"Subtitle1Bold"} content={totalAmount}></TextWrapper>
+                        <TextWrapper variant={"Body1"} content={'TOTAL_AMOUNT'}></TextWrapper>:
+                        <TextWrapper variant={"Subtitle1Bold"} content={totalAmount}></TextWrapper>
                       </div>
                     </div>
 
                     {/* Submit Button */}
                     <div className="mt-4">
-                      <Button disabled={!values.ProductSellInfo.length || !values.WholeSalerId || !values.PaymentAmount}
+                      <Button onClick={() => submitInvoice(values)} disabled={!values.ProductSellInfo.length || !values.WholeSalerId || !values.PaymentAmount}
                         type="submit" variant="contained" color="primary">
                         Submit Invoice
                       </Button>

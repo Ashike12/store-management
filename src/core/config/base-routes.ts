@@ -32,6 +32,13 @@ const BASE_ROUTES: IRoute[] = [
     Component: React.lazy(() => import('@features/invoice/pages/invoice')),
   },
   {
+    title: ROUTE_PATH.wholesalerDetails.title,
+    path: ROUTE_PATH.wholesalerDetails.path,
+    pathMatch: ROUTE_PATH.wholesalerDetails.pathMatch,
+    exact: true,
+    Component: React.lazy(() => import('@features/wholesalers/pages/wholesalerDetails')),
+  },
+  {
     title: ROUTE_PATH.invoiceDetails.title,
     path: ROUTE_PATH.invoiceDetails.path,
     pathMatch: ROUTE_PATH.invoiceDetails.pathMatch,
@@ -43,14 +50,14 @@ const BASE_ROUTES: IRoute[] = [
     path: ROUTE_PATH.invoiceAdd.path,
     pathMatch: ROUTE_PATH.invoiceAdd.pathMatch,
     exact: true,
-    Component: React.lazy(() => import('@features/invoice/pages/invoiceAdd')),
+    Component: React.lazy(() => import('@features/invoice/pages/invoiceAddOrUpdate')),
   },
   {
     title: ROUTE_PATH.invoiceUpdate.title,
     path: ROUTE_PATH.invoiceUpdate.path,
     pathMatch: ROUTE_PATH.invoiceUpdate.pathMatch,
     exact: true,
-    Component: React.lazy(() => import('@features/invoice/pages/invoiceUpdate')),
+    Component: React.lazy(() => import('@features/invoice/pages/invoiceAddOrUpdate')),
   }
 ];
 

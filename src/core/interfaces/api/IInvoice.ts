@@ -21,7 +21,12 @@ export interface ICreateInvoicePayload {
     ProductSellInfo: IProductSellInfo[];
 }
 
+export interface IUpdateInvoicePayload extends ICreateInvoicePayload {
+    ItemId: string;
+}
+
 export interface IProductSellInfo {
+    ItemId: string;
     ProductId: string;
     Quantity: number;
     SellingPrice: number;

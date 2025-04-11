@@ -44,6 +44,12 @@ const useGetHeaderTitle = (): HeaderTitle => {
         setbackButtonPath(ROUTE_PATH.wholesalers.backButtonRoute);
         return;
       }
+      case ROUTE_PATH.wholesalerDetails.pathMatch: {
+        setTitle(ROUTE_PATH.wholesalerDetails.title);
+        setSubTitle(ROUTE_PATH.wholesalerDetails.subTitle);
+        setbackButtonPath(ROUTE_PATH.wholesalerDetails.backButtonRoute);
+        return;
+      }
       case ROUTE_PATH.invoice.pathMatch: {
         setTitle(ROUTE_PATH.invoice.title);
         setSubTitle(ROUTE_PATH.invoice.subTitle);

@@ -14,6 +14,7 @@ import IconCaretDoubleLeft from '@assets/icons/IconCaretDoubleLeft';
 import TextWrapper from '@components/text/TextWrapper';
 import IconLock from '@assets/icons/IconLock';
 import { IconBox, IconBuildingStore, IconFileInvoice, IconLayoutDashboard } from '@tabler/icons-react';
+import IconCaretDoubleRight from '@assets/icons/IconCaretDoubleRight';
 
 const drawerWidth = DRAWER_WIDTH;
 
@@ -108,8 +109,8 @@ export default function LeftSidebar({
   drawerClose,
   drawerOpen,
   lockLeftSidebar,
-  open,
-  isLocked,
+  open = false,
+  isLocked = true,
 }: Readonly<ISidebarProps>) {
   const navigateTo = useNavigate();
   const match = useMatch(':pageName');
@@ -133,8 +134,8 @@ export default function LeftSidebar({
       className={'fixed inset-0 bg-white' + (isLocked ? 'relative' : 'fixed z-[9999]')}>
       <div
         className={`flex flex-col min-h-screen justify-between pt-5 ${open ? 'px-4' : 'px-2'}`}
-        onPointerLeave={drawerCollapse}>
-        <div className="" onPointerEnter={drawerOpen}>
+      >
+        <div className="">
           <div className="flex items-center justify-center">
             {open ? (
               <div className="flex w-full items-center justify-between pb-6">
@@ -143,13 +144,13 @@ export default function LeftSidebar({
                   content={'PROJECT_TITLE'}
                   variant={'H6'}
                 />
-                {!isLocked && (
+                {/* {!isLocked && (
                   <button
                     className="bg-transparent-grey-16 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full p-[10px]"
                     onClick={lockLeftSidebar}>
                     <IconLock />
                   </button>
-                )}
+                )} */}
               </div>
             ) : (
               <div className="pb-4">
@@ -262,7 +263,14 @@ export default function LeftSidebar({
             </>
           ) : (
             <div className="flex w-full flex-row items-center justify-center">
-
+              <button
+                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-[#919EAB29]"
+                onClick={() => {
+                  drawerOpen();
+                  lockLeftSidebar();
+                }}>
+                <IconCaretDoubleRight />
+              </button>
             </div>
           )}
         </div>

@@ -20,6 +20,13 @@ export const ROUTE_PATH = {
     subTitle: '',
     backButtonRoute: null
   },
+  wholesalerDetails: {
+    path: '/wholesaler/invoice/:id',
+    pathMatch: 'wholesaler/invoice',
+    title: 'WHOLESALERS',
+    subTitle: 'INVOICE',
+    backButtonRoute: '/wholesalers'
+  },
   invoice: {
     path: '/invoice',
     pathMatch: 'invoice',

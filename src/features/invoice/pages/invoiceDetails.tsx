@@ -4,7 +4,6 @@ import TextWrapper from "@components/text/TextWrapper";
 import { InvoiceDetailsResponse } from "@core/interfaces/api/IInvoice";
 import { useGetInvoiceQuery } from "@core/store/api/invoiceApi";
 import { useNavigate, useParams } from "react-router-dom";
-import InvoiceBg from "@assets/images/invoice-bg.jpg";
 
 const columns = [
     { key: "ProductName", label: "PRODUCT_NAME" },
@@ -18,7 +17,7 @@ export default function invoiceDetails() {
     const invoiceData = (data?.Data as InvoiceDetailsResponse) || {};
     const navigate = useNavigate();
     const handleButtonAction = (action: string) => {
-        navigate(`/invoice/${action}/${id}`);
+        navigate(`/invoice/${action}/${id}?isUpdate=${action === 'update'}`);
     }
     return (
         <>
@@ -48,11 +47,30 @@ export default function invoiceDetails() {
                             <TextWrapper variant={'Body1'} content={': ' + (invoiceData.WholeSalerName ?? 'N/A')}>
                             </TextWrapper>
                         </div>
-                        <p><strong>Wholesaler:</strong> {invoiceData.WholeSalerName}</p>
-                        <p><strong>Payment Amount:</strong> {invoiceData.PaymentAmount} tk</p>
-                        <p><strong>Profit Margin:</strong> {invoiceData.ProfitMargin} tk</p>
-                        <p><strong>Total Amount:</strong> {invoiceData.TotalAmount} tk</p>
-                        <p><strong>Created Date:</strong> {invoiceData.CreatedDate ? new Date(invoiceData.CreatedDate).toLocaleDateString() : ''}</p>
+                        <div>
+                            <TextWrapper variant={'H6'} content={'PAYMENT_AMOUNT'}>
+                            </TextWrapper>
+                            <TextWrapper variant={'Body1'} content={': ' + (invoiceData.PaymentAmount ?? 'N/A')}>
+                            </TextWrapper>
+                        </div>
+                        <div>
+                            <TextWrapper variant={'H6'} content={'PROFIT_MARGIN'}>
+                            </TextWrapper>
+                            <TextWrapper variant={'Body1'} content={': ' + (invoiceData.ProfitMargin ?? 'N/A')}>
+                            </TextWrapper>
+                        </div>
+                        <div>
+                            <TextWrapper variant={'H6'} content={'TOTAL_AMOUNT'}>
+                            </TextWrapper>
+                            <TextWrapper variant={'Body1'} content={': ' + (invoiceData.TotalAmount ?? 'N/A')}>
+                            </TextWrapper>
+                        </div>
+                        <div>
+                            <TextWrapper variant={'H6'} content={'CREATED_DATE'}>
+                            </TextWrapper>
+                            <TextWrapper variant={'Body1'} content={': ' + (invoiceData.CreatedDate ? new Date(invoiceData.CreatedDate).toLocaleDateString() ?? 'N/A' : 'N/A')}>
+                            </TextWrapper>
+                        </div>
 
                         {invoiceData?.ProductSellInfo && invoiceData?.ProductSellInfo.length > 0 && (<div className="p-10 w-full">
                             <CustomTable
