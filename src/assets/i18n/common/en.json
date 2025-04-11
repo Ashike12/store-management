@@ -46,5 +46,6 @@
   "CREATED_DATE": "Created Date",
   "TOTAL_PAID_AMOUNT": "Total paid amount",
   "TOTAL_DUE_AMOUNT": "Total due amount",
-  "CONSUMER": "Consumer"
+  "CONSUMER": "Consumer",
+  "SEND_A_MESSAGE": "Send a due message"
 }

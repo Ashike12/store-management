@@ -93,7 +93,7 @@ export default function StoreManagement() {
       // refetch();
     }
     else if(isGoDetails) {
-      navigate(`/wholesaler/invoice/${row.ItemId}`);
+      navigate(`/wholesaler/invoice/${row.ItemId}?phoneNumber=${row.Phone}`);
     } else {
       setIsUpdate(true);
       setIsOpen(true);

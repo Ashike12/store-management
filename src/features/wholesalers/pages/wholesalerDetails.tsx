@@ -2,7 +2,8 @@ import CustomTable from "@components/table/CustomTable";
 import TextWrapper from "@components/text/TextWrapper";
 import { IInvoice } from "@core/interfaces/api/IInvoice";
 import { useGetInvoiceQuery } from "@core/store/api/invoiceApi";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { IconMessage, IconArrowNarrowRight } from '@tabler/icons-react';
 
 const columns = [
     { key: "InvoiceNumber", label: "INVOICE_NUMBER" },
@@ -17,6 +18,8 @@ const columns = [
 export default function wholesalerDetails() {
     const { id } = useParams();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const phoneNumber = searchParams.get("phoneNumber")?.trim();
     const { data, isLoading } = useGetInvoiceQuery({ pageNumber: 1, pageSize: 10, itemId: '', wholesalerId: id ?? '' });
     const invoiceData = (data?.Data as IInvoice[]) || [];
     const wholesalerName = invoiceData[0]?.WholeSalerName || 'N/A';
@@ -26,6 +29,11 @@ export default function wholesalerDetails() {
     const totalAmount = invoiceData.reduce((acc, item) => acc + (item.TotalAmount || 0), 0);
     const totalPaidAmount = invoiceData.reduce((acc, item) => acc + (item.PaymentAmount || 0), 0);
     const totalProfit = invoiceData.reduce((acc, item) => acc + (item.ProfitMargin || 0), 0);
+    const openSMS = () => {
+        const smsUrl = `sms:+${phoneNumber}?body=${encodeURIComponent('You have due amount of: ' + (totalAmount - totalPaidAmount) + ' tk, please pay it as soon as possible.')}`;
+        console.log(smsUrl);
+        window.location.href = smsUrl;
+    };
     return (
         <>
             <div className='w-full'>
@@ -60,18 +68,26 @@ export default function wholesalerDetails() {
                             <TextWrapper className="text-bold text-green" variant={'Body1'} content={': ' + (totalPaidAmount) + ' tk'}>
                             </TextWrapper>
                         </div>
-                        <div>
+                        <div className="flex flex-row">
                             <TextWrapper variant={'H6'} content={'TOTAL_DUE_AMOUNT'}>
                             </TextWrapper>
-                            <TextWrapper className="text-bold text-green" variant={'Body1'} content={': ' + (totalAmount - totalPaidAmount) + ' tk'}>
-                            </TextWrapper>
+                            :
+                            {totalAmount <= totalPaidAmount ? (<TextWrapper className="!text-green text-bold" variant={'Body1'} content={((totalAmount - totalPaidAmount)) + ' tk'}>
+                            </TextWrapper>) : (<TextWrapper className="!text-red text-bold" variant={'Body1'} content={' ' + ((totalAmount - totalPaidAmount)) + ' tk'}>
+                            </TextWrapper>)}
+                            {totalAmount > totalPaidAmount && (<div className="pl-3 cursor-pointer flex flex-row" onClick={openSMS}>
+                                <TextWrapper content={'SEND_A_MESSAGE'}></TextWrapper>
+                                <div className="pl-2 pt-[3px]">
+                                    <IconArrowNarrowRight size={20} />
+                                </div>
+                            </div>)}
                         </div>
                         <div>
                             <TextWrapper variant={'H6'} content={'YOUR_PROFIT'}>
                             </TextWrapper>
-                            : 
+                            :
                             {totalProfit >= 0 ? (<TextWrapper className="!text-green text-bold" variant={'Body1'} content={(totalProfit) + ' tk'}>
-                            </TextWrapper>): (<TextWrapper className="!text-red text-bold" variant={'Body1'} content={' '+(totalProfit) + ' tk'}>
+                            </TextWrapper>) : (<TextWrapper className="!text-red text-bold" variant={'Body1'} content={' ' + (totalProfit) + ' tk'}>
                             </TextWrapper>)}
                         </div>
                         {invoiceData && invoiceData?.length > 0 && (<div className="p-10 w-full">
