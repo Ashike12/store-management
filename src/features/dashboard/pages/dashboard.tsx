@@ -4,6 +4,7 @@ import {
   LineChart, Line, XAxis, YAxis, Tooltip, BarChart, Bar, PieChart, Pie, Cell,
   ResponsiveContainer
 } from 'recharts';
+import CountUp from 'react-countup';
 
 const dummySalesData = [
   { date: 'Apr 1', revenue: 2000 },
@@ -33,9 +34,30 @@ const Dashboard = () => {
 
       {/* KPI Cards */}
       <div className='flex flex-row gap-4'>
-        <Card className='lg:basis-1/3 basis-full'><CardContent><p className="text-sm">Today's Revenue</p><p className="text-2xl font-bold text-green-600">₹25,000</p></CardContent></Card>
-        <Card className='lg:basis-1/3 basis-full'><CardContent><p className="text-sm">Total Invoices</p><p className="text-2xl font-bold">18</p></CardContent></Card>
-        <Card className='lg:basis-1/3 basis-full'><CardContent><p className="text-sm">Products Sold</p><p className="text-2xl font-bold">320</p></CardContent></Card>
+        <Card className='lg:basis-1/3 basis-full'>
+          <CardContent>
+            <p className="text-sm">Today's Revenue</p>
+            <p className="text-2xl font-bold text-green-600">
+              ₹<CountUp end={25000} duration={5} separator="," />
+            </p>
+          </CardContent>
+        </Card>
+        <Card className='lg:basis-1/3 basis-full'>
+        <CardContent>
+          <p className="text-sm">Total Invoices</p>
+          <p className="text-2xl font-bold">
+            <CountUp end={18} duration={5} />
+          </p>
+        </CardContent>
+        </Card>
+        <Card className='lg:basis-1/3 basis-full'>
+        <CardContent>
+          <p className="text-sm">Products Sold</p>
+          <p className="text-2xl font-bold">
+            <CountUp end={320} duration={5} />
+          </p>
+        </CardContent>
+        </Card>
       </div>
 
       {/* Sales Overview Chart */}
