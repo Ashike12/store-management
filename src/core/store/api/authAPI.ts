@@ -3,6 +3,7 @@ import {ApiServiceBaseQuery} from './baseQueries';
 import {APP_CONFIG} from '@core/config/config';
 import {IAuthResponse} from '@core/interfaces/api/IAuthResponse';
 import { addLogin } from '../slices/auth.slice';
+import { localStorageService } from '@core/services/localStorage.service';
 
 export const authApi = createApi({
   reducerPath: 'authApi',
@@ -23,7 +24,10 @@ export const authApi = createApi({
         // `onStart` side-effectdispatch(messageCreated('Fetching post...'))
         try {
           const {data} = await queryFulfilled;
-          dispatch(addLogin(data));
+          localStorageService.setToken(data.login_token, data.refresh_token);
+          setTimeout(() => {
+            dispatch(addLogin(data));
+          }, 100);
         } catch (err) {
           // `onError` side-effectdispatch(messageCreated('Error fetching post!'))
         }

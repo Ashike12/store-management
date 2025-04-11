@@ -2,18 +2,20 @@ import TextWrapper from "@components/text/TextWrapper";
 import { IconButton } from "@mui/material";
 import { IconEdit, IconTrash } from "@tabler/icons-react";
 import { useState } from "react";
+import moment from "moment";
 
 // Define types for table columns and data
 interface Column {
     key: string; // Unique key for data access
     label: string; // Column header label
+    altKey?: string; // Unique key for data access
 }
 
 interface TableProps<T> {
     columns: Column[]; // Array of columns
     data: T[]; // Array of data objects
     rowsPerPage?: number; // Optional pagination setting
-    handleRowClick?: (row: T, isDelete: boolean) => void; // Optional row click handler
+    handleRowClick?: (row: T, isDelete: boolean, isGoDetails?: boolean) => void; // Optional row click handler
     showActionButtons?: boolean; // Optional flag to show actions column
     isRowClickable?: boolean; // Optional flag to make row clickable
 }
@@ -22,7 +24,7 @@ const CustomTable = <T extends Record<string, any>>({
     columns,
     data,
     rowsPerPage = 5,
-    handleRowClick = (row: T, isDelete: boolean) => { },
+    handleRowClick = (row: T, isDelete: boolean, isGoDetails?: boolean) => { },
     showActionButtons = false,
     isRowClickable = false
 }: TableProps<T>) => {
@@ -31,6 +33,10 @@ const CustomTable = <T extends Record<string, any>>({
 
     // Get current page data
     const currentData = data.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+
+    const isValidDate = (date: any) => {
+        return moment(date, moment.ISO_8601, true).isValid();
+    };
 
     return (
         <div className="p-4 bg-white rounded-lg shadow-lg">
@@ -53,12 +59,12 @@ const CustomTable = <T extends Record<string, any>>({
                     {currentData.map((row, rowIndex) => (
                         <tr key={rowIndex} className="hover:bg-gray-100">
                             {columns.map((col) => (
-                                <td key={col.key} className={`border border-grey-grey-200 px-4 py-2 ${isRowClickable ? 'cursor-pointer' : ''}`} onClick={() => isRowClickable && handleRowClick(row, false)}>
-                                    <TextWrapper variant={'Body1'} content={row[col.key]} />
+                                <td key={col.key} className={`border border-grey-grey-200 px-4 py-2 ${isRowClickable ? 'cursor-pointer' : ''}`} onClick={() => isRowClickable && handleRowClick(row, false, true)}>
+                                    {col.key.indexOf('Date') == -1 ? (<TextWrapper variant={'Body1'} content={(col.altKey ? row[col.altKey] : row[col.key]??'')} />) : moment(row[col.key]).format("DD/MM/YYYY")}
                                 </td>
                             ))}
                             {showActionButtons && (
-                                <td key={'action'+rowIndex} colSpan={columns.length} className="border border-grey-grey-200 px-4 py-2">
+                                <td key={'action' + rowIndex} colSpan={columns.length} className="border border-grey-grey-200 px-4 py-2">
                                     <IconButton onClick={() => handleRowClick(row, false)} size={'small'} className="!ml-2 px-5">
                                         <IconEdit color="green" />
                                     </IconButton>

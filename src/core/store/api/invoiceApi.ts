@@ -13,7 +13,7 @@ export const invoiceApi = createApi({
       query: (mutation) => ({
         url: `${APP_CONFIG.businessUrl}/business/CreateInvoice`,
         method: 'POST',
-        body: mutation.payload,
+        body: {...mutation.payload, InvoiceType: mutation.payload.WholeSalerId ? 'WHOLESALE': 'CONSUMER'},
       }),
       async onQueryStarted(id, {dispatch, queryFulfilled}) {
         // `onStart` side-effectdispatch(messageCreated('Fetching post...'))
@@ -25,7 +25,7 @@ export const invoiceApi = createApi({
         }
       },
     }),
-    updateInvoice: builder.mutation<IAuthResponse, {payload: IInvoice}>({
+    updateInvoice: builder.mutation<IAuthResponse, {payload: ICreateInvoicePayload}>({
       query: (mutation) => ({
         url: `${APP_CONFIG.businessUrl}/business/UpdateInvoice`,
         method: 'POST',
@@ -59,12 +59,13 @@ export const invoiceApi = createApi({
         }
       },
     }),
-    getInvoice: builder.query<IInvoiceResponse, {pageNumber: number, pageSize: number, itemId: string}>({
+    getInvoice: builder.query<IInvoiceResponse, {pageNumber: number, pageSize: number, itemId: string, wholesalerId?: string}>({
       query: (mutation) => ({
         url: `${APP_CONFIG.businessUrl}/business/GetInvoice?page=${mutation.pageNumber}&size=${mutation.pageSize}`,
         method: 'POST',
         body: {
-          ItemId: mutation.itemId
+          ItemId: mutation.itemId,
+          WholesalerId: mutation.wholesalerId,
         },
       }),
       providesTags: (_result, _error) => [{type: 'invoice'}], // Cache by ID
