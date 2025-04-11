@@ -8,6 +8,7 @@ import moment from "moment";
 interface Column {
     key: string; // Unique key for data access
     label: string; // Column header label
+    altKey?: string; // Unique key for data access
 }
 
 interface TableProps<T> {
@@ -59,7 +60,7 @@ const CustomTable = <T extends Record<string, any>>({
                         <tr key={rowIndex} className="hover:bg-gray-100">
                             {columns.map((col) => (
                                 <td key={col.key} className={`border border-grey-grey-200 px-4 py-2 ${isRowClickable ? 'cursor-pointer' : ''}`} onClick={() => isRowClickable && handleRowClick(row, false, true)}>
-                                    {col.key.indexOf('Date') == -1 ? (<TextWrapper variant={'Body1'} content={row[col.key]} />) : moment(row[col.key]).format("DD/MM/YYYY")}
+                                    {col.key.indexOf('Date') == -1 ? (<TextWrapper variant={'Body1'} content={(col.altKey ? row[col.altKey] : row[col.key]??'')} />) : moment(row[col.key]).format("DD/MM/YYYY")}
                                 </td>
                             ))}
                             {showActionButtons && (

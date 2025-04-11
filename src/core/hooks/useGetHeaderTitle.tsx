@@ -19,6 +19,8 @@ const useGetHeaderTitle = (): HeaderTitle => {
 
     if (path === 'invoice' && !!pathName.split('/')[2]) {
       pathCheck = path + '/' + pathName.split('/')[2];
+    }else if (path === 'wholesaler' && !!pathName.split('/')[2]) {
+      pathCheck = path + '/' + pathName.split('/')[2];
     } else {
       pathCheck = path;
     }

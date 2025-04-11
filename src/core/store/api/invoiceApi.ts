@@ -13,7 +13,7 @@ export const invoiceApi = createApi({
       query: (mutation) => ({
         url: `${APP_CONFIG.businessUrl}/business/CreateInvoice`,
         method: 'POST',
-        body: mutation.payload,
+        body: {...mutation.payload, InvoiceType: mutation.payload.WholeSalerId ? 'WHOLESALE': 'CONSUMER'},
       }),
       async onQueryStarted(id, {dispatch, queryFulfilled}) {
         // `onStart` side-effectdispatch(messageCreated('Fetching post...'))

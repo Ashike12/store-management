@@ -43,5 +43,8 @@
   "TOTAL_AMOUNT": "Total amount",
   "SELLING_DATE": "Selling date",
   "DETAILS_INVOICE": "Details invoice",
-  "CREATED_DATE": "Created Date"
+  "CREATED_DATE": "Created Date",
+  "TOTAL_PAID_AMOUNT": "Total paid amount",
+  "TOTAL_DUE_AMOUNT": "Total due amount",
+  "CONSUMER": "Consumer"
 }

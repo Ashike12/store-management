@@ -11,14 +11,21 @@ const columns = [
     { key: "TotalAmount", label: "TOTAL_BILL" },
     { key: "PaymentAmount", label: "PAID_AMOUNT" },
     { key: "ProfitMargin", label: "YOUR_PROFIT" },
-  ];
-  
+];
+
 
 export default function wholesalerDetails() {
     const { id } = useParams();
+    const navigate = useNavigate();
     const { data, isLoading } = useGetInvoiceQuery({ pageNumber: 1, pageSize: 10, itemId: '', wholesalerId: id ?? '' });
     const invoiceData = (data?.Data as IInvoice[]) || [];
     const wholesalerName = invoiceData[0]?.WholeSalerName || 'N/A';
+    const handleRowClick = async (row: IInvoice) => {
+        navigate(`/invoice/details/${row.ItemId}`);
+    }
+    const totalAmount = invoiceData.reduce((acc, item) => acc + (item.TotalAmount || 0), 0);
+    const totalPaidAmount = invoiceData.reduce((acc, item) => acc + (item.PaymentAmount || 0), 0);
+    const totalProfit = invoiceData.reduce((acc, item) => acc + (item.ProfitMargin || 0), 0);
     return (
         <>
             <div className='w-full'>
@@ -38,18 +45,39 @@ export default function wholesalerDetails() {
                         <div>
                             <TextWrapper variant={'H6'} content={'WHOLESALER_NAME'}>
                             </TextWrapper>
-                            <TextWrapper variant={'Body1'} content={': ' + (wholesalerName)}>
+                            <TextWrapper className="text-bold !text-green " variant={'Body1'} content={': ' + (wholesalerName)}>
                             </TextWrapper>
                         </div>
                         <div>
-                            <TextWrapper variant={'H6'} content={'WHOLESALER_NAME'}>
+                            <TextWrapper variant={'H6'} content={'TOTAL_BILL'}>
                             </TextWrapper>
-                            <TextWrapper variant={'Body1'} content={': ' + (wholesalerName)}>
+                            <TextWrapper className="text-bold text-green" variant={'Body1'} content={': ' + (totalAmount) + ' tk'}>
                             </TextWrapper>
+                        </div>
+                        <div>
+                            <TextWrapper variant={'H6'} content={'TOTAL_PAID_AMOUNT'}>
+                            </TextWrapper>
+                            <TextWrapper className="text-bold text-green" variant={'Body1'} content={': ' + (totalPaidAmount) + ' tk'}>
+                            </TextWrapper>
+                        </div>
+                        <div>
+                            <TextWrapper variant={'H6'} content={'TOTAL_DUE_AMOUNT'}>
+                            </TextWrapper>
+                            <TextWrapper className="text-bold text-green" variant={'Body1'} content={': ' + (totalAmount - totalPaidAmount) + ' tk'}>
+                            </TextWrapper>
+                        </div>
+                        <div>
+                            <TextWrapper variant={'H6'} content={'YOUR_PROFIT'}>
+                            </TextWrapper>
+                            : 
+                            {totalProfit >= 0 ? (<TextWrapper className="!text-green text-bold" variant={'Body1'} content={(totalProfit) + ' tk'}>
+                            </TextWrapper>): (<TextWrapper className="!text-red text-bold" variant={'Body1'} content={' '+(totalProfit) + ' tk'}>
+                            </TextWrapper>)}
                         </div>
                         {invoiceData && invoiceData?.length > 0 && (<div className="p-10 w-full">
                             <CustomTable
-                                isRowClickable={false}
+                                isRowClickable={true}
+                                handleRowClick={handleRowClick}
                                 columns={columns}
                                 data={invoiceData || []}
                                 rowsPerPage={10} />

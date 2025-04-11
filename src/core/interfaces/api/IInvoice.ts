@@ -13,6 +13,7 @@ export interface IInvoice {
     TotalAmount: number;
     PaymentAmount: number;
     ProfitMargin: number;
+    InvoiceType: string;
 }
 
 export interface ICreateInvoicePayload {

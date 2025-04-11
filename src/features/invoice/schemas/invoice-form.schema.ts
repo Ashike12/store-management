@@ -1,7 +1,7 @@
 import * as Yup from "yup";
 
 export const invoiceValidationSchema = Yup.object({
-    WholeSalerId: Yup.string().required("Wholesaler is required"),
+    WholeSalerId: Yup.string(),
     PaymentAmount: Yup.number().required("Payment Amount is required").positive("Amount must be positive"),
     ProductSellInfo: Yup.array()
       .of(

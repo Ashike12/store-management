@@ -5,11 +5,11 @@ import { useNavigate } from 'react-router-dom';
 
 // Define table columns
 const columns = [
-  { key: "InvoiceNumber", label: "INVOICE_NUMBER" },
-  { key: "WholeSalerName", label: "WHOLE_SLAER_NAME" },
-  { key: "TotalAmount", label: "TOTAL_BILL" },
-  { key: "PaymentAmount", label: "PAID_AMOUNT" },
-  { key: "ProfitMargin", label: "YOUR_PROFIT" },
+  { altKey: "", key: "InvoiceNumber", label: "INVOICE_NUMBER" },
+  { altKey: "InvoiceType", key: "WholeSalerName", label: "WHOLE_SLAER_NAME" },
+  { altKey: "", key: "TotalAmount", label: "TOTAL_BILL" },
+  { altKey: "", key: "PaymentAmount", label: "PAID_AMOUNT" },
+  { altKey: "", key: "ProfitMargin", label: "YOUR_PROFIT" },
 ];
 
 export default function Invoice() {

@@ -242,7 +242,7 @@ export default function invoiceAddOrUpdate() {
 
                     {/* Submit Button */}
                     <div className="mt-4">
-                      <Button onClick={() => submitInvoice(values)} disabled={!values.ProductSellInfo.length || !values.WholeSalerId || !values.PaymentAmount}
+                      <Button onClick={() => submitInvoice(values)} disabled={!values.ProductSellInfo.length || !values.PaymentAmount}
                         type="submit" variant="contained" color="primary">
                         Submit Invoice
                       </Button>
