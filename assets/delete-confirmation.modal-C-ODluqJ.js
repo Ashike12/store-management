@@ -1,0 +1,6 @@
+import{x as o,j as e,M as n,B as t,T as l}from"./index-6Mo_YPcM.js";import{B as r}from"./Button-BaW1ZP3C.js";/**
+ * @license @tabler/icons-react v3.31.0 - MIT
+ *
+ * This source code is licensed under the MIT license.
+ * See the LICENSE file in the root directory of this source tree.
+ */var i=o("outline","alert-triangle","IconAlertTriangle",[["path",{d:"M12 9v4",key:"svg-0"}],["path",{d:"M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z",key:"svg-1"}],["path",{d:"M12 16h.01",key:"svg-2"}]]);function p({isOpen:s,handleConfirm:a}){return e.jsx(e.Fragment,{children:e.jsx(n,{open:s,onClose:()=>a(!1),children:e.jsxs(t,{sx:{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%, -50%)",width:400,bgcolor:"background.paper",boxShadow:24,p:5,borderRadius:2},children:[e.jsxs("div",{className:"p-5 m-5 item flex flex-col gap-4 items-center justify-center",children:[e.jsx(i,{color:"red",className:"w-6 h-6 mr-2"}),e.jsx(l,{className:"center",variant:"H5",content:"ARE_YOU_SURE_TO_DELETE"})]}),e.jsxs(t,{display:"flex",justifyContent:"flex-end",className:"gap-4 mt-4",children:[e.jsx(r,{variant:"outlined",color:"secondary",onClick:()=>a(!1),children:"Cancel"}),e.jsx(r,{variant:"contained",onClick:()=>a(!0),color:"primary",children:"CONFIRM"})]})]})})})}export{p as D};
