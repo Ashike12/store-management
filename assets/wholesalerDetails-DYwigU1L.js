@@ -1,4 +1,4 @@
-import{x as p,z as A,w as b,A as g,y,j as e,T as t}from"./index-B7I1Kzlq.js";import{C as w}from"./CustomTable-BkyXfwP2.js";/**
+import{x as p,z as A,w as b,A as g,y,j as e,T as t}from"./index-6Mo_YPcM.js";import{C as w}from"./CustomTable-BUQrBqCU.js";/**
  * @license @tabler/icons-react v3.31.0 - MIT
  *
  * This source code is licensed under the MIT license.

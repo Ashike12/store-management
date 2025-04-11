@@ -1,4 +1,4 @@
-import{x as Rt,r as Ys,j as p,T as $e,I as Ot}from"./index-B7I1Kzlq.js";/**
+import{x as Rt,r as Ys,j as p,T as $e,I as Ot}from"./index-6Mo_YPcM.js";/**
  * @license @tabler/icons-react v3.31.0 - MIT
  *
  * This source code is licensed under the MIT license.
