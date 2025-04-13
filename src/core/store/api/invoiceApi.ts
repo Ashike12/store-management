@@ -2,7 +2,7 @@ import {createApi} from '@reduxjs/toolkit/query/react';
 import {ApiServiceBaseQuery} from './baseQueries';
 import {APP_CONFIG} from '@core/config/config';
 import {IAuthResponse} from '@core/interfaces/api/IAuthResponse';
-import { ICreateInvoicePayload, IInvoice, IInvoiceResponse } from '@core/interfaces/api/IInvoice';
+import { ICreateInvoicePayload, IDashboardResponse, IInvoice, IInvoiceResponse } from '@core/interfaces/api/IInvoice';
 
 export const invoiceApi = createApi({
   reducerPath: 'invoiceApi',
@@ -72,8 +72,19 @@ export const invoiceApi = createApi({
       transformResponse: (response: IInvoiceResponse) => {
         return response;
       },
+    }),
+    getDashboardData: builder.query<IDashboardResponse, {}>({
+      query: (mutation) => ({
+        url: `${APP_CONFIG.businessUrl}/business/GetDashboardData`,
+        method: 'POST',
+        body: {},
+      }),
+      providesTags: (_result, _error) => [{type: 'invoice'}], // Cache by ID
+      transformResponse: (response: IDashboardResponse) => {
+        return response;
+      },
     })
   }),
 });
 
-export const {useCreateInvoiceMutation, useUpdateInvoiceMutation, useDeleteInvoiceMutation, useGetInvoiceQuery} = invoiceApi;
+export const {useCreateInvoiceMutation, useUpdateInvoiceMutation, useDeleteInvoiceMutation, useGetInvoiceQuery, useGetDashboardDataQuery} = invoiceApi;

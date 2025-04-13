@@ -46,3 +46,34 @@ export interface IProductSellInfoResponse extends IProductSellInfo {
 export interface InvoiceDetailsResponse extends IInvoice {
     ProductSellInfo: IProductSellInfoResponse[];
 }
+
+export interface SalesEntry {
+    revenue: number;
+    date: string; // Format: 'YYYY-MM-DD'
+}
+
+export interface ProductSalesInfoEntry {
+    sales: number;
+    name: string;
+}
+
+export interface WholesalerDataEntry {
+    value: number;
+    name: string;
+}
+
+export interface IDashboardData {
+    SalesData: SalesEntry[];
+    ProductSalesInfo: ProductSalesInfoEntry[];
+    WholesalerData: WholesalerDataEntry[];
+    ThisMonthRevenue: number;
+    ThisMonthTotalInvoice: number;
+    ThisMonthTotalSell: number;
+    RecentInvoiceData: IInvoice[];
+}
+
+export interface IDashboardResponse {
+    IsSuccess: boolean;
+    TotalCount: number;
+    Data: IDashboardData;
+}

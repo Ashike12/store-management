@@ -6,7 +6,7 @@ import { CustomButton } from '@components/button/CustomButton';
 import { useEffect } from 'react';
 
 // Define table columns
-const columns = [
+export const InvoiceColumns = [
   { altKey: "", key: "InvoiceNumber", label: "INVOICE_NUMBER" },
   { altKey: "InvoiceType", key: "WholeSalerName", label: "WHOLE_SLAER_NAME" },
   { altKey: "", key: "TotalAmount", label: "TOTAL_BILL" },
@@ -37,7 +37,7 @@ export default function Invoice() {
           <CustomTable
             isRowClickable={true}
             handleRowClick={handleRowClick}
-            columns={columns}
+            columns={InvoiceColumns}
             data={invoiceList || []}
             rowsPerPage={10} />
         </div>)}
