@@ -24,11 +24,11 @@ const topProducts = [
   { name: 'Product C', sales: 75 },
 ];
 
-const wholesalerData = [
-  { name: 'Wholesaler 1', value: 4000 },
-  { name: 'Wholesaler 2', value: 2500 },
-  { name: 'Wholesaler 3', value: 1500 },
-];
+// const wholesalerData = [
+//   { name: 'Wholesaler 1', value: 4000 },
+//   { name: 'Wholesaler 2', value: 2500 },
+//   { name: 'Wholesaler 3', value: 1500 },
+// ];
 
 const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#d0ed57', '#a4de6b', '#8dd1e1', '#83a6ed', '#8dd1e1'];
 
