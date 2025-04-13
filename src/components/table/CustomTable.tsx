@@ -38,6 +38,13 @@ const CustomTable = <T extends Record<string, any>>({
         return moment(date, moment.ISO_8601, true).isValid();
     };
 
+    const getContent = (row: any, col: Column) => {
+        if(row[col.key] == null || row[col.key] == undefined || row[col.key] == '') {
+            return col.altKey ? (row[col.altKey] ?? 'N/A') : 'N/A';
+        }
+        return row[col.key];
+    }
+
     return (
         <div className="p-4 bg-white rounded-lg shadow-lg">
             <table className="w-full border rounded-sm border-grey-grey-200">
@@ -60,7 +67,7 @@ const CustomTable = <T extends Record<string, any>>({
                         <tr key={rowIndex} className="hover:bg-gray-100">
                             {columns.map((col) => (
                                 <td key={col.key} className={`border border-grey-grey-200 px-4 py-2 ${isRowClickable ? 'cursor-pointer' : ''}`} onClick={() => isRowClickable && handleRowClick(row, false, true)}>
-                                    {col.key.indexOf('Date') == -1 ? (<TextWrapper variant={'Body1'} content={(col.altKey ? row[col.altKey] : row[col.key]??'')} />) : moment(row[col.key]).format("DD/MM/YYYY")}
+                                    {col.key.indexOf('Date') == -1 ? (<TextWrapper variant={'Body1'} content={getContent(row,col)} />) : moment(row[col.key]).format("DD/MM/YYYY")}
                                 </td>
                             ))}
                             {showActionButtons && (

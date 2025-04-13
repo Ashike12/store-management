@@ -41,7 +41,8 @@ const initialValuesOnUpdate = (invoiceDetails: InvoiceDetailsResponse) => {
 
 export default function invoiceAddOrUpdate() {
   const navigate = useNavigate();
-  const { id } = useParams();
+  let { id } = useParams();
+  id = id === 'new' ? '' : id;
   const [searchParams] = useSearchParams();
   const isUpdate = searchParams.get("isUpdate") === "true";
   const { data: productData, isLoading: isProductLoading } = useGetProductQuery({ pageNumber: 1, pageSize: 1000, itemId: '' });
@@ -140,14 +141,17 @@ export default function invoiceAddOrUpdate() {
                                     fullWidth
                                     variant="outlined"
                                     select
-                                    value={product.ProductId}
-                                    onChange={(e) =>
-                                      setFieldValue(`ProductSellInfo[${index}].ProductId`, e.target.value)
+                                    value={product.ProductId+'_'+product.SellingPrice}
+                                    onChange={(e) => {
+                                      setFieldValue(`ProductSellInfo[${index}].ProductId`, e.target.value.split('_')[0]);
+                                      setFieldValue(`ProductSellInfo[${index}].SellingPrice`, e.target.value.split('_')[1]);
+                                      setFieldValue(`ProductSellInfo[${index}].Quantity`, 5);
+                                    }
                                     }
                                   >
                                     {productList
                                       .map((productOption) => (
-                                        <MenuItem disabled={selectedProducts.indexOf(productOption.ItemId) > -1} key={productOption.ItemId} value={productOption.ItemId}>
+                                        <MenuItem disabled={selectedProducts.indexOf(productOption.ItemId) > -1} key={productOption.ItemId} value={productOption.ItemId+'_'+productOption.SellingPrice}>
                                           {productOption.ProductName}
                                         </MenuItem>
                                       ))}

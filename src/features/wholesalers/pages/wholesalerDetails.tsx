@@ -4,6 +4,7 @@ import { IInvoice } from "@core/interfaces/api/IInvoice";
 import { useGetInvoiceQuery } from "@core/store/api/invoiceApi";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { IconMessage, IconArrowNarrowRight } from '@tabler/icons-react';
+import { CustomButton } from "@components/button/CustomButton";
 
 const columns = [
     { key: "InvoiceNumber", label: "INVOICE_NUMBER" },
@@ -20,9 +21,9 @@ export default function wholesalerDetails() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const phoneNumber = searchParams.get("phoneNumber")?.trim();
+    const wholesalerName = searchParams.get("wholesalerName") ?? 'N/A';
     const { data, isLoading } = useGetInvoiceQuery({ pageNumber: 1, pageSize: 10, itemId: '', wholesalerId: id ?? '' });
     const invoiceData = (data?.Data as IInvoice[]) || [];
-    const wholesalerName = invoiceData[0]?.WholeSalerName || 'N/A';
     const handleRowClick = async (row: IInvoice) => {
         navigate(`/invoice/details/${row.ItemId}`);
     }
@@ -34,9 +35,13 @@ export default function wholesalerDetails() {
         console.log(smsUrl);
         window.location.href = smsUrl;
     };
+    const addInvoice = () => {
+        navigate(`/invoice/add/new?isUpdate=false`);
+    }
     return (
         <>
             <div className='w-full'>
+                <CustomButton onClick={() => addInvoice()} className='fixed bottom-4 right-4 ml-4 my-3 cursor-pointer' text={'ADD_INVOICE'} variant={'primary'}></CustomButton>
                 {/* <div className="fixed top-16 w-full h-64 bg-cover bg-center z-0">
                     <img className="w-full h-[200px] object-cover"  src={InvoiceBg} alt="Invocie bg" />
                 </div> */}
