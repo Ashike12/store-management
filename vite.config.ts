@@ -8,8 +8,7 @@ dotenv.config(); // load env vars from .env
 
 // https://vite.dev/config/
 export default defineConfig({
-  // base: "/store-management/", // for deployment
-  base: "/", // for locallocalhost
+  base: "/store-management/",
   plugins: [
     react(),
     tsconfigPaths(), // only if you installed the plugin
