@@ -1,13 +1,13 @@
 import {createApi} from '@reduxjs/toolkit/query/react';
 import {ApiServiceBaseQuery} from './baseQueries';
 import {APP_CONFIG} from '@core/config/config';
-import {IAuthResponse} from '@core/interfaces/api/IAuthResponse';
+import {IAuthResponse, ISetPasswordResponse} from '@core/interfaces/api/IAuthResponse';
 import { addLogin } from '../slices/auth.slice';
 import { localStorageService } from '@core/services/localStorage.service';
 
 export const authApi = createApi({
   reducerPath: 'authApi',
-  baseQuery: ApiServiceBaseQuery, // Empty baseQuery (no base URL here)
+  baseQuery: (ApiServiceBaseQuery), // Empty baseQuery (no base URL here)
   tagTypes: ['auth'],
   endpoints: builder => ({
     getAuthData: builder.mutation<IAuthResponse, {email: string; password: string}>({
@@ -45,7 +45,20 @@ export const authApi = createApi({
         return response as IAuthResponse;
       },
     }),
+    setPassword: builder.mutation<ISetPasswordResponse, {password: string, activationId: string}>({
+      query: (mutation) => ({
+        url: `${APP_CONFIG.businessUrl}/auth/setPassword`,
+        method: 'POST',
+        body: {
+          Password: mutation.password,
+          ActivationId: mutation.activationId,
+        },
+      }),
+      transformResponse: (response: ISetPasswordResponse) => {
+        return response as ISetPasswordResponse;
+      },
+    }),
   }),
 });
 
-export const {useGetAuthDataMutation, useGetAuthDataByRefreshTokenMutation} = authApi;
+export const {useGetAuthDataMutation, useGetAuthDataByRefreshTokenMutation, useSetPasswordMutation} = authApi;

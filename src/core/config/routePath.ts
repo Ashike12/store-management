@@ -58,6 +58,11 @@ export const ROUTE_PATH = {
   login: {
     path: '/login',
   },
+  setPassword: {
+    path: '/set-password',
+    pathMatch: 'set-password',
+    title: 'SET_PASSWORD',
+  },
   test: {
     paths: {path: '/test', title: 'test'},
     get one() {
