@@ -48,5 +48,9 @@
   "TOTAL_DUE_AMOUNT": "Total due amount",
   "CONSUMER": "Consumer",
   "SEND_A_MESSAGE": "Send a due message",
-  "ADD_PRODUCTION": "Add Production"
+  "ADD_PRODUCTION": "Add Production",
+  "SET_PASSWORD": "Set Password",
+  "ACTIVATION_FAILD": "Your activation code expired, please contact administrator",
+  "PLEASE_LOGIN": "Back to login",
+  "PASSWORD_SET_SUCCESSFULLY": "Password set successfully"
 }

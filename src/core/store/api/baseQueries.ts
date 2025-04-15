@@ -6,12 +6,9 @@ import {
   FetchBaseQueryMeta,
 } from '@reduxjs/toolkit/query';
 import { APP_CONFIG } from '@core/config/config';
-import { persistor, RootState } from '../store';
 import { IAuthResponse } from '@core/interfaces/api/IAuthResponse';
 import { addLogin, removeLogin } from '../slices/auth.slice';
-import { useNavigate } from 'react-router-dom';
 import { localStorageService, storagePath } from '@core/services/localStorage.service';
-import { set } from 'lodash';
 
 // Function to refresh the token
 const refreshAccessToken = async (refreshToken: string): Promise<IAuthResponse | null> => {
@@ -66,7 +63,9 @@ const customBaseQuery =
 
       let result = await baseQuery(args, api, extraOptions);
       // If Unauthorized (401), attempt to refresh token
-
+      if(api.endpoint == 'setPassword' || api.endpoint == 'login') {
+        return result;
+      }
       if (
         result.error &&
         (result.error?.status === 401 ||
