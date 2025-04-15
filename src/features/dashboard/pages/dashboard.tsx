@@ -24,11 +24,11 @@ const topProducts = [
   { name: 'Product C', sales: 75 },
 ];
 
-// const wholesalerData = [
-//   { name: 'Wholesaler 1', value: 4000 },
-//   { name: 'Wholesaler 2', value: 2500 },
-//   { name: 'Wholesaler 3', value: 1500 },
-// ];
+const wholesalerData = [
+  { name: 'Wholesaler 1', value: 4000 },
+  { name: 'Wholesaler 2', value: 2500 },
+  { name: 'Wholesaler 3', value: 1500 },
+];
 
 const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#d0ed57', '#a4de6b', '#8dd1e1', '#83a6ed', '#8dd1e1'];
 
@@ -108,7 +108,7 @@ const Dashboard = () => {
             <ResponsiveContainer width="100%" height={250}>
               <PieChart>
                 <Pie
-                  data={dashBoardData?.WholesalerData}
+                  data={dashBoardData?.WholesalerData ?? wholesalerData}
                   dataKey="value"
                   nameKey="name"
                   cx="50%"
@@ -116,7 +116,7 @@ const Dashboard = () => {
                   outerRadius={80}
                   label
                 >
-                  {dashBoardData?.WholesalerData.map((entry, index) => (
+                  {(dashBoardData?.WholesalerData ?? wholesalerData).map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
