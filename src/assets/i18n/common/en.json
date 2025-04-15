@@ -47,5 +47,6 @@
   "TOTAL_PAID_AMOUNT": "Total paid amount",
   "TOTAL_DUE_AMOUNT": "Total due amount",
   "CONSUMER": "Consumer",
-  "SEND_A_MESSAGE": "Send a due message"
+  "SEND_A_MESSAGE": "Send a due message",
+  "ADD_PRODUCTION": "Add Production"
 }

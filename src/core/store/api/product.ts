@@ -2,7 +2,7 @@ import {createApi} from '@reduxjs/toolkit/query/react';
 import {ApiServiceBaseQuery} from './baseQueries';
 import {APP_CONFIG} from '@core/config/config';
 import {IAuthResponse} from '@core/interfaces/api/IAuthResponse';
-import { ICreateProductPayload, IProduct, IProductResponse } from '@core/interfaces/api/IProduct';
+import { IAddProductionPayload, ICreateProductPayload, IProduct, IProductResponse } from '@core/interfaces/api/IProduct';
 
 export const productApi = createApi({
   reducerPath: 'productApi',
@@ -71,8 +71,24 @@ export const productApi = createApi({
       transformResponse: (response: IProductResponse) => {
         return response;
       },
-    })
+    }),
+    addProduction: builder.mutation<IAuthResponse, {payload: IAddProductionPayload}>({
+      query: (mutation) => ({
+        url: `${APP_CONFIG.businessUrl}/business/AddProduction`,
+        method: 'POST',
+        body: mutation.payload,
+      }),
+      async onQueryStarted(id, {dispatch, queryFulfilled}) {
+        // `onStart` side-effectdispatch(messageCreated('Fetching post...'))
+        try {
+          const {data} = await queryFulfilled;
+          console.log('production-added', data);
+        } catch (err) {
+          // `onError` side-effectdispatch(messageCreated('Error fetching post!'))
+        }
+      },
+    }),
   }),
 });
 
-export const {useCreateProductMutation, useUpdateProductMutation, useDeleteProductMutation, useGetProductQuery} = productApi;
+export const {useAddProductionMutation, useCreateProductMutation, useUpdateProductMutation, useDeleteProductMutation, useGetProductQuery} = productApi;

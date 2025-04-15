@@ -16,3 +16,14 @@ export interface IProduct extends ICreateProductPayload {
     ItemId: string;
     CreatedDate?: string;
 }
+
+
+
+export interface IAddProductionPayload {
+    ProductionInfo: IAddProduction[];
+}
+
+export interface IAddProduction {
+    ProductId: string;
+    Quantity: number;
+}
