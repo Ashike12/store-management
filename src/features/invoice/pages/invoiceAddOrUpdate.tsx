@@ -79,7 +79,7 @@ export default function invoiceAddOrUpdate() {
         {/* <div className="fixed top-16 w-full h-64 bg-cover bg-center z-0">
                     <img className="w-full h-[200px] object-cover"  src={InvoiceBg} alt="Invocie bg" />
                 </div> */}
-        <CustomButton onClick={() => handleRedirection('details')} className='fixed bottom-4 right-4 ml-4 my-3 cursor-pointer' text={'DETAILS_INVOICE'} variant={'primary'}></CustomButton>
+        {id!=='' && (<CustomButton onClick={() => handleRedirection('details')} className='fixed bottom-4 right-4 ml-4 my-3 cursor-pointer' text={'DETAILS_INVOICE'} variant={'primary'}></CustomButton>)}
         {/* {isUpdate ? (<CustomButton onClick={() => handleRedirection('add')} className='fixed bottom-4 right-36 ml-4 my-3 cursor-pointer' text={'ADD_INVOICE'} variant={'primary'}></CustomButton>) :
         (<CustomButton onClick={() => handleRedirection('update')} className='fixed bottom-4 right-36 ml-4 my-3 cursor-pointer' text={'UPDATE_INVOICE'} variant={'primary'}></CustomButton>)} */}
 
