@@ -72,7 +72,6 @@ const customBaseQuery =
           (result.error as any)?.originalStatus === 401)
       ) {
         console.warn('Unauthorized! Attempting token refresh...');
-        const state = api.getState() as RootState;
         const refreshToken = localStorageService.getItemLocalStore(storagePath.RefreshToken);
         const newToken = await refreshAccessToken(refreshToken);
         if (newToken) {
@@ -84,7 +83,7 @@ const customBaseQuery =
           api.dispatch(removeLogin());
           // persistor.purge(); // Clear all state
           setTimeout(() => {
-            window.location.href = '/login';
+            window.location.href = '/'; // Redirect to login page
           }, 300);
           // api.dispatch(fetchAllLogout()); // Dispatch logout action
         }
