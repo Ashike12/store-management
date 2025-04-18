@@ -1,4 +1,4 @@
-import { BrowserRouter, useLocation, useNavigate } from 'react-router-dom';
+import { HashRouter, useLocation, useNavigate } from 'react-router-dom';
 import AppRouter from 'router/AppRouter';
 import AuthRouter from 'router/AuthRouter';
 import { selectAppIsLogin } from '@core/store/slices/auth.slice';
@@ -10,11 +10,11 @@ export default function App() {
   const isLogin = useAppSelector(selectAppIsLogin);
   console.log('isLogin', isLogin);
   return (
-    <BrowserRouter>
+    <HashRouter>
       <AuthGuard isLogin={isLogin}>
         {isLogin ? <AppRouter /> : <AuthRouter />}
       </AuthGuard>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
