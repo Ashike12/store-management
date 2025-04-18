@@ -5,13 +5,16 @@ import { TextField, Container, Typography, Box, InputAdornment, IconButton } fro
 import { IconEye, IconEyeOff, IconPlus } from "@tabler/icons-react";
 import { useFormik } from "formik";
 import { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import * as Yup from "yup";
 
 export default function setPassword() {
     const [showPassword, setShowPassword] = useState(false);
     const [showRetypePassword, setShowRetypePassword] = useState(false);
     const [setPassword, { isLoading, isError, isSuccess }] = useSetPasswordMutation();
-    const activationId = new URLSearchParams(window.location.search).get("activationId") || "";
+    const location = useLocation();
+    const activationId = new URLSearchParams(location.search).get("activationId") || "";
+    const navigate = useNavigate();
 
     const toggleShowPassword = () => setShowPassword(prev => !prev);
     const toggleShowRetypePassword = () => setShowRetypePassword(prev => !prev);
@@ -144,13 +147,13 @@ export default function setPassword() {
                 </form>)}
                 {isSuccess && (<div className="p-5 flex flex-col items-center justify-center mb-4">
                     <TextWrapper variant={"H4Bold"} className="text-center" content={'PASSWORD_SET_SUCCESSFULLY'} />
-                    <div onClick={() => window.location.href = '/login'} className="flex text-green hover:text-blue flex-row items-center gap-2 cursor-pointer">
+                    <div onClick={() => navigate('/')} className="flex text-green hover:text-blue flex-row items-center gap-2 cursor-pointer">
                         <TextWrapper className="pt-5" content={'PLEASE_LOGIN'} />
                     </div>
                 </div>)}
                 {isError && (<div className="px-5 flex flex-col items-center justify-center mb-4">
                     <TextWrapper className="text-red text-center" content={'ACTIVATION_FAILD'} />
-                    <div onClick={() => window.location.href = '/login'} className="flex text-green hover:text-blue flex-row items-center gap-2 cursor-pointer">
+                    <div onClick={() => navigate('/')} className="flex text-green hover:text-blue flex-row items-center gap-2 cursor-pointer">
                         <TextWrapper className="cursor-pointer" content={'PLEASE_LOGIN'} />
                     </div>
                 </div>)}
