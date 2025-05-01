@@ -14,24 +14,28 @@ interface Column {
 interface TableProps<T> {
     columns: Column[]; // Array of columns
     data: T[]; // Array of data objects
+    totalCount?: number; // Optional total count for pagination
     rowsPerPage?: number; // Optional pagination setting
     handleRowClick?: (row: T, isDelete: boolean, isGoDetails?: boolean) => void; // Optional row click handler
     showActionButtons?: boolean; // Optional flag to show actions column
     isRowClickable?: boolean; // Optional flag to make row clickable
     hidePagination?: boolean; // Optional flag to hide pagination
+    handlePageSelection?: (page: number) => void; // Optional page selection handler
 }
 
 const CustomTable = <T extends Record<string, any>>({
     columns,
     data,
+    totalCount = data.length,
     rowsPerPage = 5,
     handleRowClick = (row: T, isDelete: boolean, isGoDetails?: boolean) => { },
     showActionButtons = false,
     isRowClickable = false,
     hidePagination = false,
+    handlePageSelection = (page: number) => { },
 }: TableProps<T>) => {
     const [currentPage, setCurrentPage] = useState(1);
-    const totalPages = Math.ceil(data.length / rowsPerPage);
+    const totalPages = Math.ceil(totalCount / rowsPerPage);
 
     // Get current page data
     const currentData = data.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
@@ -91,7 +95,7 @@ const CustomTable = <T extends Record<string, any>>({
                 {/* Pagination Controls */}
                 {!hidePagination && (<div className="flex justify-between items-center mt-4">
                     <button
-                        onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                        onClick={() => {setCurrentPage((prev) => Math.max(prev - 1, 1)); handlePageSelection(currentPage - 1)}}
                         disabled={currentPage === 1}
                         className={`px-4 py-2 bg-gray-500 text-white rounded ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-600 cursor-pointer"
                             }`}
@@ -104,7 +108,7 @@ const CustomTable = <T extends Record<string, any>>({
                     </span>
 
                     <button
-                        onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                        onClick={() => {setCurrentPage((prev) => Math.min(prev + 1, totalPages)); handlePageSelection(currentPage + 1)}}
                         disabled={currentPage === totalPages}
                         className={`px-4 py-2 bg-gray-500 text-white rounded ${currentPage === totalPages ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-600 cursor-pointer"
                             }`}
