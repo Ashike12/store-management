@@ -1,6 +1,6 @@
 import { CustomButton } from '@components/button/CustomButton';
 import CustomTable from '@components/table/CustomTable';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import DeleteConfirmationModal from '@components/confirmation-modal/delete-confirmation.modal';
 import UserModal, { IUserForm } from '../components/userModal';
 import { useCreateUserMutation, useDeleteUserMutation, useGetUserQuery, useUpdateUserMutation } from '@core/store/api';
@@ -34,6 +34,7 @@ export default function StoreManagement() {
   const [isOpen, setIsOpen] = useState(false);
   const [isDelete, setIsDelete] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
+  const [searchText, setSearchText] = useState('');
   const [formData, setFormData] = useState<IUserForm>(initialFormData);
   const navigate = useNavigate();
   const handleSave = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -92,7 +93,7 @@ export default function StoreManagement() {
       // await deleteProduct({id: row.ItemId}).unwrap();
       // refetch();
     }
-    else if(isGoDetails) {
+    else if (isGoDetails) {
       navigate(`/wholesaler/invoice/${row.ItemId}?phoneNumber=${row.Phone}&wholesalerName=${row.FirstName + ' ' + row.LastName}`);
     } else {
       setIsUpdate(true);
@@ -108,8 +109,8 @@ export default function StoreManagement() {
 
   const handleDelete = async (isConfirm: boolean) => {
     setIsDelete(false);
-    if(isConfirm){
-      await deleteProduct({id: formData.ItemId}).unwrap();
+    if (isConfirm) {
+      await deleteProduct({ id: formData.ItemId }).unwrap();
       refetch();
     }
   }
@@ -118,17 +119,36 @@ export default function StoreManagement() {
     setFormData(initialFormData);
     setIsOpen(true);
   }
+  // Filtered and searched data
+  const filteredData = useMemo(() => {
+    if (!data?.Data) return [];
+
+    return data.Data.filter(item => {
+      const matchesSearch = item.DisplayName.toLowerCase().includes(searchText.toLowerCase());
+
+      return matchesSearch;
+    });
+  }, [data, searchText]);
   return (
     <>
       <div className='w-full'>
         <CustomButton onClick={() => resetForm()} className='fixed bottom-4 right-4 ml-4 my-3 cursor-pointer' text={'ADD_USER'} variant={'primary'}></CustomButton>
         {data && data && data?.Data?.length > 0 && (<div className="p-10 w-full">
+          <div className="flex flex-wrap gap-4 mb-6">
+            <input
+              type="text"
+              placeholder="Search by name"
+              className="border p-2 rounded w-full sm:w-1/2"
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+            />
+          </div>
           <CustomTable
             showActionButtons={true}
             isRowClickable={true}
             handleRowClick={handleRowClick}
             columns={columns}
-            data={data?.Data || []}
+            data={filteredData}
             rowsPerPage={10} />
         </div>)}
         {!isLoading && data && data && data?.Data?.length == 0 && (<div className="p-10 w-full">
