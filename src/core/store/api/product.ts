@@ -19,7 +19,6 @@ export const productApi = createApi({
         // `onStart` side-effectdispatch(messageCreated('Fetching post...'))
         try {
           const {data} = await queryFulfilled;
-          console.log('product-create-data', data);
         } catch (err) {
           // `onError` side-effectdispatch(messageCreated('Error fetching post!'))
         }
@@ -35,7 +34,6 @@ export const productApi = createApi({
         // `onStart` side-effectdispatch(messageCreated('Fetching post...'))
         try {
           const {data} = await queryFulfilled;
-          console.log('product-create-data', data);
         } catch (err) {
           // `onError` side-effectdispatch(messageCreated('Error fetching post!'))
         }
@@ -53,7 +51,6 @@ export const productApi = createApi({
         // `onStart` side-effectdispatch(messageCreated('Fetching post...'))
         try {
           const {data} = await queryFulfilled;
-          console.log('product-delete-data', data);
         } catch (err) {
           // `onError` side-effectdispatch(messageCreated('Error fetching post!'))
         }
@@ -82,7 +79,6 @@ export const productApi = createApi({
         // `onStart` side-effectdispatch(messageCreated('Fetching post...'))
         try {
           const {data} = await queryFulfilled;
-          console.log('production-added', data);
         } catch (err) {
           // `onError` side-effectdispatch(messageCreated('Error fetching post!'))
         }

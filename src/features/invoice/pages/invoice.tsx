@@ -37,7 +37,6 @@ export default function Invoice() {
   const handlePageSelection = (page: number) => {
     // setPayload((prev) => ({ ...prev, pageNumber: page }));
     // refetch();
-    console.log('page', page);
   }
   const filteredData = useMemo(() => {
     if (!data?.Data) return [];

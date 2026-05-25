@@ -4,7 +4,7 @@ import { TextField, Container, Typography, Box } from "@mui/material";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 
-export default function login() {
+export default function Login() {
   const [login, { isLoading }] = useGetAuthDataMutation();
   const formik = useFormik({
     initialValues: {
@@ -20,7 +20,6 @@ export default function login() {
         .required("Password is required"),
     }),
     onSubmit: async (values) => {
-      console.log("Login Data:", values);
       await login(values).unwrap();
     },
   });

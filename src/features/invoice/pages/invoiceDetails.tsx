@@ -11,9 +11,9 @@ const columns = [
     { key: "Quantity", label: "QUANTITY" }
 ];
 
-export default function invoiceDetails() {
+export default function InvoiceDetails() {
     const { id } = useParams();
-    const { data, isLoading } = useGetInvoiceQuery({ pageNumber: 1, pageSize: 10, itemId: id ?? '' });
+    const {data} = useGetInvoiceQuery({pageNumber: 1, pageSize: 10, itemId: id ?? ''});
     const invoiceData = (data?.Data as InvoiceDetailsResponse) || {};
     const navigate = useNavigate();
     const handleButtonAction = (action: string) => {

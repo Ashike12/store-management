@@ -8,7 +8,7 @@ import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import * as Yup from "yup";
 
-export default function setPassword() {
+export default function SetPassword() {
     const [showPassword, setShowPassword] = useState(false);
     const [showRetypePassword, setShowRetypePassword] = useState(false);
     const [setPassword, { isLoading, isError, isSuccess }] = useSetPasswordMutation();
@@ -40,7 +40,6 @@ export default function setPassword() {
                 .required("Please retype your password"),
         }),
         onSubmit: async (values) => {
-            console.log("Login Data:", values);
             await setPassword({ password: values.password, activationId }).unwrap();
         },
     });

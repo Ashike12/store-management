@@ -19,7 +19,6 @@ export default function CustomAccordionSection({
     console.info({sectionId, accordionProperty});
   };
 
-  console.log(accordionSection.accordionSectionId);
 
   return (
     <div className="bg-common-white grid w-full grid-cols-[repeat(auto-fill,minmax(350px,1fr))] gap-x-4 gap-y-4 rounded p-2">

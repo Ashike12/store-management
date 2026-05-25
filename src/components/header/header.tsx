@@ -1,8 +1,4 @@
-import {
-  IconButton,
-  AppBar as MuiAppBar,
-  Toolbar,
-} from '@mui/material';
+import {AppBar as MuiAppBar, IconButton, Toolbar} from '@mui/material';
 import { styled } from '@mui/material/styles';
 import TextWrapper from '@components/text/TextWrapper';
 import useGetHeaderTitle from '@core/hooks/useGetHeaderTitle';
@@ -42,10 +38,10 @@ export default function Header({ isLocked }: Readonly<IHeaderProps>) {
       position={'sticky'}
       className={cn(
         '!bg-background-default border-transparent-grey-16 !border-b !shadow-none',
-        !isLocked ? 'pl-16' : '',
+        !isLocked ? 'md:pl-[60px]' : '',
       )}>
-      <Toolbar className="mx-5 flex justify-between !p-0">
-        <div className={`flex basis-7/10 text-2xl font-bold`}>
+      <Toolbar className="mx-5 flex min-h-[80px] flex-wrap items-center justify-between gap-3 !p-0">
+        <div className="flex min-w-0 flex-1 items-center text-2xl font-bold">
           {isLocked && (<div className='border-r h-16 pt-4 border-transparent-grey-16 pr-8 mr-4'>
             <TextWrapper
               className="text-text-disabled pr-1"
@@ -66,9 +62,9 @@ export default function Header({ isLocked }: Readonly<IHeaderProps>) {
             )}
           </div>
         </div>
-        <div className='flex justify-end basis-3/10'>
+        <div className='flex shrink-0 items-center justify-end gap-3'>
           <img width={50} src={BusinessLogo} alt="expanded logo" />
-          <CustomButton onClick={() => handleLogout()} className='ml-4 mt-2 cursor-pointer' text={'LOGOUT'} variant={'primary'}></CustomButton>
+          <CustomButton onClick={() => handleLogout()} className='cursor-pointer' text={'LOGOUT'} variant={'primary'}></CustomButton>
         </div>
       </Toolbar>
     </AppBar>

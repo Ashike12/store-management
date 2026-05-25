@@ -44,7 +44,6 @@ export default function ProductionModal({
                 Quantity: item.CurrentQuantity
             })
         })
-        console.log("Payload", payload);
         await createProduction({ payload }).unwrap();
         handleClose();
     }
@@ -74,7 +73,6 @@ export default function ProductionModal({
                     initialValues={createProductionInitialValues}
                     validationSchema={addProductionValidationSchema}
                     onSubmit={(values) => {
-                        console.log("Form data", values);
                     }}
                 >
                     {({ values, setFieldValue, errors, touched }) => {

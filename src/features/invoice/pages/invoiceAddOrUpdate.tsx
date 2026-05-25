@@ -39,7 +39,7 @@ const initialValuesOnUpdate = (invoiceDetails: InvoiceDetailsResponse) => {
   }
 }
 
-export default function invoiceAddOrUpdate() {
+export default function InvoiceAddOrUpdate() {
   const navigate = useNavigate();
   let { id } = useParams();
   id = id === 'new' ? '' : id;
@@ -47,26 +47,23 @@ export default function invoiceAddOrUpdate() {
   const isUpdate = searchParams.get("isUpdate") === "true";
   const { data: productData, isLoading: isProductLoading } = useGetProductQuery({ pageNumber: 1, pageSize: 1000, itemId: '' });
   const { data: userData, isLoading: isUserLoading } = useGetUserQuery({ pageNumber: 1, pageSize: 10, itemId: '' });
-  const { data: invoiceData, isLoading: isInvoiceLoading } = useGetInvoiceQuery({ pageNumber: 1, pageSize: 10, itemId: id ?? '' });
-  const [createInvoice, { isLoading: isCreating }] = useCreateInvoiceMutation();
-  const [updateInvoice, { isLoading: isUpdating }] = useUpdateInvoiceMutation();
+  const {data: invoiceData} = useGetInvoiceQuery({pageNumber: 1, pageSize: 10, itemId: id ?? ''});
+  const [createInvoice] = useCreateInvoiceMutation();
+  const [updateInvoice] = useUpdateInvoiceMutation();
   const productList = productData?.Data || [];
   const wholesalerList = userData?.Data || [];
   if (isProductLoading || isUserLoading) {
     return <CircularProgress />;
   }
 
-  console.log(invoiceData)
 
   const handleRedirection = (action: string) => {
     navigate(`/invoice/${action}/${id}`);
   }
   const submitInvoice = async (values: ICreateInvoicePayload) => {
-    console.log("Form data", values);
     if (isUpdate) {
       const updatePayload = values as IUpdateInvoicePayload;
       updatePayload.ItemId = id ?? '';
-      console.log("Update payload", updatePayload);
       await updateInvoice({ payload: updatePayload }).unwrap();
     } else {
       await createInvoice({ payload: values }).unwrap();
@@ -92,10 +89,9 @@ export default function invoiceAddOrUpdate() {
               initialValues={!isUpdate ? createInvoiceInitialValues : initialValuesOnUpdate(invoiceData?.Data as InvoiceDetailsResponse)}
               validationSchema={invoiceValidationSchema}
               onSubmit={(values) => {
-                console.log("Form data", values);
               }}
             >
-              {({ values, setFieldValue, errors, touched }) => {
+              {({values, setFieldValue}) => {
                 const selectedProducts = values.ProductSellInfo.map(
                   (product) => product.ProductId
                 );

@@ -6,15 +6,14 @@ import List from '@mui/material/List';
 import { styled, Theme, CSSObject } from '@mui/material/styles';
 import MuiDrawer from '@mui/material/Drawer';
 import { DRAWER_WIDTH } from '@core/config/constants';
-import { EnumLeftSidebarItem } from '@core/enums/left-sidebar-item.enum';
 import BusinessLogo from '@assets/images/logo-business.png';
 import BASE_ROUTES from '@core/config/base-routes';
-import { useMatch, useNavigate } from 'react-router';
+import { useMatch, useNavigate } from 'react-router-dom';
 import IconCaretDoubleLeft from '@assets/icons/IconCaretDoubleLeft';
 import TextWrapper from '@components/text/TextWrapper';
-import IconLock from '@assets/icons/IconLock';
 import { IconBox, IconBuildingStore, IconFileInvoice, IconLayoutDashboard } from '@tabler/icons-react';
 import IconCaretDoubleRight from '@assets/icons/IconCaretDoubleRight';
+import cn from '@core/utils/cn';
 
 const drawerWidth = DRAWER_WIDTH;
 
@@ -117,10 +116,6 @@ export default function LeftSidebar({
   const isActiveItem = (itemType: string) => {
     return match?.params.pageName === itemType.toLowerCase();
   };
-  const drawerCollapse = () => {
-    if (!isLocked) drawerClose();
-  };
-
   return (
     <Drawer
       variant="permanent"
@@ -129,9 +124,14 @@ export default function LeftSidebar({
       sx={{
         '& .MuiDrawer-paper': {
           height: '100vh', // Full screen height
+          borderRight: '1px solid rgba(145, 158, 171, 0.24)',
         },
+        display: { xs: 'none', md: 'block' },
       }}
-      className={'fixed inset-0 bg-white' + (isLocked ? 'relative' : 'fixed z-[9999]')}>
+      className={cn(
+        'bg-white',
+        isLocked ? 'relative' : 'fixed inset-0 z-[9999]',
+      )}>
       <div
         className={`flex flex-col min-h-screen justify-between pt-5 ${open ? 'px-4' : 'px-2'}`}
       >

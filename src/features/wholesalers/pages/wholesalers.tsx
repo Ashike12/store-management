@@ -77,7 +77,6 @@ export default function StoreManagement() {
   }
 
   const handleRowClick = async (row: IUser, isDelete: boolean, isGoDetails?: boolean) => {
-    console.log('row', row);
     setFormData({
       ItemId: row.ItemId,
       FirstName: row.FirstName,

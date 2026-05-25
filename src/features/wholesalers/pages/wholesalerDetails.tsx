@@ -3,7 +3,7 @@ import TextWrapper from "@components/text/TextWrapper";
 import { IInvoice } from "@core/interfaces/api/IInvoice";
 import { useGetInvoiceQuery } from "@core/store/api/invoiceApi";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { IconMessage, IconArrowNarrowRight } from '@tabler/icons-react';
+import { IconArrowNarrowRight } from '@tabler/icons-react';
 import { CustomButton } from "@components/button/CustomButton";
 
 const columns = [
@@ -16,13 +16,13 @@ const columns = [
 ];
 
 
-export default function wholesalerDetails() {
+export default function WholesalerDetails() {
     const { id } = useParams();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const phoneNumber = searchParams.get("phoneNumber")?.trim();
     const wholesalerName = searchParams.get("wholesalerName") ?? 'N/A';
-    const { data, isLoading } = useGetInvoiceQuery({ pageNumber: 1, pageSize: 10, itemId: '', wholesalerId: id ?? '' });
+    const {data} = useGetInvoiceQuery({pageNumber: 1, pageSize: 10, itemId: '', wholesalerId: id ?? ''});
     const invoiceData = (data?.Data as IInvoice[]) || [];
     const handleRowClick = async (row: IInvoice) => {
         navigate(`/invoice/details/${row.ItemId}`);
@@ -32,7 +32,6 @@ export default function wholesalerDetails() {
     const totalProfit = invoiceData.reduce((acc, item) => acc + (item.ProfitMargin || 0), 0);
     const openSMS = () => {
         const smsUrl = `sms:+${phoneNumber}?body=${encodeURIComponent('You have due amount of: ' + (totalAmount - totalPaidAmount) + ' tk, please pay it as soon as possible.')}`;
-        console.log(smsUrl);
         window.location.href = smsUrl;
     };
     const addInvoice = () => {
