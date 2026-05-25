@@ -56,7 +56,6 @@ export default function Invoice() {
   return (
     <>
       <div className='w-full'>
-        <CustomButton onClick={() => addInvoice()} className='fixed bottom-4 right-4 ml-4 my-3 cursor-pointer' text={'ADD_INVOICE'} variant={'primary'}></CustomButton>
         {data && data && invoiceList.length > 0 && (<div className="p-10 w-full">
           <div className="flex flex-wrap gap-4 mb-6">
             <div className="flex flex-col cursor-pointer">
@@ -87,6 +86,14 @@ export default function Invoice() {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search by wholesaler or invoice no."
                 className="border p-2 rounded w-full"
+              />
+            </div>
+            <div className="flex flex-col mt-6">
+              <CustomButton
+                onClick={() => addInvoice()}
+                className='cursor-pointer'
+                text={'ADD_INVOICE'}
+                variant={'primary'}
               />
             </div>
           </div>

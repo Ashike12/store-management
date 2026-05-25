@@ -22,7 +22,7 @@ export default function WholesalerDetails() {
     const [searchParams] = useSearchParams();
     const phoneNumber = searchParams.get("phoneNumber")?.trim();
     const wholesalerName = searchParams.get("wholesalerName") ?? 'N/A';
-    const {data} = useGetInvoiceQuery({pageNumber: 1, pageSize: 10, itemId: '', wholesalerId: id ?? ''});
+    const { data } = useGetInvoiceQuery({ pageNumber: 1, pageSize: 10, itemId: '', wholesalerId: id ?? '' });
     const invoiceData = (data?.Data as IInvoice[]) || [];
     const handleRowClick = async (row: IInvoice) => {
         navigate(`/invoice/details/${row.ItemId}`);
@@ -40,18 +40,19 @@ export default function WholesalerDetails() {
     return (
         <>
             <div className='w-full'>
-                <CustomButton onClick={() => addInvoice()} className='fixed bottom-4 right-4 ml-4 my-3 cursor-pointer' text={'ADD_INVOICE'} variant={'primary'}></CustomButton>
-                {/* <div className="fixed top-16 w-full h-64 bg-cover bg-center z-0">
-                    <img className="w-full h-[200px] object-cover"  src={InvoiceBg} alt="Invocie bg" />
-                </div> */}
-                {/* <CustomButton onClick={() => handleButtonAction('add')} className='fixed bottom-4 right-4 ml-4 my-3 cursor-pointer' text={'ADD_INVOICE'} variant={'primary'}></CustomButton>
-                <CustomButton onClick={() => handleButtonAction('update')} className='fixed bottom-4 right-30 ml-4 my-3 cursor-pointer' text={'UPDATE_INVOICE'} variant={'primary'}></CustomButton> */}
-
                 <div className=" mx-auto p-6 bg-white shadow-lg rounded-xl mt-10">
                     {/* Invoice Header */}
-                    <h2 className="text-2xl font-bold text-gray-800 border-b pb-3">
-                        Wholesaler Details
-                    </h2>
+                    <div className="flex flex-wrap gap-4 mb-6 items-center justify-between">
+                        <h2 className="text-2xl flex-1 font-bold text-gray-800 border-b pb-3">
+                            Wholesaler Details
+                        </h2>
+                        <CustomButton
+                            onClick={() => addInvoice()}
+                            className='cursor-pointer'
+                            text={'ADD_INVOICE'}
+                            variant={'primary'}
+                        />
+                    </div>
 
                     <div className="mt-4 space-y-2">
                         <div>

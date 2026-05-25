@@ -13,7 +13,7 @@ const columns = [
 
 export default function InvoiceDetails() {
     const { id } = useParams();
-    const {data} = useGetInvoiceQuery({pageNumber: 1, pageSize: 10, itemId: id ?? ''});
+    const { data } = useGetInvoiceQuery({ pageNumber: 1, pageSize: 10, itemId: id ?? '' });
     const invoiceData = (data?.Data as InvoiceDetailsResponse) || {};
     const navigate = useNavigate();
     const handleButtonAction = (action: string) => {
@@ -22,17 +22,28 @@ export default function InvoiceDetails() {
     return (
         <>
             <div className='w-full'>
-                {/* <div className="fixed top-16 w-full h-64 bg-cover bg-center z-0">
-                    <img className="w-full h-[200px] object-cover"  src={InvoiceBg} alt="Invocie bg" />
-                </div> */}
-                <CustomButton onClick={() => handleButtonAction('add')} className='fixed bottom-4 right-4 ml-4 my-3 cursor-pointer' text={'ADD_INVOICE'} variant={'primary'}></CustomButton>
-                <CustomButton onClick={() => handleButtonAction('update')} className='fixed bottom-4 right-30 ml-4 my-3 cursor-pointer' text={'UPDATE_INVOICE'} variant={'primary'}></CustomButton>
 
                 <div className="max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-xl mt-10">
                     {/* Invoice Header */}
-                    <h2 className="text-2xl font-bold text-gray-800 border-b pb-3">
-                        Invoice Details
-                    </h2>
+                    <div className="flex flex-wrap gap-4 mb-6 items-center justify-between">
+                        <h2 className="text-2xl flex-1 font-bold text-gray-800 border-b pb-3">
+                            Invoice Details
+                        </h2>
+                        <div className="flex gap-4">
+                            <CustomButton
+                                onClick={() => handleButtonAction('add')}
+                                className='cursor-pointer'
+                                text={'ADD_INVOICE'}
+                                variant={'primary'}
+                            />
+                            <CustomButton
+                                onClick={() => handleButtonAction('update')}
+                                className='cursor-pointer'
+                                text={'UPDATE_INVOICE'}
+                                variant={'primary'}
+                            />
+                        </div>
+                    </div>
 
                     <div className="mt-4 space-y-2">
                         <div>

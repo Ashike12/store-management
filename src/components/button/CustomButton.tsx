@@ -1,57 +1,102 @@
-import {cva, VariantProps} from 'class-variance-authority';
+import {Button} from '@mui/material';
 import {Icon, IconLoader2, IconProps} from '@tabler/icons-react';
 import React, {ForwardRefExoticComponent, RefAttributes} from 'react';
+import {SxProps, Theme} from '@mui/material/styles';
 import cn from '@core/utils/cn';
 import useLocalization from '@core/hooks/useLocalization';
 
-const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded text-[13px] font-sfPro font-[590] leading-[24px] disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
-  {
-    variants: {
-      variant: {
-        primary:
-          'bg-interaction-main text-common-white hover:bg-interaction-dark disabled:bg-button-disabled disabled:text-text-disabled',
-        secondary:
-          'bg-interaction-secondary-main text-common-white hover:bg-interaction-secondary disabled:bg-button-disabled disabled:text-text-disabled',
-        outline:
-          'border border-interaction-main bg-common-white text-interaction-main hover:bg-transparent-interaction-16 disabled:border-button-disabled disabled:text-button-disabled',
-        ghost:
-          'text-interaction-main bg-transparent hover:bg-transparent-interaction-16 disabled:text-button-disabled',
-      },
-      size: {
-        lg: 'h-[44px] px-[12px] py-[10px]',
-        md: 'h-[36px] px-[12px] py-[6px]',
-        sm: 'h-[30px] px-[12px] py-[6px] text-[12px] leading-[22px]',
-        icon: 'h-10 w-10',
-      },
-    },
-    defaultVariants: {
-      variant: 'primary',
-      size: 'lg',
-    },
-  },
-);
+type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost';
+type ButtonSize = 'lg' | 'md' | 'sm' | 'icon';
 
 interface ICustomButtonProps
-  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'children'>,
-    VariantProps<typeof buttonVariants> {
+  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
   text: string;
+  variant?: ButtonVariant;
+  size?: ButtonSize;
   loading?: boolean;
   iconAlign?: 'left' | 'right';
   Icon?: ForwardRefExoticComponent<IconProps & RefAttributes<Icon>>;
+  sx?: SxProps<Theme>;
 }
+
+function getVariantStyles(theme: Theme, variant: ButtonVariant) {
+  const commonStyles = {
+    textTransform: 'none',
+    borderRadius: '8px',
+    fontFamily: 'SF Pro',
+    fontWeight: 590,
+  };
+
+  if (variant === 'secondary') {
+    return {
+      ...commonStyles,
+      bgcolor: theme.vars.palette.background.neutral,
+      color: theme.vars.palette.text.primary,
+      '&:hover': {bgcolor: theme.vars.palette.action.hover},
+      '&.Mui-disabled': {
+        bgcolor: theme.vars.palette.action.disabledBackground,
+        color: theme.vars.palette.text.disabled,
+      },
+    };
+  }
+
+  if (variant === 'outline') {
+    return {
+      ...commonStyles,
+      border: `1px solid ${theme.vars.palette.primary.main}`,
+      bgcolor: 'transparent',
+      color: theme.vars.palette.primary.main,
+      '&:hover': {bgcolor: theme.vars.palette.action.hover},
+      '&.Mui-disabled': {
+        borderColor: theme.vars.palette.action.disabledBackground,
+        color: theme.vars.palette.text.disabled,
+      },
+    };
+  }
+
+  if (variant === 'ghost') {
+    return {
+      ...commonStyles,
+      bgcolor: 'transparent',
+      color: theme.vars.palette.primary.main,
+      '&:hover': {bgcolor: theme.vars.palette.action.hover},
+      '&.Mui-disabled': {
+        color: theme.vars.palette.text.disabled,
+      },
+    };
+  }
+
+  return {
+    ...commonStyles,
+    bgcolor: theme.vars.palette.primary.main,
+    color: theme.vars.palette.primary.contrastText,
+    '&:hover': {bgcolor: theme.vars.palette.primary.dark},
+    '&.Mui-disabled': {
+      bgcolor: theme.vars.palette.action.disabledBackground,
+      color: theme.vars.palette.text.disabled,
+    },
+  };
+}
+
+const sizeStyles: Record<ButtonSize, object> = {
+  lg: {height: '44px', px: '12px', py: '10px', fontSize: '13px', lineHeight: '24px'},
+  md: {height: '36px', px: '12px', py: '6px', fontSize: '13px', lineHeight: '24px'},
+  sm: {height: '30px', px: '12px', py: '6px', fontSize: '12px', lineHeight: '22px'},
+  icon: {height: '40px', width: '40px', minWidth: '40px'},
+};
 
 const CustomButton = React.forwardRef<HTMLButtonElement, ICustomButtonProps>(
   (
     {
       className,
-      variant,
-      size,
+      variant = 'primary',
+      size = 'lg',
       text,
       Icon,
       loading = false,
       iconAlign = 'right',
       disabled = false,
+      sx,
       ...props
     },
     ref,
@@ -59,19 +104,41 @@ const CustomButton = React.forwardRef<HTMLButtonElement, ICustomButtonProps>(
     const translatedText = useLocalization({content: text});
 
     return (
-      <button
+      <Button
         ref={ref}
-        className={cn(buttonVariants({variant, size, className}))}
+        className={cn(className)}
         disabled={loading || disabled}
+        sx={theme => {
+          const baseStyles = {
+            ...sizeStyles[size],
+            ...getVariantStyles(theme, variant),
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            whiteSpace: 'nowrap',
+          };
+
+          if (Array.isArray(sx)) {
+            return [baseStyles, ...sx];
+          }
+
+          if (typeof sx === 'function') {
+            return [baseStyles, sx(theme)];
+          }
+
+          return sx ? [baseStyles, sx] : baseStyles;
+        }}
         {...props}>
         {loading && <IconLoader2 className="animate-spin" />}
         {Icon && iconAlign === 'left' && <Icon />}
         {translatedText}
         {Icon && iconAlign === 'right' && <Icon />}
-      </button>
+      </Button>
     );
   },
 );
+
 CustomButton.displayName = 'CustomButton';
 
 export {CustomButton};

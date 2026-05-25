@@ -1,4 +1,5 @@
 import * as React from 'react';
+import {Box} from '@mui/material';
 import LeftSidebar from '@components/left-sidebar/LeftSidebar.tsx';
 import {Header} from '@components/header';
 import cn from '@core/utils/cn';
@@ -25,7 +26,11 @@ export default function BaseLayout({children}: Readonly<IBaseLayoutProps>) {
   };
 
   return (
-    <div className="flex min-h-screen bg-common-white">
+    <Box
+      className="flex min-h-screen"
+      sx={theme => ({
+        backgroundColor: theme.vars.palette.background.default,
+      })}>
       <LeftSidebar
         drawerClose={handleDrawerClose}
         drawerOpen={handleDrawerOpen}
@@ -33,7 +38,7 @@ export default function BaseLayout({children}: Readonly<IBaseLayoutProps>) {
         open={open}
         isLocked={isLocked}
       />
-      <div className="bg-common-white flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col">
         <Header isLocked={isLocked} />
         <main
           className={cn(
@@ -43,6 +48,6 @@ export default function BaseLayout({children}: Readonly<IBaseLayoutProps>) {
           {children}
         </main>
       </div>
-    </div>
+    </Box>
   );
 }

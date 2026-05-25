@@ -24,7 +24,7 @@ const openedMixin = (theme: Theme): CSSObject => ({
     duration: theme.transitions.duration.enteringScreen,
   }),
   overflowX: 'hidden',
-  backgroundColor: '#f4f4f7',
+  backgroundColor: theme.vars.palette.secondary.main,
 });
 
 const closedMixin = (theme: Theme): CSSObject => ({
@@ -33,7 +33,7 @@ const closedMixin = (theme: Theme): CSSObject => ({
     duration: theme.transitions.duration.leavingScreen,
   }),
   overflowX: 'hidden',
-  backgroundColor: '#f4f4f7',
+  backgroundColor: theme.vars.palette.secondary.main,
   width: `calc(${theme.spacing(9)} + 1px)`,
   [theme.breakpoints.up('sm')]: {
     width: `calc(${theme.spacing(7)} + 1px)`,
@@ -124,12 +124,12 @@ export default function LeftSidebar({
       sx={{
         '& .MuiDrawer-paper': {
           height: '100vh', // Full screen height
-          borderRight: '1px solid rgba(145, 158, 171, 0.24)',
+          borderRight: '1px solid',
+          borderColor: 'var(--palette-secondary-dark)',
         },
         display: { xs: 'none', md: 'block' },
       }}
       className={cn(
-        'bg-white',
         isLocked ? 'relative' : 'fixed inset-0 z-[9999]',
       )}>
       <div
@@ -140,7 +140,7 @@ export default function LeftSidebar({
             {open ? (
               <div className="flex w-full items-center justify-between pb-6">
                 <TextWrapper
-                  className="text-text-disabled pr-1"
+                  className="pr-1 text-[var(--palette-common-white)]"
                   content={'PROJECT_TITLE'}
                   variant={'H6'}
                 />
@@ -173,7 +173,7 @@ export default function LeftSidebar({
                 sx={{ display: 'block' }}
                 onClick={() => navigateTo(item.path)}>
                 <ListItemButton
-                  sx={[
+                  sx={theme => [
                     {
                       minHeight: '44px',
                       maxHeight: '44px',
@@ -181,24 +181,23 @@ export default function LeftSidebar({
                       px: '16px',
                       py: '10px',
                       borderRadius: '4px',
+                      color: theme.vars.palette.common.white,
                       backgroundColor: isActiveItem(item.type)
-                        ? 'rgba(145, 158, 171, 0.24)'
+                        ? theme.vars.palette.secondary.dark
                         : 'transparent',
                     },
                     {
                       '&:hover': {
-                        backgroundColor: isActiveItem(item.type)
-                          ? 'rgba(145, 158, 171, 0.24)'
-                          : 'rgba(145, 158, 171, 0.08)',
+                        backgroundColor: theme.vars.palette.secondary.dark,
                       },
                     },
                     open
                       ? {
-                        justifyContent: 'initial',
-                      }
+                          justifyContent: 'initial',
+                        }
                       : {
-                        justifyContent: 'center',
-                      },
+                          justifyContent: 'center',
+                        },
                   ]}>
                   <ListItemIcon
                     sx={[
@@ -212,18 +211,18 @@ export default function LeftSidebar({
                         }
                         : {
                           mr: 0,
-                        },
+                      },
                     ]}>
                     {isActiveItem(item.type) ? (
-                      <item.FilledIcon color="#212B36" size={20} />
+                      <item.FilledIcon color="currentColor" size={20} />
                     ) : (
-                      <item.OutlineIcon color="#212B36" size={20} />
+                      <item.OutlineIcon color="currentColor" size={20} />
                     )}
                   </ListItemIcon>
                   <ListItemText
                     primary={
                       <TextWrapper
-                        className="text-text-primary"
+                        className=""
                         content={item.text}
                         variant={'Body2'}
                       />
@@ -243,19 +242,20 @@ export default function LeftSidebar({
             ))}
           </List>
         </div>
-        <div className="flex flex-row items-center justify-between bg-[#f4f4f7] pt-2 pb-5">
+        <div className="flex flex-row items-center justify-between pt-2 pb-5">
           {open ? (
             <>
               <div className="flex flex-row items-center justify-start">
                 <TextWrapper
-                  className="text-text-disabled pr-1"
+                  className="pr-1 text-[var(--palette-common-white)]"
                   content={'Ashikur Rahman Nabir'}
                   variant={'Caption'}
                 />
               </div>
               <div className="pl-2">
                 <button
-                  className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-[#919EAB29]"
+                  className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full"
+                  style={{backgroundColor: 'var(--palette-background-neutral)'}}
                   onClick={drawerClose}>
                   <IconCaretDoubleLeft />
                 </button>
@@ -264,7 +264,8 @@ export default function LeftSidebar({
           ) : (
             <div className="flex w-full flex-row items-center justify-center">
               <button
-                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-[#919EAB29]"
+                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full"
+                style={{backgroundColor: 'var(--palette-background-neutral)'}}
                 onClick={() => {
                   drawerOpen();
                   lockLeftSidebar();
