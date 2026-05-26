@@ -26,6 +26,7 @@ export const invoiceApi = createApi({
           // `onError` side-effectdispatch(messageCreated('Error fetching post!'))
         }
       },
+      invalidatesTags: (_result, _error) => [{type: 'invoice'}],
     }),
     updateInvoice: builder.mutation<IAuthResponse, {payload: IUpdateInvoicePayload}>({
       query: (mutation) => ({
@@ -41,6 +42,7 @@ export const invoiceApi = createApi({
           // `onError` side-effectdispatch(messageCreated('Error fetching post!'))
         }
       },
+      invalidatesTags: (_result, _error) => [{type: 'invoice'}],
     }),
     deleteInvoice: builder.mutation<IAuthResponse, {id: string}>({
       query: (mutation) => ({
@@ -58,6 +60,7 @@ export const invoiceApi = createApi({
           // `onError` side-effectdispatch(messageCreated('Error fetching post!'))
         }
       },
+      invalidatesTags: (_result, _error) => [{type: 'invoice'}],
     }),
     getInvoice: builder.query<IInvoiceResponse, {pageNumber: number, pageSize: number, itemId: string, wholesalerId?: string}>({
       query: (mutation) => ({

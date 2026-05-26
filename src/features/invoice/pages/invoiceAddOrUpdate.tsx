@@ -2,6 +2,7 @@ import {CustomButton} from "@components/button/CustomButton";
 import TextWrapper from "@components/text/TextWrapper";
 import {
   ICreateInvoicePayload,
+  IInvoice,
   InvoiceDetailsResponse,
   IProductSellInfo,
   IUpdateInvoicePayload,
@@ -11,9 +12,10 @@ import {useCreateInvoiceMutation, useGetInvoiceQuery, useUpdateInvoiceMutation} 
 import {useGetProductQuery} from "@core/store/api/product";
 import {useTheme} from "@mui/material/styles";
 import {CircularProgress, FormControl, InputLabel, MenuItem, Select, Tab, Tabs, TextField} from "@mui/material";
-import {ErrorMessage, Field, FieldArray, Form, Formik} from "formik";
+import {ErrorMessage, FieldArray, Form, Formik, useFormikContext} from "formik";
 import {useNavigate, useParams, useSearchParams} from "react-router-dom";
 import {invoiceValidationSchema} from "../schemas/invoice-form.schema";
+import {useEffect, useMemo, useState} from "react";
 
 const EMPTY_PRODUCT_ROW: IProductSellInfo = {
   ItemId: "",
@@ -29,6 +31,35 @@ const createInvoiceInitialValues: ICreateInvoicePayload = {
   WholeSalerId: "",
   InvoiceType: "WHOLESALE",
 };
+
+function DuePaymentAutofill({
+  isUpdate,
+  dueAmount,
+}: Readonly<{isUpdate: boolean; dueAmount: number}>) {
+  const {values, touched, setFieldValue} = useFormikContext<ICreateInvoicePayload>();
+
+  useEffect(() => {
+    if (isUpdate) {
+      return;
+    }
+
+    if (values.InvoiceType !== "DUE_PAYMENT") {
+      return;
+    }
+
+    if (!values.WholeSalerId) {
+      return;
+    }
+
+    if (touched.PaymentAmount) {
+      return;
+    }
+
+    setFieldValue("PaymentAmount", dueAmount, false);
+  }, [dueAmount, isUpdate, setFieldValue, touched.PaymentAmount, values.InvoiceType, values.WholeSalerId]);
+
+  return null;
+}
 
 const initialValuesOnUpdate = (
   invoiceDetails?: InvoiceDetailsResponse,
@@ -85,9 +116,33 @@ export default function InvoiceAddOrUpdate() {
 
   const [createInvoice] = useCreateInvoiceMutation();
   const [updateInvoice] = useUpdateInvoiceMutation();
+  const [dueWholesalerId, setDueWholesalerId] = useState(preselectedWholesalerId);
+
+  const editingInvoice = (invoiceData?.Data as InvoiceDetailsResponse | undefined);
+
+  useEffect(() => {
+    if (isUpdate) {
+      setDueWholesalerId(editingInvoice?.WholeSalerId || "");
+      return;
+    }
+
+    setDueWholesalerId(preselectedWholesalerId);
+  }, [editingInvoice?.WholeSalerId, isUpdate, preselectedWholesalerId]);
 
   const productList = productData?.Data || [];
   const wholesalerList = userData?.Data || [];
+  const {data: wholesalerInvoices} = useGetInvoiceQuery(
+    {pageNumber: 1, pageSize: 10000, itemId: "", wholesalerId: dueWholesalerId},
+    {skip: !dueWholesalerId},
+  );
+
+  const currentDueAmount = useMemo(() => {
+    const invoices = (wholesalerInvoices?.Data as IInvoice[]) || [];
+    const due = invoices.reduce((acc, eachInvoice) => {
+      return acc + ((eachInvoice.TotalAmount || 0) - (eachInvoice.PaymentAmount || 0));
+    }, 0);
+    return due > 0 ? due : 0;
+  }, [wholesalerInvoices?.Data]);
 
   if (isProductLoading || isUserLoading || (isUpdate && isInvoiceLoading)) {
     return <CircularProgress />;
@@ -125,7 +180,7 @@ export default function InvoiceAddOrUpdate() {
         ...createInvoiceInitialValues,
         WholeSalerId: preselectedWholesalerId,
       }
-    : initialValuesOnUpdate(invoiceData?.Data as InvoiceDetailsResponse | undefined);
+    : initialValuesOnUpdate(editingInvoice);
 
   return (
     <div className="w-full">
@@ -163,24 +218,39 @@ export default function InvoiceAddOrUpdate() {
             {({values, setFieldValue, isValid, dirty, isSubmitting}) => {
               const isDuePaymentInvoice = values.InvoiceType === "DUE_PAYMENT";
               const selectedProducts = values.ProductSellInfo.map(product => product.ProductId);
-
               const totalAmount = isDuePaymentInvoice
-                ? 0
+                ? currentDueAmount
                 : values.ProductSellInfo.reduce((acc, product) => {
                     return acc + product.SellingPrice * product.Quantity;
                   }, 0);
 
+              const updateWholeSaler = (nextWholesalerId: string) => {
+                setFieldValue("WholeSalerId", nextWholesalerId);
+                setDueWholesalerId(nextWholesalerId);
+              };
+
               return (
                 <Form>
+                  <DuePaymentAutofill isUpdate={isUpdate} dueAmount={currentDueAmount} />
                   <div className="mb-4">
                     <Tabs
                       value={isDuePaymentInvoice ? "DUE_PAYMENT" : "WHOLESALE"}
                       onChange={(_, nextValue: string) => {
+                        const switchingFromDueToProduct =
+                          values.InvoiceType === "DUE_PAYMENT" && nextValue !== "DUE_PAYMENT";
+
                         setFieldValue("InvoiceType", nextValue);
                         if (nextValue === "DUE_PAYMENT") {
                           setFieldValue("ProductSellInfo", []);
+                          if (!isUpdate && values.WholeSalerId) {
+                            setFieldValue("PaymentAmount", currentDueAmount, false);
+                          }
                         } else if (!values.ProductSellInfo.length) {
                           setFieldValue("ProductSellInfo", [{...EMPTY_PRODUCT_ROW}]);
+                        }
+
+                        if (!isUpdate && switchingFromDueToProduct) {
+                          setFieldValue("PaymentAmount", 0, false);
                         }
                       }}
                       sx={{
@@ -195,13 +265,17 @@ export default function InvoiceAddOrUpdate() {
                   <div className="mb-4">
                     <FormControl fullWidth>
                       <InputLabel>Wholesaler</InputLabel>
-                      <Field as={Select} name="WholeSalerId" label="Wholesaler">
+                      <Select
+                        name="WholeSalerId"
+                        label="Wholesaler"
+                        value={values.WholeSalerId}
+                        onChange={event => updateWholeSaler(event.target.value)}>
                         {wholesalerList.map(wholesaler => (
                           <MenuItem key={wholesaler.ItemId} value={wholesaler.ItemId}>
                             {wholesaler.DisplayName}
                           </MenuItem>
                         ))}
-                      </Field>
+                      </Select>
                       <ErrorMessage name="WholeSalerId" component="div" className="text-red-500" />
                     </FormControl>
                   </div>
@@ -337,7 +411,7 @@ export default function InvoiceAddOrUpdate() {
                     <div className="mb-3 rounded-md px-3 py-2" style={{backgroundColor: theme.vars.palette.background.neutral}}>
                       <TextWrapper
                         variant={"Body2"}
-                        content={"Due payment invoice records paid amount without adding products."}
+                        content={`Due amount is ${currentDueAmount}. You can edit payment amount before submit.`}
                       />
                     </div>
                   )}

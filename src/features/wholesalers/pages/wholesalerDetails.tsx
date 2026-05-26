@@ -38,7 +38,7 @@ export default function WholesalerDetails() {
         window.location.href = smsUrl;
     };
     const addInvoice = () => {
-        navigate(`/invoice/add/new?isUpdate=false`);
+        navigate(`/invoice/add/new?isUpdate=false&wholesalerId=${id ?? ''}`);
     }
     return (
         <>
