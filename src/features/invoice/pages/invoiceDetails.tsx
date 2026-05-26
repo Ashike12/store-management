@@ -4,6 +4,7 @@ import TextWrapper from "@components/text/TextWrapper";
 import { InvoiceDetailsResponse } from "@core/interfaces/api/IInvoice";
 import { useGetInvoiceQuery } from "@core/store/api/invoiceApi";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTheme } from "@mui/material/styles";
 
 const columns = [
     { key: "ProductName", label: "PRODUCT_NAME" },
@@ -13,6 +14,7 @@ const columns = [
 
 export default function InvoiceDetails() {
     const { id } = useParams();
+    const theme = useTheme();
     const { data } = useGetInvoiceQuery({ pageNumber: 1, pageSize: 10, itemId: id ?? '' });
     const invoiceData = (data?.Data as InvoiceDetailsResponse) || {};
     const navigate = useNavigate();
@@ -23,10 +25,20 @@ export default function InvoiceDetails() {
         <>
             <div className='w-full'>
 
-                <div className="max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-xl mt-10">
+                <div
+                  className="max-w-3xl mx-auto p-6 shadow-lg rounded-xl mt-10"
+                  style={{
+                    backgroundColor: theme.vars.palette.background.paper,
+                    color: theme.vars.palette.text.primary,
+                  }}>
                     {/* Invoice Header */}
                     <div className="flex flex-wrap gap-4 mb-6 items-center justify-between">
-                        <h2 className="text-2xl flex-1 font-bold text-gray-800 border-b pb-3">
+                        <h2
+                          className="text-2xl flex-1 font-bold border-b pb-3"
+                          style={{
+                            color: theme.vars.palette.text.primary,
+                            borderColor: theme.vars.palette.divider,
+                          }}>
                             Invoice Details
                         </h2>
                         <div className="flex gap-4">

@@ -2,12 +2,13 @@ import { CustomButton } from "@components/button/CustomButton";
 import { ICreateInvoicePayload, InvoiceDetailsResponse, IProductSellInfo, IUpdateInvoicePayload } from "@core/interfaces/api/IInvoice";
 import { useGetUserQuery } from "@core/store/api";
 import { useGetProductQuery } from "@core/store/api/product";
-import { Button, MenuItem, Select, TextField, FormControl, InputLabel, CircularProgress } from "@mui/material";
+import { MenuItem, Select, TextField, FormControl, InputLabel, CircularProgress } from "@mui/material";
 import { Formik, Form, Field, FieldArray, ErrorMessage } from "formik";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { invoiceValidationSchema } from "../schemas/invoice-form.schema";
 import TextWrapper from "@components/text/TextWrapper";
 import { useCreateInvoiceMutation, useGetInvoiceQuery, useUpdateInvoiceMutation } from "@core/store/api/invoiceApi";
+import { useTheme } from "@mui/material/styles";
 
 const createInvoiceInitialValues: ICreateInvoicePayload = {
   PaymentAmount: 0,
@@ -40,6 +41,7 @@ const initialValuesOnUpdate = (invoiceDetails: InvoiceDetailsResponse) => {
 }
 
 export default function InvoiceAddOrUpdate() {
+  const theme = useTheme();
   const navigate = useNavigate();
   let { id } = useParams();
   id = id === 'new' ? '' : id;
@@ -88,8 +90,18 @@ export default function InvoiceAddOrUpdate() {
         {/* {isUpdate ? (<CustomButton onClick={() => handleRedirection('add')} className='fixed bottom-4 right-36 ml-4 my-3 cursor-pointer' text={'ADD_INVOICE'} variant={'primary'}></CustomButton>) :
         (<CustomButton onClick={() => handleRedirection('update')} className='fixed bottom-4 right-36 ml-4 my-3 cursor-pointer' text={'UPDATE_INVOICE'} variant={'primary'}></CustomButton>)} */}
 
-        <div className="max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-xl mt-10">
-          <h2 className="text-2xl font-bold text-gray-800 border-b pb-3">
+        <div
+          className="max-w-3xl mx-auto p-6 shadow-lg rounded-xl mt-10"
+          style={{
+            backgroundColor: theme.vars.palette.background.paper,
+            color: theme.vars.palette.text.primary,
+          }}>
+          <h2
+            className="text-2xl font-bold border-b pb-3"
+            style={{
+              color: theme.vars.palette.text.primary,
+              borderColor: theme.vars.palette.divider,
+            }}>
             {!isUpdate ? 'Invoice Add' : 'Invoice Update'}
           </h2>
           <div className="mt-4 space-y-2">
@@ -195,35 +207,37 @@ export default function InvoiceAddOrUpdate() {
                                   <ErrorMessage name={`ProductSellInfo[${index}].Quantity`} component="div" className="text-red-500" />
                                 </div>
 
-                                {values.ProductSellInfo.length > 1 && (<Button
-                                  type="button"
-                                  variant="outlined"
-                                  color="secondary"
-                                  onClick={() => arrayHelpers.remove(index)}
-                                >
-                                  Remove Product
-                                </Button>)}
+                                {values.ProductSellInfo.length > 1 && (
+                                  <CustomButton
+                                    type="button"
+                                    variant="outline"
+                                    size="md"
+                                    text="Remove Product"
+                                    onClick={() => arrayHelpers.remove(index)}
+                                  />
+                                )}
                               </div>
 
                             </div>
                           ))}
 
                           {/* Add Product Button */}
-                          {selectedProducts.length != productList.length && (<Button
-                            type="button"
-                            variant="outlined"
-                            color="primary"
-                            onClick={() =>
-                              arrayHelpers.push({
-                                ProductId: "",
-                                Quantity: 0,
-                                SellingPrice: 0,
-                                SellingDate: "",
-                              })
-                            }
-                          >
-                            Add Product
-                          </Button>)}
+                          {selectedProducts.length != productList.length && (
+                            <CustomButton
+                              type="button"
+                              variant="outline"
+                              size="md"
+                              text="Add Product"
+                              onClick={() =>
+                                arrayHelpers.push({
+                                  ProductId: "",
+                                  Quantity: 0,
+                                  SellingPrice: 0,
+                                  SellingDate: "",
+                                })
+                              }
+                            />
+                          )}
                         </div>
                       )}
                     />
@@ -250,10 +264,14 @@ export default function InvoiceAddOrUpdate() {
 
                     {/* Submit Button */}
                     <div className="mt-4">
-                      <Button onClick={() => submitInvoice(values)} disabled={!values.ProductSellInfo.length || !values.PaymentAmount}
-                        type="submit" variant="contained" color="primary">
-                        Submit Invoice
-                      </Button>
+                      <CustomButton
+                        onClick={() => submitInvoice(values)}
+                        disabled={!values.ProductSellInfo.length || !values.PaymentAmount}
+                        type="submit"
+                        text="Submit Invoice"
+                        variant="primary"
+                        size="md"
+                      />
                     </div>
                   </Form>
                 )

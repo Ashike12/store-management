@@ -2,10 +2,7 @@ import type {} from '@mui/material/themeCssVarsAugmentation';
 
 import * as React from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
-import {
-  Experimental_CssVarsProvider as CssVarsProvider,
-  useColorScheme,
-} from '@mui/material/styles';
+import {Experimental_CssVarsProvider as CssVarsProvider} from '@mui/material/styles';
 
 import {createTheme} from './create-theme';
 
@@ -24,16 +21,6 @@ const THEME_MODE_KEY = 'store-admin-theme-mode';
 
 const ThemeModeContext = React.createContext<ThemeModeContextValue | null>(null);
 
-function ThemeModeBridge({mode}: Readonly<{mode: AppThemeMode}>) {
-  const {setColorScheme} = useColorScheme();
-
-  React.useEffect(() => {
-    setColorScheme(mode as any);
-  }, [mode, setColorScheme]);
-
-  return null;
-}
-
 export function ThemeProvider({children}: Readonly<Props>) {
   const theme = createTheme();
   const [mode, setMode] = React.useState<AppThemeMode>(() => {
@@ -46,8 +33,19 @@ export function ThemeProvider({children}: Readonly<Props>) {
 
   const handleSetMode = React.useCallback((nextMode: AppThemeMode) => {
     setMode(nextMode);
-    localStorage.setItem(THEME_MODE_KEY, nextMode);
   }, []);
+
+  React.useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const root = document.documentElement;
+    root.classList.remove('light', 'dark', 'pro');
+    root.classList.add(mode);
+    root.setAttribute('data-mui-color-scheme', mode);
+    localStorage.setItem(THEME_MODE_KEY, mode);
+  }, [mode]);
 
   const contextValue = React.useMemo(
     () => ({mode, setMode: handleSetMode}),
@@ -59,7 +57,6 @@ export function ThemeProvider({children}: Readonly<Props>) {
       theme={theme}
       defaultMode="light"
       disableTransitionOnChange>
-      <ThemeModeBridge mode={mode} />
       <ThemeModeContext.Provider value={contextValue}>
         <CssBaseline />
         {children}

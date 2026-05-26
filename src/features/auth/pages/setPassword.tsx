@@ -136,6 +136,7 @@ export default function SetPassword() {
                             helperText={formik.touched.sum && formik.errors.sum} />
                     </div>
                     <CustomButton
+                        type="submit"
                         disabled={!(formik.dirty && formik.isValid && !isLoading && formik.values.sum === (formik.values.firstValue + formik.values.secondValue))}
                         className="w-full cursor-pointer mt-4"
                         text={'SET_PASSWORD'}

@@ -59,6 +59,7 @@ export default function Login() {
             helperText={formik.touched.password && formik.errors.password}
           />
           <CustomButton
+            type="submit"
             disabled={!(formik.dirty && formik.isValid && !isLoading)}
             className="w-full cursor-pointer mt-4"
             text={'LOGIN'}

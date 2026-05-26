@@ -16,6 +16,7 @@ export function createTheme(): Theme {
   const initialTheme = {
     spacing: [0, 1, 2, 4, 8, 16, 32, 64, 128, 256],
     colorSchemes,
+    colorSchemeSelector: 'class',
     shadows: shadows(),
     customShadows: customShadows(),
     shape: {borderRadius: 8},

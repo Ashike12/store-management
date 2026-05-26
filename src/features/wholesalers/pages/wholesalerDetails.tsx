@@ -5,6 +5,7 @@ import { useGetInvoiceQuery } from "@core/store/api/invoiceApi";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { IconArrowNarrowRight } from '@tabler/icons-react';
 import { CustomButton } from "@components/button/CustomButton";
+import { useTheme } from "@mui/material/styles";
 
 const columns = [
     { key: "InvoiceNumber", label: "INVOICE_NUMBER" },
@@ -17,6 +18,7 @@ const columns = [
 
 
 export default function WholesalerDetails() {
+    const theme = useTheme();
     const { id } = useParams();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
@@ -30,6 +32,7 @@ export default function WholesalerDetails() {
     const totalAmount = invoiceData.reduce((acc, item) => acc + (item.TotalAmount || 0), 0);
     const totalPaidAmount = invoiceData.reduce((acc, item) => acc + (item.PaymentAmount || 0), 0);
     const totalProfit = invoiceData.reduce((acc, item) => acc + (item.ProfitMargin || 0), 0);
+    const dueAmount = totalAmount - totalPaidAmount;
     const openSMS = () => {
         const smsUrl = `sms:+${phoneNumber}?body=${encodeURIComponent('You have due amount of: ' + (totalAmount - totalPaidAmount) + ' tk, please pay it as soon as possible.')}`;
         window.location.href = smsUrl;
@@ -40,10 +43,20 @@ export default function WholesalerDetails() {
     return (
         <>
             <div className='w-full'>
-                <div className=" mx-auto p-6 bg-white shadow-lg rounded-xl mt-10">
+                <div
+                  className=" mx-auto p-6 shadow-lg rounded-xl mt-10"
+                  style={{
+                    backgroundColor: theme.vars.palette.background.paper,
+                    color: theme.vars.palette.text.primary,
+                  }}>
                     {/* Invoice Header */}
                     <div className="flex flex-wrap gap-4 mb-6 items-center justify-between">
-                        <h2 className="text-2xl flex-1 font-bold text-gray-800 border-b pb-3">
+                        <h2
+                          className="text-2xl flex-1 font-bold border-b pb-3"
+                          style={{
+                            color: theme.vars.palette.text.primary,
+                            borderColor: theme.vars.palette.divider,
+                          }}>
                             Wholesaler Details
                         </h2>
                         <CustomButton
@@ -77,16 +90,38 @@ export default function WholesalerDetails() {
                             <TextWrapper variant={'H6'} content={'TOTAL_DUE_AMOUNT'}>
                             </TextWrapper>
                             :
-                            {totalAmount <= totalPaidAmount ? (<TextWrapper className="!text-green text-bold" variant={'Body1'} content={((totalAmount - totalPaidAmount)) + ' tk'}>
-                            </TextWrapper>) : (<TextWrapper className="!text-red text-bold" variant={'Body1'} content={' ' + ((totalAmount - totalPaidAmount)) + ' tk'}>
-                            </TextWrapper>)}
-                            {totalAmount > totalPaidAmount && (<div className="pl-3 cursor-pointer flex flex-row" onClick={openSMS}>
-                                <TextWrapper content={'SEND_A_MESSAGE'}></TextWrapper>
-                                <div className="pl-2 pt-[3px]">
-                                    <IconArrowNarrowRight size={20} />
-                                </div>
-                            </div>)}
+                            <TextWrapper
+                              className={dueAmount > 0 ? 'font-semibold text-[var(--palette-error-main)]' : 'font-semibold text-[var(--palette-success-main)]'}
+                              variant={'Body1'}
+                              content={' ' + dueAmount + ' tk'}
+                            />
                         </div>
+                        {dueAmount > 0 && (
+                          <div
+                            className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border px-4 py-3"
+                            style={{
+                              backgroundColor: theme.vars.palette.background.neutral,
+                              borderColor: theme.vars.palette.divider,
+                            }}>
+                            <div className="flex items-center gap-2">
+                              <TextWrapper variant={'Body2Medium'} content={'Due message for'} />
+                              <TextWrapper
+                                variant={'Body2Medium'}
+                                className="font-semibold"
+                                content={`${dueAmount} tk`}
+                              />
+                            </div>
+                            <CustomButton
+                              onClick={openSMS}
+                              className="cursor-pointer"
+                              text={'SEND_A_MESSAGE'}
+                              variant={'outline'}
+                              size={'sm'}
+                              Icon={IconArrowNarrowRight}
+                              iconAlign="right"
+                            />
+                          </div>
+                        )}
                         <div>
                             <TextWrapper variant={'H6'} content={'YOUR_PROFIT'}>
                             </TextWrapper>
