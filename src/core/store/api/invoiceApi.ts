@@ -2,7 +2,7 @@ import {createApi} from '@reduxjs/toolkit/query/react';
 import {ApiServiceBaseQuery} from './baseQueries';
 import {APP_CONFIG} from '@core/config/config';
 import {IAuthResponse} from '@core/interfaces/api/IAuthResponse';
-import { ICreateInvoicePayload, IDashboardResponse, IInvoice, IInvoiceResponse } from '@core/interfaces/api/IInvoice';
+import { ICreateInvoicePayload, IDashboardResponse, IInvoice, IInvoiceResponse, IUpdateInvoicePayload } from '@core/interfaces/api/IInvoice';
 
 export const invoiceApi = createApi({
   reducerPath: 'invoiceApi',
@@ -13,19 +13,22 @@ export const invoiceApi = createApi({
       query: (mutation) => ({
         url: `${APP_CONFIG.businessUrl}/business/CreateInvoice`,
         method: 'POST',
-        body: {...mutation.payload, InvoiceType: mutation.payload.WholeSalerId ? 'WHOLESALE': 'CONSUMER'},
+        body: {
+          ...mutation.payload,
+          InvoiceType: mutation.payload.InvoiceType || (mutation.payload.WholeSalerId ? 'WHOLESALE' : 'CONSUMER'),
+        },
       }),
       async onQueryStarted(id, {dispatch, queryFulfilled}) {
         // `onStart` side-effectdispatch(messageCreated('Fetching post...'))
         try {
           const {data} = await queryFulfilled;
-          console.log('Invoice-create-data', data);
         } catch (err) {
           // `onError` side-effectdispatch(messageCreated('Error fetching post!'))
         }
       },
+      invalidatesTags: (_result, _error) => [{type: 'invoice'}],
     }),
-    updateInvoice: builder.mutation<IAuthResponse, {payload: ICreateInvoicePayload}>({
+    updateInvoice: builder.mutation<IAuthResponse, {payload: IUpdateInvoicePayload}>({
       query: (mutation) => ({
         url: `${APP_CONFIG.businessUrl}/business/UpdateInvoice`,
         method: 'POST',
@@ -35,11 +38,11 @@ export const invoiceApi = createApi({
         // `onStart` side-effectdispatch(messageCreated('Fetching post...'))
         try {
           const {data} = await queryFulfilled;
-          console.log('Invoice-create-data', data);
         } catch (err) {
           // `onError` side-effectdispatch(messageCreated('Error fetching post!'))
         }
       },
+      invalidatesTags: (_result, _error) => [{type: 'invoice'}],
     }),
     deleteInvoice: builder.mutation<IAuthResponse, {id: string}>({
       query: (mutation) => ({
@@ -53,11 +56,11 @@ export const invoiceApi = createApi({
         // `onStart` side-effectdispatch(messageCreated('Fetching post...'))
         try {
           const {data} = await queryFulfilled;
-          console.log('Invoice-delete-data', data);
         } catch (err) {
           // `onError` side-effectdispatch(messageCreated('Error fetching post!'))
         }
       },
+      invalidatesTags: (_result, _error) => [{type: 'invoice'}],
     }),
     getInvoice: builder.query<IInvoiceResponse, {pageNumber: number, pageSize: number, itemId: string, wholesalerId?: string}>({
       query: (mutation) => ({

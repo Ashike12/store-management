@@ -6,15 +6,15 @@ import List from '@mui/material/List';
 import { styled, Theme, CSSObject } from '@mui/material/styles';
 import MuiDrawer from '@mui/material/Drawer';
 import { DRAWER_WIDTH } from '@core/config/constants';
-import { EnumLeftSidebarItem } from '@core/enums/left-sidebar-item.enum';
 import BusinessLogo from '@assets/images/logo-business.png';
 import BASE_ROUTES from '@core/config/base-routes';
-import { useMatch, useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router-dom';
 import IconCaretDoubleLeft from '@assets/icons/IconCaretDoubleLeft';
 import TextWrapper from '@components/text/TextWrapper';
-import IconLock from '@assets/icons/IconLock';
 import { IconBox, IconBuildingStore, IconFileInvoice, IconLayoutDashboard } from '@tabler/icons-react';
 import IconCaretDoubleRight from '@assets/icons/IconCaretDoubleRight';
+import cn from '@core/utils/cn';
+import {useAppThemeMode} from 'theme/theme-provider';
 
 const drawerWidth = DRAWER_WIDTH;
 
@@ -25,7 +25,7 @@ const openedMixin = (theme: Theme): CSSObject => ({
     duration: theme.transitions.duration.enteringScreen,
   }),
   overflowX: 'hidden',
-  backgroundColor: '#f4f4f7',
+  backgroundColor: theme.vars.palette.secondary.main,
 });
 
 const closedMixin = (theme: Theme): CSSObject => ({
@@ -34,7 +34,7 @@ const closedMixin = (theme: Theme): CSSObject => ({
     duration: theme.transitions.duration.leavingScreen,
   }),
   overflowX: 'hidden',
-  backgroundColor: '#f4f4f7',
+  backgroundColor: theme.vars.palette.secondary.main,
   width: `calc(${theme.spacing(9)} + 1px)`,
   [theme.breakpoints.up('sm')]: {
     width: `calc(${theme.spacing(7)} + 1px)`,
@@ -112,14 +112,45 @@ export default function LeftSidebar({
   open = false,
   isLocked = true,
 }: Readonly<ISidebarProps>) {
+  const {mode} = useAppThemeMode();
   const navigateTo = useNavigate();
-  const match = useMatch(':pageName');
+  const location = useLocation();
   const isActiveItem = (itemType: string) => {
-    return match?.params.pageName === itemType.toLowerCase();
+    const pathParts = location.pathname.toLowerCase().split('/');
+    const firstSegment = pathParts[1] ?? '';
+    const secondSegment = pathParts[2] ?? '';
+    const normalizedType = itemType.toLowerCase();
+
+    const pathCheck =
+      firstSegment === 'invoice' && secondSegment
+        ? `${firstSegment}/${secondSegment}`
+        : firstSegment === 'wholesaler' && secondSegment
+          ? `${firstSegment}/${secondSegment}`
+          : firstSegment;
+
+    if (normalizedType === 'dashboard') {
+      return pathCheck === 'dashboard' || pathCheck === '';
+    }
+
+    if (normalizedType === 'products') {
+      return pathCheck === 'products';
+    }
+
+    if (normalizedType === 'wholesalers') {
+      return pathCheck === 'wholesalers' || pathCheck === 'wholesaler/invoice';
+    }
+
+    if (normalizedType === 'invoice') {
+      return firstSegment === 'invoice';
+    }
+
+    return false;
   };
-  const drawerCollapse = () => {
-    if (!isLocked) drawerClose();
-  };
+
+  const menuTextColor = mode === 'dark' ? '#94A3B8' : mode === 'pro' ? '#C6D4E1' : '#CBD5E1';
+  const menuActiveBg = mode === 'dark' ? '#1E293B' : mode === 'pro' ? '#1F3B57' : '#334155';
+  const menuHoverBg = mode === 'dark' ? '#334155' : mode === 'pro' ? '#1F3B57' : '#1E293B';
+  const sidebarMetaText = mode === 'dark' ? '#94A3B8' : mode === 'pro' ? '#C6D4E1' : '#CBD5E1';
 
   return (
     <Drawer
@@ -129,9 +160,14 @@ export default function LeftSidebar({
       sx={{
         '& .MuiDrawer-paper': {
           height: '100vh', // Full screen height
+          borderRight: '1px solid',
+          borderColor: 'var(--palette-secondary-dark)',
         },
+        display: { xs: 'none', md: 'block' },
       }}
-      className={'fixed inset-0 bg-white' + (isLocked ? 'relative' : 'fixed z-[9999]')}>
+      className={cn(
+        isLocked ? 'relative' : 'fixed inset-0 z-[9999]',
+      )}>
       <div
         className={`flex flex-col min-h-screen justify-between pt-5 ${open ? 'px-4' : 'px-2'}`}
       >
@@ -139,11 +175,13 @@ export default function LeftSidebar({
           <div className="flex items-center justify-center">
             {open ? (
               <div className="flex w-full items-center justify-between pb-6">
-                <TextWrapper
-                  className="text-text-disabled pr-1"
-                  content={'PROJECT_TITLE'}
-                  variant={'H6'}
-                />
+                <div style={{color: sidebarMetaText}}>
+                  <TextWrapper
+                    className="pr-1"
+                    content={'PROJECT_TITLE'}
+                    variant={'H6'}
+                  />
+                </div>
                 {/* {!isLocked && (
                   <button
                     className="bg-transparent-grey-16 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full p-[10px]"
@@ -172,7 +210,11 @@ export default function LeftSidebar({
                 disablePadding
                 sx={{ display: 'block' }}
                 onClick={() => navigateTo(item.path)}>
+                {(() => {
+                  const isActive = isActiveItem(item.type);
+                  return (
                 <ListItemButton
+                  selected={isActive}
                   sx={[
                     {
                       minHeight: '44px',
@@ -180,26 +222,36 @@ export default function LeftSidebar({
                       width: '100%',
                       px: '16px',
                       py: '10px',
-                      borderRadius: '4px',
-                      backgroundColor: isActiveItem(item.type)
-                        ? 'rgba(145, 158, 171, 0.24)'
-                        : 'transparent',
+                      borderRadius: '6px',
+                      color: menuTextColor,
+                      backgroundColor: 'transparent',
+                      borderLeft: '3px solid transparent',
+                      fontWeight: 500,
                     },
                     {
                       '&:hover': {
-                        backgroundColor: isActiveItem(item.type)
-                          ? 'rgba(145, 158, 171, 0.24)'
-                          : 'rgba(145, 158, 171, 0.08)',
+                        color: 'var(--palette-common-white)',
+                        backgroundColor: menuHoverBg,
+                        borderLeft: '3px solid var(--palette-primary-main)',
+                      },
+                      '&.Mui-selected': {
+                        color: 'var(--palette-common-white)',
+                        backgroundColor: menuActiveBg,
+                        borderLeft: '3px solid var(--palette-primary-main)',
+                        fontWeight: 700,
+                      },
+                      '&.Mui-selected:hover': {
+                        backgroundColor: menuActiveBg,
                       },
                     },
                     open
                       ? {
-                        justifyContent: 'initial',
-                      }
+                          justifyContent: 'initial',
+                        }
                       : {
-                        justifyContent: 'center',
-                      },
-                  ]}>
+                          justifyContent: 'center',
+                        },
+                    ]}>
                   <ListItemIcon
                     sx={[
                       {
@@ -210,20 +262,20 @@ export default function LeftSidebar({
                         ? {
                           mr: '8px',
                         }
-                        : {
+                      : {
                           mr: 0,
-                        },
+                      },
                     ]}>
-                    {isActiveItem(item.type) ? (
-                      <item.FilledIcon color="#212B36" size={20} />
+                    {isActive ? (
+                      <item.FilledIcon color="currentColor" size={20} />
                     ) : (
-                      <item.OutlineIcon color="#212B36" size={20} />
+                      <item.OutlineIcon color="currentColor" size={20} />
                     )}
                   </ListItemIcon>
                   <ListItemText
                     primary={
                       <TextWrapper
-                        className="text-text-primary"
+                        className=""
                         content={item.text}
                         variant={'Body2'}
                       />
@@ -239,37 +291,51 @@ export default function LeftSidebar({
                     ]}
                   />
                 </ListItemButton>
+                  );
+                })()}
               </ListItem>
             ))}
           </List>
         </div>
-        <div className="flex flex-row items-center justify-between bg-[#f4f4f7] pt-2 pb-5">
+        <div className="flex flex-row items-center justify-between pt-2 pb-5">
           {open ? (
             <>
               <div className="flex flex-row items-center justify-start">
-                <TextWrapper
-                  className="text-text-disabled pr-1"
-                  content={'Ashikur Rahman Nabir'}
-                  variant={'Caption'}
-                />
+                <div style={{color: sidebarMetaText}}>
+                  <TextWrapper
+                    className="pr-1"
+                    content={'Ashikur Rahman Nabir'}
+                    variant={'Caption'}
+                  />
+                </div>
               </div>
               <div className="pl-2">
                 <button
-                  className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-[#919EAB29]"
+                  className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full"
+                  style={{
+                    backgroundColor: 'var(--palette-background-neutral)',
+                    color: 'var(--palette-text-primary)',
+                    border: '1px solid var(--palette-divider)',
+                  }}
                   onClick={drawerClose}>
-                  <IconCaretDoubleLeft />
+                  <IconCaretDoubleLeft color="currentColor" />
                 </button>
               </div>
             </>
           ) : (
             <div className="flex w-full flex-row items-center justify-center">
               <button
-                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-[#919EAB29]"
+                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full"
+                style={{
+                  backgroundColor: 'var(--palette-background-neutral)',
+                  color: 'var(--palette-text-primary)',
+                  border: '1px solid var(--palette-divider)',
+                }}
                 onClick={() => {
                   drawerOpen();
                   lockLeftSidebar();
                 }}>
-                <IconCaretDoubleRight />
+                <IconCaretDoubleRight color="currentColor" />
               </button>
             </div>
           )}

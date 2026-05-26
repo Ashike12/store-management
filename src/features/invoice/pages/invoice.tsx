@@ -9,6 +9,7 @@ import dayjs from 'dayjs';
 // Define table columns
 export const InvoiceColumns = [
   { altKey: "", key: "InvoiceNumber", label: "INVOICE_NUMBER" },
+  { altKey: "", key: "InvoiceType", label: "INVOICE_TYPE" },
   { altKey: "InvoiceType", key: "WholeSalerName", label: "WHOLE_SLAER_NAME" },
   { altKey: "", key: "TotalAmount", label: "TOTAL_BILL" },
   { altKey: "", key: "PaymentAmount", label: "PAID_AMOUNT" },
@@ -37,11 +38,17 @@ export default function Invoice() {
   const handlePageSelection = (page: number) => {
     // setPayload((prev) => ({ ...prev, pageNumber: page }));
     // refetch();
-    console.log('page', page);
   }
   const filteredData = useMemo(() => {
     if (!data?.Data) return [];
     const dataList = data.Data as IInvoice[];
+    const getInvoiceTypeLabel = (invoiceType: string) => {
+      if (invoiceType === 'DUE_PAYMENT') return 'Due Payment';
+      if (invoiceType === 'WHOLESALE') return 'Product (Wholesaler)';
+      if (invoiceType === 'CONSUMER') return 'Product (Consumer)';
+      return invoiceType || 'N/A';
+    };
+
     return dataList.filter((item) => {
       const created = dayjs(item.CreatedDate);
       const matchesDate =
@@ -52,12 +59,14 @@ export default function Invoice() {
         (item.InvoiceNumber && item.InvoiceNumber.toLowerCase().includes(searchTerm.toLowerCase()));
 
       return matchesDate && matchesSearch;
-    });
+    }).map(item => ({
+      ...item,
+      InvoiceType: getInvoiceTypeLabel(item.InvoiceType),
+    }));
   }, [data, fromDate, toDate, searchTerm]);
   return (
     <>
       <div className='w-full'>
-        <CustomButton onClick={() => addInvoice()} className='fixed bottom-4 right-4 ml-4 my-3 cursor-pointer' text={'ADD_INVOICE'} variant={'primary'}></CustomButton>
         {data && data && invoiceList.length > 0 && (<div className="p-10 w-full">
           <div className="flex flex-wrap gap-4 mb-6">
             <div className="flex flex-col cursor-pointer">
@@ -88,6 +97,14 @@ export default function Invoice() {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search by wholesaler or invoice no."
                 className="border p-2 rounded w-full"
+              />
+            </div>
+            <div className="flex flex-col mt-6">
+              <CustomButton
+                onClick={() => addInvoice()}
+                className='cursor-pointer'
+                text={'ADD_INVOICE'}
+                variant={'primary'}
               />
             </div>
           </div>

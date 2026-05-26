@@ -4,6 +4,7 @@ import TextWrapper from "@components/text/TextWrapper";
 import { InvoiceDetailsResponse } from "@core/interfaces/api/IInvoice";
 import { useGetInvoiceQuery } from "@core/store/api/invoiceApi";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTheme } from "@mui/material/styles";
 
 const columns = [
     { key: "ProductName", label: "PRODUCT_NAME" },
@@ -11,28 +12,60 @@ const columns = [
     { key: "Quantity", label: "QUANTITY" }
 ];
 
-export default function invoiceDetails() {
+export default function InvoiceDetails() {
     const { id } = useParams();
-    const { data, isLoading } = useGetInvoiceQuery({ pageNumber: 1, pageSize: 10, itemId: id ?? '' });
+    const theme = useTheme();
+    const { data } = useGetInvoiceQuery({ pageNumber: 1, pageSize: 10, itemId: id ?? '' });
     const invoiceData = (data?.Data as InvoiceDetailsResponse) || {};
+    const getInvoiceTypeLabel = (invoiceType?: string) => {
+        if (invoiceType === 'DUE_PAYMENT') return 'Due Payment';
+        if (invoiceType === 'WHOLESALE') return 'Product (Wholesaler)';
+        if (invoiceType === 'CONSUMER') return 'Product (Consumer)';
+        return invoiceType ?? 'N/A';
+    };
     const navigate = useNavigate();
     const handleButtonAction = (action: string) => {
+        if (action === 'add') {
+            navigate(`/invoice/add/new?isUpdate=false&wholesalerId=${invoiceData.WholeSalerId ?? ''}`);
+            return;
+        }
         navigate(`/invoice/${action}/${id}?isUpdate=${action === 'update'}`);
     }
     return (
         <>
             <div className='w-full'>
-                {/* <div className="fixed top-16 w-full h-64 bg-cover bg-center z-0">
-                    <img className="w-full h-[200px] object-cover"  src={InvoiceBg} alt="Invocie bg" />
-                </div> */}
-                <CustomButton onClick={() => handleButtonAction('add')} className='fixed bottom-4 right-4 ml-4 my-3 cursor-pointer' text={'ADD_INVOICE'} variant={'primary'}></CustomButton>
-                <CustomButton onClick={() => handleButtonAction('update')} className='fixed bottom-4 right-30 ml-4 my-3 cursor-pointer' text={'UPDATE_INVOICE'} variant={'primary'}></CustomButton>
 
-                <div className="max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-xl mt-10">
+                <div
+                  className="max-w-3xl mx-auto p-6 shadow-lg rounded-xl mt-10"
+                  style={{
+                    backgroundColor: theme.vars.palette.background.paper,
+                    color: theme.vars.palette.text.primary,
+                  }}>
                     {/* Invoice Header */}
-                    <h2 className="text-2xl font-bold text-gray-800 border-b pb-3">
-                        Invoice Details
-                    </h2>
+                    <div className="flex flex-wrap gap-4 mb-6 items-center justify-between">
+                        <h2
+                          className="text-2xl flex-1 font-bold border-b pb-3"
+                          style={{
+                            color: theme.vars.palette.text.primary,
+                            borderColor: theme.vars.palette.divider,
+                          }}>
+                            Invoice Details
+                        </h2>
+                        <div className="flex gap-4">
+                            <CustomButton
+                                onClick={() => handleButtonAction('add')}
+                                className='cursor-pointer'
+                                text={'ADD_INVOICE'}
+                                variant={'primary'}
+                            />
+                            <CustomButton
+                                onClick={() => handleButtonAction('update')}
+                                className='cursor-pointer'
+                                text={'UPDATE_INVOICE'}
+                                variant={'primary'}
+                            />
+                        </div>
+                    </div>
 
                     <div className="mt-4 space-y-2">
                         <div>
@@ -45,6 +78,12 @@ export default function invoiceDetails() {
                             <TextWrapper variant={'H6'} content={'WHOLESALER_NAME'}>
                             </TextWrapper>
                             <TextWrapper variant={'Body1'} content={': ' + (invoiceData.WholeSalerName ?? 'N/A')}>
+                            </TextWrapper>
+                        </div>
+                        <div>
+                            <TextWrapper variant={'H6'} content={'INVOICE_TYPE'}>
+                            </TextWrapper>
+                            <TextWrapper variant={'Body1'} content={': ' + getInvoiceTypeLabel(invoiceData.InvoiceType)}>
                             </TextWrapper>
                         </div>
                         <div>

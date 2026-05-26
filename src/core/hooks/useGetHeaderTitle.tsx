@@ -25,7 +25,6 @@ const useGetHeaderTitle = (): HeaderTitle => {
       pathCheck = path;
     }
 
-    console.log('pathCheck', pathCheck);
 
     switch (pathCheck) {
       case ROUTE_PATH.dashBoard.pathMatch: {

@@ -3,8 +3,9 @@ import TextWrapper from "@components/text/TextWrapper";
 import { IInvoice } from "@core/interfaces/api/IInvoice";
 import { useGetInvoiceQuery } from "@core/store/api/invoiceApi";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { IconMessage, IconArrowNarrowRight } from '@tabler/icons-react';
+import { IconArrowNarrowRight } from '@tabler/icons-react';
 import { CustomButton } from "@components/button/CustomButton";
+import { useTheme } from "@mui/material/styles";
 
 const columns = [
     { key: "InvoiceNumber", label: "INVOICE_NUMBER" },
@@ -16,13 +17,14 @@ const columns = [
 ];
 
 
-export default function wholesalerDetails() {
+export default function WholesalerDetails() {
+    const theme = useTheme();
     const { id } = useParams();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const phoneNumber = searchParams.get("phoneNumber")?.trim();
     const wholesalerName = searchParams.get("wholesalerName") ?? 'N/A';
-    const { data, isLoading } = useGetInvoiceQuery({ pageNumber: 1, pageSize: 10, itemId: '', wholesalerId: id ?? '' });
+    const { data } = useGetInvoiceQuery({ pageNumber: 1, pageSize: 10, itemId: '', wholesalerId: id ?? '' });
     const invoiceData = (data?.Data as IInvoice[]) || [];
     const handleRowClick = async (row: IInvoice) => {
         navigate(`/invoice/details/${row.ItemId}`);
@@ -30,29 +32,40 @@ export default function wholesalerDetails() {
     const totalAmount = invoiceData.reduce((acc, item) => acc + (item.TotalAmount || 0), 0);
     const totalPaidAmount = invoiceData.reduce((acc, item) => acc + (item.PaymentAmount || 0), 0);
     const totalProfit = invoiceData.reduce((acc, item) => acc + (item.ProfitMargin || 0), 0);
+    const dueAmount = totalAmount - totalPaidAmount;
     const openSMS = () => {
         const smsUrl = `sms:+${phoneNumber}?body=${encodeURIComponent('You have due amount of: ' + (totalAmount - totalPaidAmount) + ' tk, please pay it as soon as possible.')}`;
-        console.log(smsUrl);
         window.location.href = smsUrl;
     };
     const addInvoice = () => {
-        navigate(`/invoice/add/new?isUpdate=false`);
+        navigate(`/invoice/add/new?isUpdate=false&wholesalerId=${id ?? ''}`);
     }
     return (
         <>
             <div className='w-full'>
-                <CustomButton onClick={() => addInvoice()} className='fixed bottom-4 right-4 ml-4 my-3 cursor-pointer' text={'ADD_INVOICE'} variant={'primary'}></CustomButton>
-                {/* <div className="fixed top-16 w-full h-64 bg-cover bg-center z-0">
-                    <img className="w-full h-[200px] object-cover"  src={InvoiceBg} alt="Invocie bg" />
-                </div> */}
-                {/* <CustomButton onClick={() => handleButtonAction('add')} className='fixed bottom-4 right-4 ml-4 my-3 cursor-pointer' text={'ADD_INVOICE'} variant={'primary'}></CustomButton>
-                <CustomButton onClick={() => handleButtonAction('update')} className='fixed bottom-4 right-30 ml-4 my-3 cursor-pointer' text={'UPDATE_INVOICE'} variant={'primary'}></CustomButton> */}
-
-                <div className=" mx-auto p-6 bg-white shadow-lg rounded-xl mt-10">
+                <div
+                  className=" mx-auto p-6 shadow-lg rounded-xl mt-10"
+                  style={{
+                    backgroundColor: theme.vars.palette.background.paper,
+                    color: theme.vars.palette.text.primary,
+                  }}>
                     {/* Invoice Header */}
-                    <h2 className="text-2xl font-bold text-gray-800 border-b pb-3">
-                        Wholesaler Details
-                    </h2>
+                    <div className="flex flex-wrap gap-4 mb-6 items-center justify-between">
+                        <h2
+                          className="text-2xl flex-1 font-bold border-b pb-3"
+                          style={{
+                            color: theme.vars.palette.text.primary,
+                            borderColor: theme.vars.palette.divider,
+                          }}>
+                            Wholesaler Details
+                        </h2>
+                        <CustomButton
+                            onClick={() => addInvoice()}
+                            className='cursor-pointer'
+                            text={'ADD_INVOICE'}
+                            variant={'primary'}
+                        />
+                    </div>
 
                     <div className="mt-4 space-y-2">
                         <div>
@@ -77,16 +90,38 @@ export default function wholesalerDetails() {
                             <TextWrapper variant={'H6'} content={'TOTAL_DUE_AMOUNT'}>
                             </TextWrapper>
                             :
-                            {totalAmount <= totalPaidAmount ? (<TextWrapper className="!text-green text-bold" variant={'Body1'} content={((totalAmount - totalPaidAmount)) + ' tk'}>
-                            </TextWrapper>) : (<TextWrapper className="!text-red text-bold" variant={'Body1'} content={' ' + ((totalAmount - totalPaidAmount)) + ' tk'}>
-                            </TextWrapper>)}
-                            {totalAmount > totalPaidAmount && (<div className="pl-3 cursor-pointer flex flex-row" onClick={openSMS}>
-                                <TextWrapper content={'SEND_A_MESSAGE'}></TextWrapper>
-                                <div className="pl-2 pt-[3px]">
-                                    <IconArrowNarrowRight size={20} />
-                                </div>
-                            </div>)}
+                            <TextWrapper
+                              className={dueAmount > 0 ? 'font-semibold text-[var(--palette-error-main)]' : 'font-semibold text-[var(--palette-success-main)]'}
+                              variant={'Body1'}
+                              content={' ' + dueAmount + ' tk'}
+                            />
                         </div>
+                        {dueAmount > 0 && (
+                          <div
+                            className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border px-4 py-3"
+                            style={{
+                              backgroundColor: theme.vars.palette.background.neutral,
+                              borderColor: theme.vars.palette.divider,
+                            }}>
+                            <div className="flex items-center gap-2">
+                              <TextWrapper variant={'Body2Medium'} content={'Due message for'} />
+                              <TextWrapper
+                                variant={'Body2Medium'}
+                                className="font-semibold"
+                                content={`${dueAmount} tk`}
+                              />
+                            </div>
+                            <CustomButton
+                              onClick={openSMS}
+                              className="cursor-pointer"
+                              text={'SEND_A_MESSAGE'}
+                              variant={'outline'}
+                              size={'sm'}
+                              Icon={IconArrowNarrowRight}
+                              iconAlign="right"
+                            />
+                          </div>
+                        )}
                         <div>
                             <TextWrapper variant={'H6'} content={'YOUR_PROFIT'}>
                             </TextWrapper>

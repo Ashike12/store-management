@@ -1,6 +1,7 @@
 import TextWrapper from "@components/text/TextWrapper";
+import { CustomButton } from "@components/button/CustomButton";
 import useLocalization from "@core/hooks/useLocalization";
-import { Modal, Box, TextField, Button } from "@mui/material";
+import { Modal, Box, TextField } from "@mui/material";
 
 export interface IProductForm {
     ItemId: string;
@@ -92,12 +93,18 @@ export default function ProductModal({
 
                 {/* Buttons */}
                 <Box display="flex" justifyContent="flex-end" className="gap-4 mt-4">
-                    <Button variant="outlined" color="secondary" onClick={() => handleCancel()}>
-                        Cancel
-                    </Button>
-                    <Button variant="contained" color="primary" onClick={() => handleSubmit()}>
-                        {!isUpdate ? 'Save' : 'Update'}
-                    </Button>
+                    <CustomButton
+                        variant="secondary"
+                        size="md"
+                        text="Cancel"
+                        onClick={() => handleCancel()}
+                    />
+                    <CustomButton
+                        variant="primary"
+                        size="md"
+                        text={!isUpdate ? 'Save' : 'Update'}
+                        onClick={() => handleSubmit()}
+                    />
                 </Box>
             </Box>
         </Modal>

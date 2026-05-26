@@ -1,39 +1,40 @@
-import {describe, it, expect, vi, beforeEach, afterEach} from 'vitest';
-import {render, screen, cleanup} from '@testing-library/react';
+import {describe, expect, it, vi, beforeEach} from 'vitest';
+import {render, screen} from '@testing-library/react';
 import App from '@app/App';
-import * as AuthModule from '@core/utils/auth'; // Import the module containing getIsLogin
 
-// Mock the layouts
-vi.mock('@layout/BaseLayout', () => ({
-  default: () => <div data-testid="base-layout">Base Layout</div>,
+const mockUseAppSelector = vi.fn();
+
+vi.mock('@core/store/hooks', () => ({
+  useAppSelector: () => mockUseAppSelector(),
 }));
 
-vi.mock('@layout/AuthLayout', () => ({
-  default: () => <div data-testid="auth-layout">Auth Layout</div>,
+vi.mock('router/AppRouter', () => ({
+  default: () => <div data-testid="app-router">App Router</div>,
 }));
 
-describe('App Component', () => {
+vi.mock('router/AuthRouter', () => ({
+  default: () => <div data-testid="auth-router">Auth Router</div>,
+}));
+
+describe('App routing guard', () => {
   beforeEach(() => {
-    cleanup(); // Ensure a clean state before each test
+    vi.clearAllMocks();
+    window.location.hash = '#/login';
   });
 
-  afterEach(() => {
-    vi.restoreAllMocks(); // Restore mocks after each test
-  });
-
-  it('renders BaseLayout when user is logged in', () => {
-    vi.spyOn(AuthModule, 'getIsLogin').mockReturnValue(true); // Mock getIsLogin
+  it('renders app router when logged in', () => {
+    mockUseAppSelector.mockReturnValue(true);
 
     render(<App />);
 
-    expect(screen.getByTestId('base-layout')).toBeInTheDocument();
+    expect(screen.getByTestId('app-router')).toBeInTheDocument();
   });
 
-  it('renders AuthLayout when user is not logged in', () => {
-    vi.spyOn(AuthModule, 'getIsLogin').mockReturnValue(false); // Mock getIsLogin
+  it('renders auth router when logged out', () => {
+    mockUseAppSelector.mockReturnValue(false);
 
     render(<App />);
 
-    expect(screen.getByTestId('auth-layout')).toBeInTheDocument();
+    expect(screen.getByTestId('auth-router')).toBeInTheDocument();
   });
 });

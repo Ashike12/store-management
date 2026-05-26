@@ -3,6 +3,7 @@ import { IconButton } from "@mui/material";
 import { IconEdit, IconTrash } from "@tabler/icons-react";
 import { useState } from "react";
 import moment from "moment";
+import {useTheme} from "@mui/material/styles";
 
 // Define types for table columns and data
 interface Column {
@@ -34,8 +35,10 @@ const CustomTable = <T extends Record<string, any>>({
     hidePagination = false,
     handlePageSelection = (page: number) => { },
 }: TableProps<T>) => {
+    const theme = useTheme();
     const [currentPage, setCurrentPage] = useState(1);
     const totalPages = Math.ceil(totalCount / rowsPerPage);
+    const tableBorderColor = theme.vars.palette.divider;
 
     // Get current page data
     const currentData = data.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
@@ -53,17 +56,23 @@ const CustomTable = <T extends Record<string, any>>({
 
     return (
         <>
-            <div className="p-4 bg-white rounded-lg shadow-lg">
-                <table className="w-full border rounded-sm border-grey-grey-200">
-                    <thead className="bg-gray-200">
+            <div
+                className="p-4 rounded-lg shadow-lg"
+                style={{
+                    backgroundColor: theme.vars.palette.background.paper,
+                    color: theme.vars.palette.text.primary,
+                }}
+            >
+                <table className="w-full border rounded-sm" style={{borderColor: tableBorderColor}}>
+                    <thead style={{backgroundColor: theme.vars.palette.background.neutral}}>
                         <tr>
                             {columns.map((col) => (
-                                <th key={col.key} className="border border-grey-grey-200 px-4 py-2 text-left">
+                                <th key={col.key} className="border px-4 py-2 text-left" style={{borderColor: tableBorderColor}}>
                                     <TextWrapper variant={'H6'} content={col.label} />
                                 </th>
                             ))}
                             {showActionButtons && (
-                                <th colSpan={columns.length} className="border border-grey-grey-200 px-4 py-2">
+                                <th colSpan={columns.length} className="border px-4 py-2" style={{borderColor: tableBorderColor}}>
                                     <TextWrapper variant={'H6'} content={'ACTION'} />
                                 </th>
                             )}
@@ -71,19 +80,32 @@ const CustomTable = <T extends Record<string, any>>({
                     </thead>
                     <tbody>
                         {currentData.map((row, rowIndex) => (
-                            <tr key={rowIndex} className="hover:bg-gray-100">
+                            <tr
+                                key={rowIndex}
+                                style={{transition: 'background-color 120ms ease'}}
+                                onMouseEnter={e => {
+                                    e.currentTarget.style.backgroundColor = theme.vars.palette.action.selected;
+                                }}
+                                onMouseLeave={e => {
+                                    e.currentTarget.style.backgroundColor = 'transparent';
+                                }}
+                            >
                                 {columns.map((col) => (
-                                    <td key={col.key} className={`border border-grey-grey-200 px-4 py-2 ${isRowClickable ? 'cursor-pointer' : ''}`} onClick={() => isRowClickable && handleRowClick(row, false, true)}>
+                                    <td
+                                        key={col.key}
+                                        className={`border px-4 py-2 ${isRowClickable ? 'cursor-pointer' : ''}`}
+                                        style={{borderColor: tableBorderColor}}
+                                        onClick={() => isRowClickable && handleRowClick(row, false, true)}>
                                         {col.key.indexOf('Date') == -1 ? (<TextWrapper variant={'Body1'} content={getContent(row, col)} />) : moment(row[col.key]).format("DD/MM/YYYY")}
                                     </td>
                                 ))}
                                 {showActionButtons && (
-                                    <td key={'action' + rowIndex} colSpan={columns.length} className="border border-grey-grey-200 px-4 py-2">
+                                    <td key={'action' + rowIndex} colSpan={columns.length} className="border px-4 py-2" style={{borderColor: tableBorderColor}}>
                                         <IconButton onClick={() => handleRowClick(row, false)} size={'small'} className="!ml-2 px-5">
-                                            <IconEdit color="green" />
+                                            <IconEdit color={theme.vars.palette.success.main} />
                                         </IconButton>
                                         <IconButton onClick={() => handleRowClick(row, true)} size={'small'} className="!ml-2 px-5">
-                                            <IconTrash color="red" />
+                                            <IconTrash color={theme.vars.palette.error.main} />
                                         </IconButton>
                                     </td>
                                 )}
@@ -97,21 +119,27 @@ const CustomTable = <T extends Record<string, any>>({
                     <button
                         onClick={() => {setCurrentPage((prev) => Math.max(prev - 1, 1)); handlePageSelection(currentPage - 1)}}
                         disabled={currentPage === 1}
-                        className={`px-4 py-2 bg-gray-500 text-white rounded ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-600 cursor-pointer"
-                            }`}
+                        className={`px-4 py-2 rounded ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+                        style={{
+                            backgroundColor: theme.vars.palette.background.neutral,
+                            color: theme.vars.palette.text.primary,
+                        }}
                     >
                         Previous
                     </button>
 
-                    <span className="text-gray-700">
+                    <span style={{color: theme.vars.palette.text.secondary}}>
                         Page {currentPage} of {totalPages}
                     </span>
 
                     <button
                         onClick={() => {setCurrentPage((prev) => Math.min(prev + 1, totalPages)); handlePageSelection(currentPage + 1)}}
                         disabled={currentPage === totalPages}
-                        className={`px-4 py-2 bg-gray-500 text-white rounded ${currentPage === totalPages ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-600 cursor-pointer"
-                            }`}
+                        className={`px-4 py-2 rounded ${currentPage === totalPages ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+                        style={{
+                            backgroundColor: theme.vars.palette.background.neutral,
+                            color: theme.vars.palette.text.primary,
+                        }}
                     >
                         Next
                     </button>

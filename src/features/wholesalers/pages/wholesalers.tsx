@@ -77,7 +77,6 @@ export default function StoreManagement() {
   }
 
   const handleRowClick = async (row: IUser, isDelete: boolean, isGoDetails?: boolean) => {
-    console.log('row', row);
     setFormData({
       ItemId: row.ItemId,
       FirstName: row.FirstName,
@@ -132,7 +131,7 @@ export default function StoreManagement() {
   return (
     <>
       <div className='w-full'>
-        <CustomButton onClick={() => resetForm()} className='fixed bottom-4 right-4 ml-4 my-3 cursor-pointer' text={'ADD_USER'} variant={'primary'}></CustomButton>
+
         {data && data && data?.Data?.length > 0 && (<div className="p-10 w-full">
           <div className="flex flex-wrap gap-4 mb-6">
             <input
@@ -141,6 +140,12 @@ export default function StoreManagement() {
               className="border p-2 rounded w-full sm:w-1/2"
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
+            />
+            <CustomButton
+              onClick={() => resetForm()}
+              className='cursor-pointer'
+              text={'ADD_USER'}
+              variant={'primary'}
             />
           </div>
           <CustomTable

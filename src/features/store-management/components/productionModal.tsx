@@ -1,7 +1,8 @@
 import TextWrapper from "@components/text/TextWrapper";
+import { CustomButton } from "@components/button/CustomButton";
 import { IAddProductionPayload } from "@core/interfaces/api/IProduct";
 import { useAddProductionMutation, useGetProductQuery } from "@core/store/api/product";
-import { Modal, Box, TextField, Button, FormControl, MenuItem } from "@mui/material";
+import { Modal, Box, TextField, MenuItem } from "@mui/material";
 import { ErrorMessage, FieldArray, Form, Formik } from "formik";
 import { addProductionValidationSchema } from "../schemas/add-production.schema";
 import { useEffect } from "react";
@@ -44,7 +45,6 @@ export default function ProductionModal({
                 Quantity: item.CurrentQuantity
             })
         })
-        console.log("Payload", payload);
         await createProduction({ payload }).unwrap();
         handleClose();
     }
@@ -74,7 +74,6 @@ export default function ProductionModal({
                     initialValues={createProductionInitialValues}
                     validationSchema={addProductionValidationSchema}
                     onSubmit={(values) => {
-                        console.log("Form data", values);
                     }}
                 >
                     {({ values, setFieldValue, errors, touched }) => {
@@ -155,46 +154,54 @@ export default function ProductionModal({
                                                             <ErrorMessage name={`ProductionInfo[${index}].ProductionAmount`} component="div" className="text-red-500" />
                                                         </div>
 
-                                                        {values.ProductionInfo.length > 1 && (<Button
-                                                            type="button"
-                                                            variant="outlined"
-                                                            color="secondary"
-                                                            onClick={() => arrayHelpers.remove(index)}
-                                                        >
-                                                            Remove Product
-                                                        </Button>)}
+                                                        {values.ProductionInfo.length > 1 && (
+                                                            <CustomButton
+                                                                type="button"
+                                                                variant="outline"
+                                                                size="md"
+                                                                text="Remove Product"
+                                                                onClick={() => arrayHelpers.remove(index)}
+                                                            />
+                                                        )}
                                                     </div>
 
                                                 </div>
                                             ))}
 
                                             {/* Add Product Button */}
-                                            {selectedProducts.length != productList.length && (<Button
-                                                type="button"
-                                                variant="outlined"
-                                                color="primary"
-                                                onClick={() =>
-                                                    arrayHelpers.push({
-                                                        ProductId: '',
-                                                        CurrentQuantity: 0,
-                                                        ProductionAmount: 0,
-                                                    })
-                                                }
-                                            >
-                                                Add Product
-                                            </Button>)}
+                                            {selectedProducts.length != productList.length && (
+                                                <CustomButton
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="md"
+                                                    text="Add Product"
+                                                    onClick={() =>
+                                                        arrayHelpers.push({
+                                                            ProductId: '',
+                                                            CurrentQuantity: 0,
+                                                            ProductionAmount: 0,
+                                                        })
+                                                    }
+                                                />
+                                            )}
                                         </div>
                                     )}
                                 />
 
                                 {/* Buttons */}
                                 <Box display="flex" justifyContent="flex-end" className="gap-4 mt-4">
-                                    <Button variant="outlined" color="secondary" onClick={() => handleClose()}>
-                                        Cancel
-                                    </Button>
-                                    <Button variant="contained" color="primary" onClick={() => submitInvoice(values)}>
-                                        {'Save'}
-                                    </Button>
+                                    <CustomButton
+                                        variant="secondary"
+                                        size="md"
+                                        text="Cancel"
+                                        onClick={() => handleClose()}
+                                    />
+                                    <CustomButton
+                                        variant="primary"
+                                        size="md"
+                                        text="Save"
+                                        onClick={() => submitInvoice(values)}
+                                    />
                                 </Box>
                             </Form>
                         )

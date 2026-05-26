@@ -1,36 +1,33 @@
-import { HashRouter, useLocation, useNavigate } from 'react-router-dom';
+import {HashRouter, Navigate, useLocation} from 'react-router-dom';
 import AppRouter from 'router/AppRouter';
 import AuthRouter from 'router/AuthRouter';
-import { selectAppIsLogin } from '@core/store/slices/auth.slice';
-import { useAppSelector } from '@core/store/hooks';
-import { useEffect } from 'react';
-import { ROUTE_PATH } from '@core/config/routePath';
+import {selectAppIsLogin} from '@core/store/slices/auth.slice';
+import {useAppSelector} from '@core/store/hooks';
+import {ROUTE_PATH} from '@core/config/routePath';
 
 export default function App() {
   const isLogin = useAppSelector(selectAppIsLogin);
-  console.log('isLogin', isLogin);
+
   return (
     <HashRouter>
-      <AuthGuard isLogin={isLogin}>
-        {isLogin ? <AppRouter /> : <AuthRouter />}
-      </AuthGuard>
+      <AuthGuard isLogin={isLogin} />
     </HashRouter>
   );
 }
 
-// 🔹 Redirect to /login if not authenticated
-function AuthGuard({ isLogin, children }: { isLogin: boolean; children: React.ReactNode }) {
-  const navigate = useNavigate();
+function AuthGuard({isLogin}: {isLogin: boolean}) {
   const location = useLocation();
-  const isSetPassword = location.pathname === ROUTE_PATH.setPassword.path;
-  useEffect(() => {
-    if (isSetPassword) {
-      navigate(`/set-password${location.search}`, { replace: true, });
-    }
-    else if (!isLogin) {
-      navigate('/login', { replace: true });
-    }
-  }, [isLogin, navigate]);
+  const isPublicAuthRoute =
+    location.pathname === ROUTE_PATH.login.path ||
+    location.pathname === ROUTE_PATH.setPassword.path;
 
-  return <>{children}</>;
+  if (isLogin) {
+    return <AppRouter />;
+  }
+
+  if (isPublicAuthRoute) {
+    return <AuthRouter />;
+  }
+
+  return <Navigate to={ROUTE_PATH.login.path} replace />;
 }

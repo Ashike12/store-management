@@ -1,4 +1,5 @@
 import * as React from 'react';
+import {Box} from '@mui/material';
 import LeftSidebar from '@components/left-sidebar/LeftSidebar.tsx';
 import {Header} from '@components/header';
 import cn from '@core/utils/cn';
@@ -8,10 +9,8 @@ interface IBaseLayoutProps {
 }
 
 export default function BaseLayout({children}: Readonly<IBaseLayoutProps>) {
-  const [open, setOpen] = React.useState(false);
-  const [isRightSidebarOpen] =
-    React.useState<boolean>(false);
-  const [isLocked, setIsLocked] = React.useState(false);
+  const [open, setOpen] = React.useState(true);
+  const [isLocked, setIsLocked] = React.useState(true);
 
   const lockLeftSidebar = () => {
     setIsLocked(true);
@@ -27,7 +26,11 @@ export default function BaseLayout({children}: Readonly<IBaseLayoutProps>) {
   };
 
   return (
-    <div className="flex">
+    <Box
+      className="flex min-h-screen"
+      sx={theme => ({
+        backgroundColor: theme.vars.palette.background.default,
+      })}>
       <LeftSidebar
         drawerClose={handleDrawerClose}
         drawerOpen={handleDrawerOpen}
@@ -35,16 +38,16 @@ export default function BaseLayout({children}: Readonly<IBaseLayoutProps>) {
         open={open}
         isLocked={isLocked}
       />
-      <div className="bg-common-white flex flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col">
         <Header isLocked={isLocked} />
         <main
           className={cn(
-            'flex min-h-[calc(100vh-80px)] ml-[200px] flex-1 p-4 pl-5 transition-all duration-200 ease-in-out',
-            !isLocked ? 'ml-16' : '',
+            'flex min-h-[calc(100vh-80px)] min-w-0 flex-1 p-4 pl-5 transition-all duration-200 ease-in-out',
+            !isLocked ? 'md:ml-[60px]' : '',
           )}>
           {children}
         </main>
       </div>
-    </div>
+    </Box>
   );
 }

@@ -1,10 +1,9 @@
-import {Suspense, useEffect} from 'react';
-import {Navigate, Outlet, Route, Routes, useLocation} from 'react-router-dom';
+import {Suspense} from 'react';
+import {Navigate, Outlet, Route, Routes} from 'react-router-dom';
 import BASE_ROUTES from '@core/config/base-routes';
 import BaseLayout from '@layout/BaseLayout';
 import {LinearProgress, linearProgressClasses} from '@mui/material';
 import {varAlpha} from 'theme/styles';
-import {ROUTE_PATH} from '@core/config/routePath';
 import NotFoundView from '@components/not-found/NotFoundView';
 
 const renderFallback = (
