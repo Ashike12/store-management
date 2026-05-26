@@ -17,25 +17,17 @@ type ThemeModeContextValue = {
   setMode: (mode: AppThemeMode) => void;
 };
 
-const THEME_MODE_KEY = 'store-admin-theme-mode';
-
 const ThemeModeContext = React.createContext<ThemeModeContextValue | null>(null);
 
 export function ThemeProvider({children}: Readonly<Props>) {
   const theme = createTheme();
-  const [mode, setMode] = React.useState<AppThemeMode>(() => {
-    if (typeof window === 'undefined') {
-      return 'light';
-    }
-    const savedMode = localStorage.getItem(THEME_MODE_KEY) as AppThemeMode | null;
-    return savedMode ?? 'light';
-  });
+  const [mode, setMode] = React.useState<AppThemeMode>('dark');
 
   const handleSetMode = React.useCallback((nextMode: AppThemeMode) => {
     setMode(nextMode);
   }, []);
 
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     if (typeof window === 'undefined') {
       return;
     }
@@ -44,7 +36,6 @@ export function ThemeProvider({children}: Readonly<Props>) {
     root.classList.remove('light', 'dark', 'pro');
     root.classList.add(mode);
     root.setAttribute('data-mui-color-scheme', mode);
-    localStorage.setItem(THEME_MODE_KEY, mode);
   }, [mode]);
 
   const contextValue = React.useMemo(
@@ -55,7 +46,7 @@ export function ThemeProvider({children}: Readonly<Props>) {
   return (
     <CssVarsProvider
       theme={theme}
-      defaultMode="light"
+      defaultMode="dark"
       disableTransitionOnChange>
       <ThemeModeContext.Provider value={contextValue}>
         <CssBaseline />
