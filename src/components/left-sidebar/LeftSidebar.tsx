@@ -8,12 +8,13 @@ import MuiDrawer from '@mui/material/Drawer';
 import { DRAWER_WIDTH } from '@core/config/constants';
 import BusinessLogo from '@assets/images/logo-business.png';
 import BASE_ROUTES from '@core/config/base-routes';
-import { useMatch, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import IconCaretDoubleLeft from '@assets/icons/IconCaretDoubleLeft';
 import TextWrapper from '@components/text/TextWrapper';
 import { IconBox, IconBuildingStore, IconFileInvoice, IconLayoutDashboard } from '@tabler/icons-react';
 import IconCaretDoubleRight from '@assets/icons/IconCaretDoubleRight';
 import cn from '@core/utils/cn';
+import {useAppThemeMode} from 'theme/theme-provider';
 
 const drawerWidth = DRAWER_WIDTH;
 
@@ -111,11 +112,46 @@ export default function LeftSidebar({
   open = false,
   isLocked = true,
 }: Readonly<ISidebarProps>) {
+  const {mode} = useAppThemeMode();
   const navigateTo = useNavigate();
-  const match = useMatch(':pageName');
+  const location = useLocation();
   const isActiveItem = (itemType: string) => {
-    return match?.params.pageName === itemType.toLowerCase();
+    const pathParts = location.pathname.toLowerCase().split('/');
+    const firstSegment = pathParts[1] ?? '';
+    const secondSegment = pathParts[2] ?? '';
+    const normalizedType = itemType.toLowerCase();
+
+    const pathCheck =
+      firstSegment === 'invoice' && secondSegment
+        ? `${firstSegment}/${secondSegment}`
+        : firstSegment === 'wholesaler' && secondSegment
+          ? `${firstSegment}/${secondSegment}`
+          : firstSegment;
+
+    if (normalizedType === 'dashboard') {
+      return pathCheck === 'dashboard' || pathCheck === '';
+    }
+
+    if (normalizedType === 'products') {
+      return pathCheck === 'products';
+    }
+
+    if (normalizedType === 'wholesalers') {
+      return pathCheck === 'wholesalers' || pathCheck === 'wholesaler/invoice';
+    }
+
+    if (normalizedType === 'invoice') {
+      return firstSegment === 'invoice';
+    }
+
+    return false;
   };
+
+  const menuTextColor = mode === 'dark' ? '#94A3B8' : mode === 'pro' ? '#C6D4E1' : '#CBD5E1';
+  const menuActiveBg = mode === 'dark' ? '#1E293B' : mode === 'pro' ? '#1F3B57' : '#334155';
+  const menuHoverBg = mode === 'dark' ? '#334155' : mode === 'pro' ? '#1F3B57' : '#1E293B';
+  const sidebarMetaText = mode === 'dark' ? '#94A3B8' : mode === 'pro' ? '#C6D4E1' : '#CBD5E1';
+
   return (
     <Drawer
       variant="permanent"
@@ -139,11 +175,13 @@ export default function LeftSidebar({
           <div className="flex items-center justify-center">
             {open ? (
               <div className="flex w-full items-center justify-between pb-6">
-                <TextWrapper
-                  className="pr-1 text-[var(--palette-text-secondary)]"
-                  content={'PROJECT_TITLE'}
-                  variant={'H6'}
-                />
+                <div style={{color: sidebarMetaText}}>
+                  <TextWrapper
+                    className="pr-1"
+                    content={'PROJECT_TITLE'}
+                    variant={'H6'}
+                  />
+                </div>
                 {/* {!isLocked && (
                   <button
                     className="bg-transparent-grey-16 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full p-[10px]"
@@ -172,26 +210,38 @@ export default function LeftSidebar({
                 disablePadding
                 sx={{ display: 'block' }}
                 onClick={() => navigateTo(item.path)}>
+                {(() => {
+                  const isActive = isActiveItem(item.type);
+                  return (
                 <ListItemButton
-                  sx={theme => [
+                  selected={isActive}
+                  sx={[
                     {
                       minHeight: '44px',
                       maxHeight: '44px',
                       width: '100%',
                       px: '16px',
                       py: '10px',
-                      borderRadius: '4px',
-                      color: isActiveItem(item.type)
-                        ? theme.vars.palette.common.white
-                        : theme.vars.palette.text.secondary,
-                      backgroundColor: isActiveItem(item.type)
-                        ? theme.vars.palette.secondary.dark
-                        : 'transparent',
+                      borderRadius: '6px',
+                      color: menuTextColor,
+                      backgroundColor: 'transparent',
+                      borderLeft: '3px solid transparent',
+                      fontWeight: 500,
                     },
                     {
                       '&:hover': {
-                        color: theme.vars.palette.common.white,
-                        backgroundColor: theme.vars.palette.secondary.dark,
+                        color: 'var(--palette-common-white)',
+                        backgroundColor: menuHoverBg,
+                        borderLeft: '3px solid var(--palette-primary-main)',
+                      },
+                      '&.Mui-selected': {
+                        color: 'var(--palette-common-white)',
+                        backgroundColor: menuActiveBg,
+                        borderLeft: '3px solid var(--palette-primary-main)',
+                        fontWeight: 700,
+                      },
+                      '&.Mui-selected:hover': {
+                        backgroundColor: menuActiveBg,
                       },
                     },
                     open
@@ -201,7 +251,7 @@ export default function LeftSidebar({
                       : {
                           justifyContent: 'center',
                         },
-                  ]}>
+                    ]}>
                   <ListItemIcon
                     sx={[
                       {
@@ -212,11 +262,11 @@ export default function LeftSidebar({
                         ? {
                           mr: '8px',
                         }
-                        : {
+                      : {
                           mr: 0,
                       },
                     ]}>
-                    {isActiveItem(item.type) ? (
+                    {isActive ? (
                       <item.FilledIcon color="currentColor" size={20} />
                     ) : (
                       <item.OutlineIcon color="currentColor" size={20} />
@@ -241,6 +291,8 @@ export default function LeftSidebar({
                     ]}
                   />
                 </ListItemButton>
+                  );
+                })()}
               </ListItem>
             ))}
           </List>
@@ -249,19 +301,21 @@ export default function LeftSidebar({
           {open ? (
             <>
               <div className="flex flex-row items-center justify-start">
-                <TextWrapper
-                  className="pr-1 text-[var(--palette-text-secondary)]"
-                  content={'Ashikur Rahman Nabir'}
-                  variant={'Caption'}
-                />
+                <div style={{color: sidebarMetaText}}>
+                  <TextWrapper
+                    className="pr-1"
+                    content={'Ashikur Rahman Nabir'}
+                    variant={'Caption'}
+                  />
+                </div>
               </div>
               <div className="pl-2">
                 <button
                   className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full"
                   style={{
                     backgroundColor: 'var(--palette-background-neutral)',
-                    color: 'var(--palette-common-white)',
-                    border: '1px solid var(--palette-secondary-dark)',
+                    color: 'var(--palette-text-primary)',
+                    border: '1px solid var(--palette-divider)',
                   }}
                   onClick={drawerClose}>
                   <IconCaretDoubleLeft color="currentColor" />
@@ -274,8 +328,8 @@ export default function LeftSidebar({
                 className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full"
                 style={{
                   backgroundColor: 'var(--palette-background-neutral)',
-                  color: 'var(--palette-common-white)',
-                  border: '1px solid var(--palette-secondary-dark)',
+                  color: 'var(--palette-text-primary)',
+                  border: '1px solid var(--palette-divider)',
                 }}
                 onClick={() => {
                   drawerOpen();
