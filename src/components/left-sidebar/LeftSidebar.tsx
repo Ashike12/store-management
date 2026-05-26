@@ -140,7 +140,7 @@ export default function LeftSidebar({
             {open ? (
               <div className="flex w-full items-center justify-between pb-6">
                 <TextWrapper
-                  className="pr-1 text-[var(--palette-common-white)]"
+                  className="pr-1 text-[var(--palette-text-secondary)]"
                   content={'PROJECT_TITLE'}
                   variant={'H6'}
                 />
@@ -181,13 +181,16 @@ export default function LeftSidebar({
                       px: '16px',
                       py: '10px',
                       borderRadius: '4px',
-                      color: theme.vars.palette.common.white,
+                      color: isActiveItem(item.type)
+                        ? theme.vars.palette.common.white
+                        : theme.vars.palette.text.secondary,
                       backgroundColor: isActiveItem(item.type)
                         ? theme.vars.palette.secondary.dark
                         : 'transparent',
                     },
                     {
                       '&:hover': {
+                        color: theme.vars.palette.common.white,
                         backgroundColor: theme.vars.palette.secondary.dark,
                       },
                     },
@@ -247,7 +250,7 @@ export default function LeftSidebar({
             <>
               <div className="flex flex-row items-center justify-start">
                 <TextWrapper
-                  className="pr-1 text-[var(--palette-common-white)]"
+                  className="pr-1 text-[var(--palette-text-secondary)]"
                   content={'Ashikur Rahman Nabir'}
                   variant={'Caption'}
                 />
@@ -255,9 +258,13 @@ export default function LeftSidebar({
               <div className="pl-2">
                 <button
                   className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full"
-                  style={{backgroundColor: 'var(--palette-background-neutral)'}}
+                  style={{
+                    backgroundColor: 'var(--palette-background-neutral)',
+                    color: 'var(--palette-common-white)',
+                    border: '1px solid var(--palette-secondary-dark)',
+                  }}
                   onClick={drawerClose}>
-                  <IconCaretDoubleLeft />
+                  <IconCaretDoubleLeft color="currentColor" />
                 </button>
               </div>
             </>
@@ -265,12 +272,16 @@ export default function LeftSidebar({
             <div className="flex w-full flex-row items-center justify-center">
               <button
                 className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full"
-                style={{backgroundColor: 'var(--palette-background-neutral)'}}
+                style={{
+                  backgroundColor: 'var(--palette-background-neutral)',
+                  color: 'var(--palette-common-white)',
+                  border: '1px solid var(--palette-secondary-dark)',
+                }}
                 onClick={() => {
                   drawerOpen();
                   lockLeftSidebar();
                 }}>
-                <IconCaretDoubleRight />
+                <IconCaretDoubleRight color="currentColor" />
               </button>
             </div>
           )}

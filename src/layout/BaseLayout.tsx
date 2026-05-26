@@ -9,8 +9,8 @@ interface IBaseLayoutProps {
 }
 
 export default function BaseLayout({children}: Readonly<IBaseLayoutProps>) {
-  const [open, setOpen] = React.useState(false);
-  const [isLocked, setIsLocked] = React.useState(false);
+  const [open, setOpen] = React.useState(true);
+  const [isLocked, setIsLocked] = React.useState(true);
 
   const lockLeftSidebar = () => {
     setIsLocked(true);
