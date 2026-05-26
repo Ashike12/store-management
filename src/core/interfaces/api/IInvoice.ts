@@ -19,6 +19,7 @@ export interface IInvoice {
 export interface ICreateInvoicePayload {
     PaymentAmount: number;
     WholeSalerId: string;
+    InvoiceType: string;
     ProductSellInfo: IProductSellInfo[];
 }
 

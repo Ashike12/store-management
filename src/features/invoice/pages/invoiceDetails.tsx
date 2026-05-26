@@ -17,8 +17,18 @@ export default function InvoiceDetails() {
     const theme = useTheme();
     const { data } = useGetInvoiceQuery({ pageNumber: 1, pageSize: 10, itemId: id ?? '' });
     const invoiceData = (data?.Data as InvoiceDetailsResponse) || {};
+    const getInvoiceTypeLabel = (invoiceType?: string) => {
+        if (invoiceType === 'DUE_PAYMENT') return 'Due Payment';
+        if (invoiceType === 'WHOLESALE') return 'Product (Wholesaler)';
+        if (invoiceType === 'CONSUMER') return 'Product (Consumer)';
+        return invoiceType ?? 'N/A';
+    };
     const navigate = useNavigate();
     const handleButtonAction = (action: string) => {
+        if (action === 'add') {
+            navigate(`/invoice/add/new?isUpdate=false&wholesalerId=${invoiceData.WholeSalerId ?? ''}`);
+            return;
+        }
         navigate(`/invoice/${action}/${id}?isUpdate=${action === 'update'}`);
     }
     return (
@@ -68,6 +78,12 @@ export default function InvoiceDetails() {
                             <TextWrapper variant={'H6'} content={'WHOLESALER_NAME'}>
                             </TextWrapper>
                             <TextWrapper variant={'Body1'} content={': ' + (invoiceData.WholeSalerName ?? 'N/A')}>
+                            </TextWrapper>
+                        </div>
+                        <div>
+                            <TextWrapper variant={'H6'} content={'INVOICE_TYPE'}>
+                            </TextWrapper>
+                            <TextWrapper variant={'Body1'} content={': ' + getInvoiceTypeLabel(invoiceData.InvoiceType)}>
                             </TextWrapper>
                         </div>
                         <div>
