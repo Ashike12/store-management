@@ -1,16 +1,21 @@
 import TextWrapper from "@components/text/TextWrapper";
 import { CustomButton } from "@components/button/CustomButton";
 import useLocalization from "@core/hooks/useLocalization";
-import { Modal, Box, TextField } from "@mui/material";
+import { PRODUCT_CATEGORIES, PRODUCT_CATEGORY_SUBCATEGORY_MAP } from "@core/config/product-category.constants";
+import { Modal, Box, MenuItem, SelectChangeEvent, TextField } from "@mui/material";
 
 export interface IProductForm {
     ItemId: string;
     ProductName: string;
+    Category: string;
+    SubCategory: string;
     Description: string;
     ImageLinks: string;
     VideoLink: string;
     MakingPrice: string;
-    SellingPrice: string;
+    WholeSalerPrice: string;
+    EndUserPrice: string;
+    EndUserDiscountedPrice: string;
     Quantity: string;
 }
 
@@ -25,12 +30,16 @@ export default function ProductModal({
     isOpen: boolean;
     handleCancel: () => void;
     formData: IProductForm;
-    handleFormData: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+    handleFormData: (
+        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string>
+    ) => void;
     handleSubmit: () => void;
     isUpdate?: boolean;
 }) {
 
     const useTranslation = useLocalization;
+    const subCategoryOptions = PRODUCT_CATEGORY_SUBCATEGORY_MAP[formData?.Category] ?? [];
+    const hasCustomSubCategory = !!formData?.SubCategory && !subCategoryOptions.includes(formData.SubCategory);
 
     return (
         <Modal open={isOpen} onClose={() => handleCancel()}>
@@ -54,16 +63,90 @@ export default function ProductModal({
                 {/* Form Fields */}
                 <Box
                     sx={{
-                        mt: 2,
+                        mt: 4,
                         display: "grid",
                         gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
-                        gap: 2,
+                        gap: 4,
                     }}
                 >
                     <TextField
                         label={useTranslation({content:'PRODUCT_NAME'})}
                         name="ProductName"
                         value={formData?.ProductName}
+                        onChange={handleFormData}
+                        fullWidth
+                    />
+                    <TextField
+                        label="Category"
+                        name="Category"
+                        value={formData?.Category}
+                        onChange={handleFormData}
+                        select
+                        fullWidth
+                    >
+                        <MenuItem value="">Select Category</MenuItem>
+                        {PRODUCT_CATEGORIES.map((category) => (
+                            <MenuItem key={category} value={category}>
+                                {category}
+                            </MenuItem>
+                        ))}
+                    </TextField>
+                    <TextField
+                        label="Sub Category"
+                        name="SubCategory"
+                        value={formData?.SubCategory}
+                        onChange={handleFormData}
+                        select
+                        disabled={!formData?.Category}
+                        fullWidth
+                    >
+                        <MenuItem value="">Select Sub Category</MenuItem>
+                        {subCategoryOptions.map((subCategory) => (
+                            <MenuItem key={subCategory} value={subCategory}>
+                                {subCategory}
+                            </MenuItem>
+                        ))}
+                        {hasCustomSubCategory && (
+                            <MenuItem value={formData.SubCategory}>{formData.SubCategory}</MenuItem>
+                        )}
+                    </TextField>
+                    <TextField
+                        label={useTranslation({content:'MAKING_COST'})}
+                        name="MakingPrice"
+                        type="number"
+                        value={formData?.MakingPrice}
+                        onChange={handleFormData}
+                        fullWidth
+                    />
+                    <TextField
+                        label="Wholesaler Price"
+                        name="WholeSalerPrice"
+                        type="number"
+                        value={formData?.WholeSalerPrice}
+                        onChange={handleFormData}
+                        fullWidth
+                    />
+                    <TextField
+                        label="End User Price"
+                        name="EndUserPrice"
+                        type="number"
+                        value={formData?.EndUserPrice}
+                        onChange={handleFormData}
+                        fullWidth
+                    />
+                    <TextField
+                        label="End User Discounted Price"
+                        name="EndUserDiscountedPrice"
+                        type="number"
+                        value={formData?.EndUserDiscountedPrice}
+                        onChange={handleFormData}
+                        fullWidth
+                    />
+                    <TextField
+                        label={useTranslation({content:'QUANTITY'})}
+                        name="Quantity"
+                        type="number"
+                        value={formData?.Quantity}
                         onChange={handleFormData}
                         fullWidth
                     />
@@ -93,30 +176,6 @@ export default function ProductModal({
                         multiline
                         rows={2}
                         sx={{ gridColumn: { xs: "1 / -1", sm: "1 / -1" } }}
-                    />
-                    <TextField
-                        label={useTranslation({content:'MAKING_COST'})}
-                        name="MakingPrice"
-                        type="number"
-                        value={formData?.MakingPrice}
-                        onChange={handleFormData}
-                        fullWidth
-                    />
-                    <TextField
-                        label={useTranslation({content:'SELLING_COST'})}
-                        name="SellingPrice"
-                        type="number"
-                        value={formData?.SellingPrice}
-                        onChange={handleFormData}
-                        fullWidth
-                    />
-                    <TextField
-                        label={useTranslation({content:'QUANTITY'})}
-                        name="Quantity"
-                        type="number"
-                        value={formData?.Quantity}
-                        onChange={handleFormData}
-                        fullWidth
                     />
                 </Box>
 

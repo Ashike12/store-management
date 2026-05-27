@@ -2,7 +2,8 @@ import { CustomButton } from '@components/button/CustomButton';
 import CustomTable from '@components/table/CustomTable';
 import { IProduct } from '@core/interfaces/api/IProduct';
 import { useCreateProductMutation, useDeleteProductMutation, useGetProductQuery, useUpdateProductMutation } from '@core/store/api/product';
-import { useEffect, useMemo, useState } from 'react';
+import { SelectChangeEvent } from '@mui/material';
+import { useMemo, useState } from 'react';
 import ProductModal, { IProductForm } from '../components/productModal';
 import DeleteConfirmationModal from '@components/confirmation-modal/delete-confirmation.modal';
 import ProductionModal from '../components/productionModal';
@@ -10,19 +11,26 @@ import ProductionModal from '../components/productionModal';
 // Define table columns
 const columns = [
   { key: "ProductName", label: "Name" },
+  { key: "Category", label: "Category" },
+  { key: "SubCategory", label: "Sub Category" },
   { key: "MakingPrice", label: "MAKING_COST" },
-  { key: "SellingPrice", label: "SELLING_COST" },
+  { key: "WholeSalerPrice", label: "Wholesaler Price" },
+  { key: "EndUserDiscountedPrice", label: "End User Discounted Price" },
   { key: "Quantity", label: "QUANTITY" },
 ];
 
 const initialFormData: IProductForm = {
   ItemId: "",
   ProductName: "",
+  Category: "MosquitoNet",
+  SubCategory: "Double",
   Description: "",
   ImageLinks: "",
   VideoLink: "",
   MakingPrice: "",
-  SellingPrice: "",
+  WholeSalerPrice: "",
+  EndUserPrice: "",
+  EndUserDiscountedPrice: "",
   Quantity: "",
 }
 
@@ -44,10 +52,15 @@ export default function StoreManagement() {
       .split(/\r?\n|,/)
       .map((x) => x.trim())
       .filter(Boolean);
-  const handleSave = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleSave = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string>
+  ) => {
+    const { name, value } = e.target;
+    const fieldName = String(name);
     setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [fieldName]: value,
+      ...(fieldName === "Category" ? { SubCategory: "" } : {}),
     }));
   };
   const handleSubmit = async () => {
@@ -56,11 +69,15 @@ export default function StoreManagement() {
         payload: {
           ItemId: formData.ItemId,
           ProductName: formData.ProductName,
+          Category: formData.Category,
+          SubCategory: formData.SubCategory,
           Description: formData.Description,
           ImageLinks: parseImageLinks(formData.ImageLinks),
           VideoLink: formData.VideoLink,
           MakingPrice: Number(formData.MakingPrice),
-          SellingPrice: Number(formData.SellingPrice),
+          WholeSalerPrice: Number(formData.WholeSalerPrice),
+          EndUserPrice: Number(formData.EndUserPrice),
+          EndUserDiscountedPrice: Number(formData.EndUserDiscountedPrice),
           Quantity: Number(formData.Quantity),
         }
       }).unwrap();
@@ -71,11 +88,15 @@ export default function StoreManagement() {
       await createProduct({
         payload: {
           ProductName: formData.ProductName,
+          Category: formData.Category,
+          SubCategory: formData.SubCategory,
           Description: formData.Description,
           ImageLinks: parseImageLinks(formData.ImageLinks),
           VideoLink: formData.VideoLink,
           MakingPrice: Number(formData.MakingPrice),
-          SellingPrice: Number(formData.SellingPrice),
+          WholeSalerPrice: Number(formData.WholeSalerPrice),
+          EndUserPrice: Number(formData.EndUserPrice),
+          EndUserDiscountedPrice: Number(formData.EndUserDiscountedPrice),
           Quantity: Number(formData.Quantity),
         }
       }).unwrap();
@@ -94,11 +115,15 @@ export default function StoreManagement() {
     setFormData({
       ItemId: row.ItemId,
       ProductName: row.ProductName,
+      Category: row.Category,
+      SubCategory: row.SubCategory,
       Description: row.Description,
       ImageLinks: row.ImageLinks?.join('\n') ?? '',
       VideoLink: row.VideoLink,
       MakingPrice: row.MakingPrice.toString(),
-      SellingPrice: row.SellingPrice.toString(),
+      WholeSalerPrice: row.WholeSalerPrice.toString(),
+      EndUserPrice: row.EndUserPrice.toString(),
+      EndUserDiscountedPrice: row.EndUserDiscountedPrice.toString(),
       Quantity: row.Quantity.toString(),
     });
     if (isDelete) {
@@ -133,7 +158,7 @@ export default function StoreManagement() {
         || item.Description.toLowerCase().includes(searchText.toLowerCase());
 
       const inPriceRange =
-        item.SellingPrice >= priceRange[0] && item.SellingPrice <= priceRange[1];
+        item.WholeSalerPrice >= priceRange[0] && item.WholeSalerPrice <= priceRange[1];
 
       return matchesSearch && inPriceRange;
     });
