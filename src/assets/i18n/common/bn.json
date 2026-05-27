@@ -10,6 +10,8 @@
   "UPDATE_PRODUCT": "পণ্য আপডেট করুন",
   "PRODUCT_NAME": "পণ্যের নাম",
   "PRODUCT_DESCRIPTION": "পণ্যের বিবরণ",
+  "PRODUCT_IMAGE_LINK": "পণ্যের ছবির লিংক",
+  "PRODUCT_VIDEO_LINK": "পণ্যের ভিডিও লিংক",
   "MAKING_COST": "তৈরির মূল্য",
   "SELLING_COST": "বিক্রয় মূল্য",
   "QUANTITY": "পরিমাণ",

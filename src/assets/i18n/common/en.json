@@ -10,6 +10,8 @@
   "UPDATE_PRODUCT": "Update Product",
   "PRODUCT_NAME": "Product Name",
   "PRODUCT_DESCRIPTION": "Product Description",
+  "PRODUCT_IMAGE_LINK": "Product Image Link",
+  "PRODUCT_VIDEO_LINK": "Product Video Link",
   "MAKING_COST": "Making Price",
   "SELLING_COST": "Selling Price",
   "QUANTITY": "Quantity",

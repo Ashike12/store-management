@@ -7,6 +7,8 @@ export interface IProductForm {
     ItemId: string;
     ProductName: string;
     Description: string;
+    ImageLinks: string;
+    VideoLink: string;
     MakingPrice: string;
     SellingPrice: string;
     Quantity: string;
@@ -38,7 +40,9 @@ export default function ProductModal({
                     top: "50%",
                     left: "50%",
                     transform: "translate(-50%, -50%)",
-                    width: 400,
+                    width: { xs: "calc(100% - 32px)", md: 820 },
+                    maxHeight: "90vh",
+                    overflowY: "auto",
                     bgcolor: "background.paper",
                     boxShadow: 24,
                     p: 5,
@@ -48,12 +52,25 @@ export default function ProductModal({
                 <TextWrapper variant={'H5'} content = {!isUpdate ? 'ADD_PRODUCT' : 'UPDATE_PRODUCT'}/>
 
                 {/* Form Fields */}
-                <Box display="flex" flexDirection="column" className="gap-5 mt-4">
+                <Box
+                    sx={{
+                        mt: 2,
+                        display: "grid",
+                        gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+                        gap: 2,
+                    }}
+                >
                     <TextField
-                        className="w-full"
                         label={useTranslation({content:'PRODUCT_NAME'})}
                         name="ProductName"
                         value={formData?.ProductName}
+                        onChange={handleFormData}
+                        fullWidth
+                    />
+                    <TextField
+                        label={useTranslation({content:'PRODUCT_VIDEO_LINK'})}
+                        name="VideoLink"
+                        value={formData?.VideoLink}
                         onChange={handleFormData}
                         fullWidth
                     />
@@ -63,7 +80,19 @@ export default function ProductModal({
                         value={formData?.Description}
                         onChange={handleFormData}
                         fullWidth
+                        multiline
                         rows={2}
+                        sx={{ gridColumn: { xs: "1 / -1", sm: "1 / -1" } }}
+                    />
+                    <TextField
+                        label={`${useTranslation({content:'PRODUCT_IMAGE_LINK'})} (one per line)`}
+                        name="ImageLinks"
+                        value={formData?.ImageLinks}
+                        onChange={handleFormData}
+                        fullWidth
+                        multiline
+                        rows={2}
+                        sx={{ gridColumn: { xs: "1 / -1", sm: "1 / -1" } }}
                     />
                     <TextField
                         label={useTranslation({content:'MAKING_COST'})}

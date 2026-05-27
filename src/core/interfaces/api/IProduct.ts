@@ -7,6 +7,8 @@ export interface IProductResponse {
 export interface ICreateProductPayload {
     ProductName: string;
     Description: string;
+    ImageLinks: string[];
+    VideoLink: string;
     MakingPrice: number;
     SellingPrice: number;
     Quantity: number;

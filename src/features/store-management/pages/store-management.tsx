@@ -19,6 +19,8 @@ const initialFormData: IProductForm = {
   ItemId: "",
   ProductName: "",
   Description: "",
+  ImageLinks: "",
+  VideoLink: "",
   MakingPrice: "",
   SellingPrice: "",
   Quantity: "",
@@ -37,6 +39,11 @@ export default function StoreManagement() {
   const [formData, setFormData] = useState<IProductForm>(initialFormData);
   const [searchText, setSearchText] = useState('');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 100000]);
+  const parseImageLinks = (input: string): string[] =>
+    input
+      .split(/\r?\n|,/)
+      .map((x) => x.trim())
+      .filter(Boolean);
   const handleSave = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData((prev) => ({
       ...prev,
@@ -50,6 +57,8 @@ export default function StoreManagement() {
           ItemId: formData.ItemId,
           ProductName: formData.ProductName,
           Description: formData.Description,
+          ImageLinks: parseImageLinks(formData.ImageLinks),
+          VideoLink: formData.VideoLink,
           MakingPrice: Number(formData.MakingPrice),
           SellingPrice: Number(formData.SellingPrice),
           Quantity: Number(formData.Quantity),
@@ -63,6 +72,8 @@ export default function StoreManagement() {
         payload: {
           ProductName: formData.ProductName,
           Description: formData.Description,
+          ImageLinks: parseImageLinks(formData.ImageLinks),
+          VideoLink: formData.VideoLink,
           MakingPrice: Number(formData.MakingPrice),
           SellingPrice: Number(formData.SellingPrice),
           Quantity: Number(formData.Quantity),
@@ -84,6 +95,8 @@ export default function StoreManagement() {
       ItemId: row.ItemId,
       ProductName: row.ProductName,
       Description: row.Description,
+      ImageLinks: row.ImageLinks?.join('\n') ?? '',
+      VideoLink: row.VideoLink,
       MakingPrice: row.MakingPrice.toString(),
       SellingPrice: row.SellingPrice.toString(),
       Quantity: row.Quantity.toString(),
