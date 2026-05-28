@@ -1,0 +1,64 @@
+.boot-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.boot-loader--admin {
+  background: #f2f2f3;
+}
+
+.ring-loader {
+  position: relative;
+  width: 136px;
+  height: 136px;
+}
+
+.ring-loader__outer,
+.ring-loader__inner {
+  position: absolute;
+  border-radius: 50%;
+}
+
+.ring-loader__outer {
+  inset: 0;
+  border: 5px solid #d9c3c5;
+  opacity: 0.72;
+  animation: ringUprise 1.05s ease-in-out infinite;
+}
+
+.ring-loader__inner {
+  top: 42px;
+  left: 42px;
+  width: 52px;
+  height: 52px;
+  border: 5px solid #b65a60;
+  animation: ringShrink 1.05s ease-in-out infinite;
+}
+
+@keyframes ringShrink {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.62);
+    opacity: 0.82;
+  }
+}
+
+@keyframes ringUprise {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.18);
+    opacity: 0.28;
+  }
+}

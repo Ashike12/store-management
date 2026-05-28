@@ -6,9 +6,15 @@ export interface IProductResponse {
 
 export interface ICreateProductPayload {
     ProductName: string;
+    Category: string;
+    SubCategory: string;
     Description: string;
+    ImageLinks: string[];
+    VideoLink: string;
     MakingPrice: number;
-    SellingPrice: number;
+    WholeSalerPrice: number;
+    EndUserPrice: number;
+    EndUserDiscountedPrice: number;
     Quantity: number;
 }
 
@@ -26,4 +32,14 @@ export interface IAddProductionPayload {
 export interface IAddProduction {
     ProductId: string;
     Quantity: number;
+}
+
+export interface IGetProductPayload {
+    pageNumber: number;
+    pageSize: number;
+    itemId: string;
+    category?: string;
+    subCategory?: string;
+    minMakingPrice?: number;
+    maxMakingPrice?: number;
 }

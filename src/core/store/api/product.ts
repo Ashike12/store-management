@@ -2,7 +2,7 @@ import {createApi} from '@reduxjs/toolkit/query/react';
 import {ApiServiceBaseQuery} from './baseQueries';
 import {APP_CONFIG} from '@core/config/config';
 import {IAuthResponse} from '@core/interfaces/api/IAuthResponse';
-import { IAddProductionPayload, ICreateProductPayload, IProduct, IProductResponse } from '@core/interfaces/api/IProduct';
+import { IAddProductionPayload, ICreateProductPayload, IGetProductPayload, IProduct, IProductResponse } from '@core/interfaces/api/IProduct';
 
 export const productApi = createApi({
   reducerPath: 'productApi',
@@ -56,12 +56,16 @@ export const productApi = createApi({
         }
       },
     }),
-    getProduct: builder.query<IProductResponse, {pageNumber: number, pageSize: number, itemId: string}>({
+    getProduct: builder.query<IProductResponse, IGetProductPayload>({
       query: (mutation) => ({
         url: `${APP_CONFIG.businessUrl}/business/GetProducts?page=${mutation.pageNumber}&size=${mutation.pageSize}`,
         method: 'POST',
         body: {
-          ItemId: mutation.itemId
+          ItemId: mutation.itemId,
+          Category: mutation.category ?? '',
+          SubCategory: mutation.subCategory ?? '',
+          MinMakingPrice: mutation.minMakingPrice,
+          MaxMakingPrice: mutation.maxMakingPrice,
         },
       }),
       providesTags: (_result, _error) => [{type: 'product'}], // Cache by ID

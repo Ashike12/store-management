@@ -224,9 +224,36 @@ export default function InvoiceAddOrUpdate() {
                     return acc + product.SellingPrice * product.Quantity;
                   }, 0);
 
+              const getDefaultSellingPrice = (productId: string, wholesalerId: string) => {
+                const selectedProduct = productList.find(product => product.ItemId === productId);
+                if (!selectedProduct) {
+                  return 0;
+                }
+
+                if (wholesalerId) {
+                  return selectedProduct.WholeSalerPrice;
+                }
+
+                return selectedProduct.EndUserDiscountedPrice
+                  ?? selectedProduct.EndUserPrice
+                  ?? selectedProduct.WholeSalerPrice
+                  ?? 0;
+              };
+
               const updateWholeSaler = (nextWholesalerId: string) => {
                 setFieldValue("WholeSalerId", nextWholesalerId);
                 setDueWholesalerId(nextWholesalerId);
+
+                if (!isDuePaymentInvoice && values.ProductSellInfo.length > 0) {
+                  values.ProductSellInfo.forEach((product, index) => {
+                    if (product.ProductId) {
+                      setFieldValue(
+                        `ProductSellInfo[${index}].SellingPrice`,
+                        getDefaultSellingPrice(product.ProductId, nextWholesalerId),
+                      );
+                    }
+                  });
+                }
               };
 
               return (
@@ -290,23 +317,30 @@ export default function InvoiceAddOrUpdate() {
                               <div className="flex space-x-4">
                                 <div className="flex-1">
                                   <TextField
-                                    label="Product ID"
+                                    label="Product"
                                     name={`ProductSellInfo[${index}].ProductId`}
                                     fullWidth
                                     variant="outlined"
                                     select
-                                    value={product.ProductId + "_" + product.SellingPrice}
+                                    value={product.ProductId}
                                     onChange={e => {
-                                      const [productId, sellingPrice] = e.target.value.split("_");
+                                      const productId = e.target.value;
                                       setFieldValue(`ProductSellInfo[${index}].ProductId`, productId);
-                                      setFieldValue(`ProductSellInfo[${index}].SellingPrice`, sellingPrice);
+                                      setFieldValue(
+                                        `ProductSellInfo[${index}].SellingPrice`,
+                                        getDefaultSellingPrice(productId, values.WholeSalerId),
+                                      );
                                       setFieldValue(`ProductSellInfo[${index}].Quantity`, 1);
                                     }}>
                                     {productList.map(productOption => (
+                                      // Prevent duplicate product rows in a single invoice.
                                       <MenuItem
-                                        disabled={selectedProducts.indexOf(productOption.ItemId) > -1}
+                                        disabled={
+                                          selectedProducts.indexOf(productOption.ItemId) > -1
+                                          && product.ProductId !== productOption.ItemId
+                                        }
                                         key={productOption.ItemId}
-                                        value={productOption.ItemId + "_" + productOption.SellingPrice}>
+                                        value={productOption.ItemId}>
                                         {productOption.ProductName}
                                       </MenuItem>
                                     ))}
