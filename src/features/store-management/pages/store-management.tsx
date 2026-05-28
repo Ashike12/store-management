@@ -3,10 +3,12 @@ import CustomTable from '@components/table/CustomTable';
 import { IProduct } from '@core/interfaces/api/IProduct';
 import { useCreateProductMutation, useDeleteProductMutation, useGetProductQuery, useUpdateProductMutation } from '@core/store/api/product';
 import { SelectChangeEvent } from '@mui/material';
+import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
 import { useMemo, useState } from 'react';
 import ProductModal, { IProductForm } from '../components/productModal';
 import DeleteConfirmationModal from '@components/confirmation-modal/delete-confirmation.modal';
 import ProductionModal from '../components/productionModal';
+import { PRODUCT_CATEGORY_SUBCATEGORY_MAP } from '@core/config/product-category.constants';
 
 // Define table columns
 const columns = [
@@ -18,6 +20,7 @@ const columns = [
   { key: "EndUserDiscountedPrice", label: "End User Discounted Price" },
   { key: "Quantity", label: "QUANTITY" },
 ];
+const ALL_OPTION = 'ALL';
 
 const initialFormData: IProductForm = {
   ItemId: "",
@@ -35,7 +38,17 @@ const initialFormData: IProductForm = {
 }
 
 export default function StoreManagement() {
-  const [payload, setPayload] = useState({ pageNumber: 1, pageSize: 1000, itemId: '' });
+  const [selectedCategory, setSelectedCategory] = useState('MosquitoNet');
+  const [selectedSubCategory, setSelectedSubCategory] = useState('Double');
+  const [payload, setPayload] = useState({
+    pageNumber: 1,
+    pageSize: 1000,
+    itemId: '',
+    category: 'MosquitoNet',
+    subCategory: 'Double',
+    minMakingPrice: 0,
+    maxMakingPrice: 100000,
+  });
   const { data, isLoading, refetch } = useGetProductQuery(payload);
   const [createProduct, { isLoading: isCreating }] = useCreateProductMutation();
   const [updateProduct, { isLoading: isUpdating }] = useUpdateProductMutation();
@@ -47,6 +60,56 @@ export default function StoreManagement() {
   const [formData, setFormData] = useState<IProductForm>(initialFormData);
   const [searchText, setSearchText] = useState('');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 100000]);
+  const categoryOptions = [ALL_OPTION, ...Object.keys(PRODUCT_CATEGORY_SUBCATEGORY_MAP)];
+  const subCategoryOptions = useMemo(() => {
+    if (selectedCategory === ALL_OPTION) {
+      return [ALL_OPTION];
+    }
+
+    const currentSubCategory = PRODUCT_CATEGORY_SUBCATEGORY_MAP[selectedCategory] ?? [];
+    return [ALL_OPTION, ...currentSubCategory];
+  }, [selectedCategory]);
+
+  const handleCategoryFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const nextCategory = e.target.value;
+    const fallbackSubCategory =
+      nextCategory === ALL_OPTION ? ALL_OPTION : (PRODUCT_CATEGORY_SUBCATEGORY_MAP[nextCategory]?.[0] ?? ALL_OPTION);
+    setSelectedCategory(nextCategory);
+    setSelectedSubCategory(fallbackSubCategory);
+    setPayload((prev) => ({
+      ...prev,
+      category: nextCategory === ALL_OPTION ? '' : nextCategory,
+      subCategory: fallbackSubCategory === ALL_OPTION ? '' : fallbackSubCategory,
+    }));
+  };
+
+  const handleSubCategoryFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const nextSubCategory = e.target.value;
+    setSelectedSubCategory(nextSubCategory);
+    setPayload((prev) => ({
+      ...prev,
+      subCategory: nextSubCategory === ALL_OPTION ? '' : nextSubCategory,
+    }));
+  };
+
+  const handleMinPriceChange = (value: string) => {
+    const nextMin = Number(value) || 0;
+    setPriceRange([nextMin, priceRange[1]]);
+    setPayload((prev) => ({
+      ...prev,
+      minMakingPrice: nextMin,
+    }));
+  };
+
+  const handleMaxPriceChange = (value: string) => {
+    const nextMax = Number(value) || 0;
+    setPriceRange([priceRange[0], nextMax]);
+    setPayload((prev) => ({
+      ...prev,
+      maxMakingPrice: nextMax,
+    }));
+  };
+
   const parseImageLinks = (input: string): string[] =>
     input
       .split(/\r?\n|,/)
@@ -149,27 +212,23 @@ export default function StoreManagement() {
     setIsOpen(true);
   }
 
-  // Filtered and searched data
+  // Searched data (price range is filtered by backend using MakingPrice)
   const filteredData = useMemo(() => {
     if (!data?.Data) return [];
 
     return data.Data.filter(item => {
       const matchesSearch = item.ProductName.toLowerCase().includes(searchText.toLowerCase())
         || item.Description.toLowerCase().includes(searchText.toLowerCase());
-
-      const inPriceRange =
-        item.WholeSalerPrice >= priceRange[0] && item.WholeSalerPrice <= priceRange[1];
-
-      return matchesSearch && inPriceRange;
+      return matchesSearch;
     });
-  }, [data, searchText, priceRange]);
+  }, [data, searchText]);
 
   return (
     <>
       <div className='w-full'>
-        {data && data && data?.Data?.length > 0 && (<div className="p-10 w-full">
-          <div className="flex flex-wrap gap-4 mb-6">
-            <div className="flex gap-2 items-center w-full">
+        {data && data && (<div className="p-10 w-full">
+          <div className="flex flex-wrap gap-3 mb-6 items-center">
+            <div className="flex gap-2 items-center w-full flex-wrap">
               <input
                 type="text"
                 placeholder="Search by name or description"
@@ -194,29 +253,67 @@ export default function StoreManagement() {
             <div className="flex gap-2 items-center w-full sm:w-1/2">
               <input
                 type="number"
-                className="border p-2 rounded w-1/2"
+                className="border p-2 mt-5 rounded w-1/2"
                 placeholder="Min Price"
                 value={priceRange[0]}
-                onChange={(e) => setPriceRange([+e.target.value, priceRange[1]])}
+                onChange={(e) => handleMinPriceChange(e.target.value)}
               />
               <input
                 type="number"
-                className="border p-2 rounded w-1/2"
+                className="border p-2 mt-5 rounded w-1/2"
                 placeholder="Max Price"
                 value={priceRange[1]}
-                onChange={(e) => setPriceRange([priceRange[0], +e.target.value])}
+                onChange={(e) => handleMaxPriceChange(e.target.value)}
               />
             </div>
+            <div className="flex items-end gap-2">
+              <div className="min-w-[190px]">
+                <p className="text-xs text-text-secondary mb-1">Category</p>
+                <div className="relative">
+                  <select
+                    className="h-10 w-full appearance-none rounded-lg border border-components-input-outlined bg-background-default px-3 pr-9 text-sm text-text-primary shadow-sm transition-all duration-200 hover:border-interaction-main focus:border-interaction-main focus:outline-none focus:ring-2 focus:ring-transparent-interaction-24"
+                    value={selectedCategory}
+                    onChange={handleCategoryFilterChange}
+                  >
+                    {categoryOptions.map((category) => (
+                      <option key={category} value={category}>
+                        {category}
+                      </option>
+                    ))}
+                  </select>
+                  <KeyboardArrowDownRoundedIcon className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-text-secondary" fontSize="small" />
+                </div>
+              </div>
+              <div className="min-w-[190px]">
+                <p className="text-xs text-text-secondary mb-1">Sub Category</p>
+                <div className="relative">
+                  <select
+                    className="h-10 w-full appearance-none rounded-lg border border-components-input-outlined bg-background-default px-3 pr-9 text-sm text-text-primary shadow-sm transition-all duration-200 hover:border-interaction-main focus:border-interaction-main focus:outline-none focus:ring-2 focus:ring-transparent-interaction-24"
+                    value={selectedSubCategory}
+                    onChange={handleSubCategoryFilterChange}
+                  >
+                    {subCategoryOptions.map((subCategory) => (
+                      <option key={subCategory} value={subCategory}>
+                        {subCategory}
+                      </option>
+                    ))}
+                  </select>
+                  <KeyboardArrowDownRoundedIcon className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-text-secondary" fontSize="small" />
+                </div>
+              </div>
+            </div>
           </div>
-          <CustomTable
-            showActionButtons={true}
-            handleRowClick={handleRowClick}
-            columns={columns}
-            data={filteredData || []}
-            rowsPerPage={10} />
-        </div>)}
-        {!isLoading && data && data && data?.Data?.length == 0 && (<div className="p-10 w-full">
-          No data found
+          {data?.Data?.length > 0 ? (
+            <CustomTable
+              showActionButtons={true}
+              handleRowClick={handleRowClick}
+              columns={columns}
+              data={filteredData || []}
+              rowsPerPage={10}
+            />
+          ) : (
+            <div>No data found</div>
+          )}
         </div>)}
         {(isLoading) && (<div className="p-10 w-full">
           Loading...

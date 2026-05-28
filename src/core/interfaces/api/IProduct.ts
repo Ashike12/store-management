@@ -33,3 +33,13 @@ export interface IAddProduction {
     ProductId: string;
     Quantity: number;
 }
+
+export interface IGetProductPayload {
+    pageNumber: number;
+    pageSize: number;
+    itemId: string;
+    category?: string;
+    subCategory?: string;
+    minMakingPrice?: number;
+    maxMakingPrice?: number;
+}
