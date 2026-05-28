@@ -5,11 +5,11 @@ import dotenv from 'dotenv';
 import tsconfigPaths from 'vite-tsconfig-paths'; // only if you installed the plugin
 
 dotenv.config(); // load env vars from .env
+const appBase = process.env.VITE_APP_BASE ?? '/';
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: "/store-management/", // for deployment
-  // base: "/", // for locallocalhost
+  base: appBase,
   plugins: [
     react(),
     tsconfigPaths(), // only if you installed the plugin
