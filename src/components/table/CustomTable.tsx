@@ -1,6 +1,6 @@
 import TextWrapper from "@components/text/TextWrapper";
 import { IconButton } from "@mui/material";
-import { IconEdit, IconTrash } from "@tabler/icons-react";
+import { IconCopy, IconEdit, IconTrash } from "@tabler/icons-react";
 import { useState } from "react";
 import moment from "moment";
 import {useTheme} from "@mui/material/styles";
@@ -18,7 +18,9 @@ interface TableProps<T> {
     totalCount?: number; // Optional total count for pagination
     rowsPerPage?: number; // Optional pagination setting
     handleRowClick?: (row: T, isDelete: boolean, isGoDetails?: boolean) => void; // Optional row click handler
+    handleCloneClick?: (row: T) => void; // Optional clone action handler
     showActionButtons?: boolean; // Optional flag to show actions column
+    showCloneButton?: boolean; // Optional flag to show clone action
     isRowClickable?: boolean; // Optional flag to make row clickable
     hidePagination?: boolean; // Optional flag to hide pagination
     handlePageSelection?: (page: number) => void; // Optional page selection handler
@@ -30,7 +32,9 @@ const CustomTable = <T extends Record<string, any>>({
     totalCount = data.length,
     rowsPerPage = 5,
     handleRowClick = (row: T, isDelete: boolean, isGoDetails?: boolean) => { },
+    handleCloneClick,
     showActionButtons = false,
+    showCloneButton = false,
     isRowClickable = false,
     hidePagination = false,
     handlePageSelection = (page: number) => { },
@@ -104,6 +108,11 @@ const CustomTable = <T extends Record<string, any>>({
                                         <IconButton onClick={() => handleRowClick(row, false)} size={'small'} className="!ml-2 px-5">
                                             <IconEdit color={theme.vars.palette.success.main} />
                                         </IconButton>
+                                        {showCloneButton && handleCloneClick && (
+                                            <IconButton onClick={() => handleCloneClick(row)} size={'small'} className="!ml-2 px-5">
+                                                <IconCopy color={theme.vars.palette.primary.main} />
+                                            </IconButton>
+                                        )}
                                         <IconButton onClick={() => handleRowClick(row, true)} size={'small'} className="!ml-2 px-5">
                                             <IconTrash color={theme.vars.palette.error.main} />
                                         </IconButton>
