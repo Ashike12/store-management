@@ -25,7 +25,9 @@ export default function ProductModal({
     formData,
     handleFormData,
     handleSubmit,
-    isUpdate
+    isUpdate,
+    isSubmitDisabled = false,
+    isSubmitting = false,
 }: {
     isOpen: boolean;
     handleCancel: () => void;
@@ -35,6 +37,8 @@ export default function ProductModal({
     ) => void;
     handleSubmit: () => void;
     isUpdate?: boolean;
+    isSubmitDisabled?: boolean;
+    isSubmitting?: boolean;
 }) {
 
     const useTranslation = useLocalization;
@@ -191,6 +195,8 @@ export default function ProductModal({
                         variant="primary"
                         size="md"
                         text={!isUpdate ? 'Save' : 'Update'}
+                        disabled={isSubmitDisabled}
+                        loading={isSubmitting}
                         onClick={() => handleSubmit()}
                     />
                 </Box>

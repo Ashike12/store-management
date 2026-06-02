@@ -37,15 +37,35 @@ const initialFormData: IProductForm = {
   Quantity: "",
 }
 
+const mapProductToForm = (row: IProduct, includeItemId = true): IProductForm => ({
+  ItemId: includeItemId ? row.ItemId : "",
+  ProductName: row.ProductName,
+  Category: row.Category,
+  SubCategory: row.SubCategory,
+  Description: row.Description,
+  ImageLinks: row.ImageLinks?.join('\n') ?? '',
+  VideoLink: row.VideoLink,
+  MakingPrice: row.MakingPrice.toString(),
+  WholeSalerPrice: row.WholeSalerPrice.toString(),
+  EndUserPrice: row.EndUserPrice.toString(),
+  EndUserDiscountedPrice: row.EndUserDiscountedPrice.toString(),
+  Quantity: row.Quantity.toString(),
+});
+
+const hasCloneIdentityChanged = (currentFormData: IProductForm, baseFormData: IProductForm) =>
+  currentFormData.ProductName !== baseFormData.ProductName ||
+  currentFormData.Category !== baseFormData.Category ||
+  currentFormData.SubCategory !== baseFormData.SubCategory;
+
 export default function StoreManagement() {
   const [selectedCategory, setSelectedCategory] = useState('MosquitoNet');
-  const [selectedSubCategory, setSelectedSubCategory] = useState('Double');
+  const [selectedSubCategory, setSelectedSubCategory] = useState(ALL_OPTION);
   const [payload, setPayload] = useState({
     pageNumber: 1,
     pageSize: 1000,
     itemId: '',
     category: 'MosquitoNet',
-    subCategory: 'Double',
+    subCategory: ALL_OPTION,
     minMakingPrice: 0,
     maxMakingPrice: 100000,
   });
@@ -58,6 +78,7 @@ export default function StoreManagement() {
   const [isDelete, setIsDelete] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
   const [formData, setFormData] = useState<IProductForm>(initialFormData);
+  const [cloneBaseFormData, setCloneBaseFormData] = useState<IProductForm | null>(null);
   const [searchText, setSearchText] = useState('');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 100000]);
   const categoryOptions = [ALL_OPTION, ...Object.keys(PRODUCT_CATEGORY_SUBCATEGORY_MAP)];
@@ -127,6 +148,10 @@ export default function StoreManagement() {
     }));
   };
   const handleSubmit = async () => {
+    if (cloneBaseFormData && !hasCloneIdentityChanged(formData, cloneBaseFormData)) {
+      return;
+    }
+
     if (isUpdate) {
       await updateProduct({
         payload: {
@@ -146,6 +171,7 @@ export default function StoreManagement() {
       }).unwrap();
       setIsOpen(false);
       setIsUpdate(false);
+      setCloneBaseFormData(null);
       refetch();
     } else {
       await createProduct({
@@ -164,6 +190,7 @@ export default function StoreManagement() {
         }
       }).unwrap();
       setIsOpen(false);
+      setCloneBaseFormData(null);
       refetch();
     }
   }
@@ -171,24 +198,13 @@ export default function StoreManagement() {
   const handleCancel = () => {
     setIsOpen(false);
     setIsUpdate(false);
+    setCloneBaseFormData(null);
     setFormData(initialFormData);
   }
 
   const handleRowClick = async (row: IProduct, isDelete: boolean) => {
-    setFormData({
-      ItemId: row.ItemId,
-      ProductName: row.ProductName,
-      Category: row.Category,
-      SubCategory: row.SubCategory,
-      Description: row.Description,
-      ImageLinks: row.ImageLinks?.join('\n') ?? '',
-      VideoLink: row.VideoLink,
-      MakingPrice: row.MakingPrice.toString(),
-      WholeSalerPrice: row.WholeSalerPrice.toString(),
-      EndUserPrice: row.EndUserPrice.toString(),
-      EndUserDiscountedPrice: row.EndUserDiscountedPrice.toString(),
-      Quantity: row.Quantity.toString(),
-    });
+    setCloneBaseFormData(null);
+    setFormData(mapProductToForm(row));
     if (isDelete) {
       setIsDelete(true);
       // await deleteProduct({id: row.ItemId}).unwrap();
@@ -198,6 +214,14 @@ export default function StoreManagement() {
       setIsOpen(true);
     }
   }
+
+  const handleCloneProduct = (row: IProduct) => {
+    const clonedFormData = mapProductToForm(row, false);
+    setFormData(clonedFormData);
+    setCloneBaseFormData(clonedFormData);
+    setIsUpdate(false);
+    setIsOpen(true);
+  };
 
   const handleDelete = async (isConfirm: boolean) => {
     setIsDelete(false);
@@ -209,8 +233,12 @@ export default function StoreManagement() {
 
   const resetForm = () => {
     setFormData(initialFormData);
+    setCloneBaseFormData(null);
+    setIsUpdate(false);
     setIsOpen(true);
   }
+
+  const isCloneSaveDisabled = !!cloneBaseFormData && !hasCloneIdentityChanged(formData, cloneBaseFormData);
 
   // Searched data (price range is filtered by backend using MakingPrice)
   const filteredData = useMemo(() => {
@@ -306,7 +334,9 @@ export default function StoreManagement() {
           {data?.Data?.length > 0 ? (
             <CustomTable
               showActionButtons={true}
+              showCloneButton={true}
               handleRowClick={handleRowClick}
+              handleCloneClick={handleCloneProduct}
               columns={columns}
               data={filteredData || []}
               rowsPerPage={10}
@@ -320,7 +350,16 @@ export default function StoreManagement() {
         </div>)}
       </div>
       {isOpen && (
-        <ProductModal isUpdate={isUpdate} handleSubmit={handleSubmit} formData={formData} isOpen={isOpen} handleFormData={handleSave} handleCancel={handleCancel} />
+        <ProductModal
+          isUpdate={isUpdate}
+          handleSubmit={handleSubmit}
+          formData={formData}
+          isOpen={isOpen}
+          handleFormData={handleSave}
+          handleCancel={handleCancel}
+          isSubmitDisabled={isCloneSaveDisabled}
+          isSubmitting={isCreating || isUpdating}
+        />
       )}
       {isProductionOpen && (
         <ProductionModal isOpen={isProductionOpen} handleClose={() => { setIsProductionOpen(false); refetch() }} />

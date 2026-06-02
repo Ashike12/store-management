@@ -28,7 +28,11 @@ export default defineConfig({
       '@layout': '/src/layout',
       '@components': '/src/components',
       '@asset': '/src/assets',
+      '@assets': '/src/assets',
       '@core': '/src/core',
+      'assets': '/src/assets',
+      'router': '/src/router',
+      'theme': '/src/theme',
     },
   },
   define: {
