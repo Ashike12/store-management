@@ -5,6 +5,9 @@ import { useNavigate } from 'react-router-dom';
 import { CustomButton } from '@components/button/CustomButton';
 import { useEffect, useMemo, useState } from 'react';
 import dayjs from 'dayjs';
+import { useAppSelector } from '@core/store/hooks';
+import { selectIsWholeSaler } from '@core/store/slices/auth.slice';
+import { useGetDashboardDataQuery } from '@core/store/api/invoiceApi';
 
 // Define table columns
 export const InvoiceColumns = [
@@ -16,14 +19,21 @@ export const InvoiceColumns = [
   { altKey: "", key: "ProfitMargin", label: "YOUR_PROFIT" },
 ];
 
+export const getInvoiceColumns = (isWholeSaler: boolean) =>
+  isWholeSaler
+    ? InvoiceColumns.filter(column => column.key !== 'ProfitMargin')
+    : InvoiceColumns;
+
 export default function Invoice() {
   const [payload, setPayload] = useState({ pageNumber: 1, pageSize: 10000, itemId: '' });
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const { data, isLoading, refetch } = useGetInvoiceQuery(payload);
+  const { data: dashboardData } = useGetDashboardDataQuery({});
+  const isWholeSaler = useAppSelector(selectIsWholeSaler);
   const navigate = useNavigate();
-  let invoiceList = (data?.Data as IInvoice[]) || [];
+  const invoiceList = (data?.Data as IInvoice[]) || [];
 
   const handleRowClick = async (row: IInvoice) => {
     navigate(`/invoice/details/${row.ItemId}`);
@@ -67,7 +77,15 @@ export default function Invoice() {
   return (
     <>
       <div className='w-full'>
-        {data && data && invoiceList.length > 0 && (<div className="p-10 w-full">
+        <div className="p-10 w-full">
+          {isWholeSaler && (
+            <div className="mb-4 rounded-md border p-4">
+              <div className="text-sm">Total Due Amount</div>
+              <div className="text-2xl font-bold text-[var(--palette-warning-main)]">
+                {dashboardData?.Data?.TotalDueAmount ?? 0}
+              </div>
+            </div>
+          )}
           <div className="flex flex-wrap gap-4 mb-6">
             <div className="flex flex-col cursor-pointer">
               <label className="text-sm mb-1">From Date</label>
@@ -95,34 +113,36 @@ export default function Invoice() {
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search by wholesaler or invoice no."
+                placeholder={isWholeSaler ? "Search by invoice no." : "Search by wholesaler or invoice no."}
                 className="border p-2 rounded w-full"
               />
             </div>
-            <div className="flex flex-col mt-6">
-              <CustomButton
-                onClick={() => addInvoice()}
-                className='cursor-pointer'
-                text={'ADD_INVOICE'}
-                variant={'primary'}
-              />
-            </div>
+            {!isWholeSaler && (
+              <div className="flex flex-col mt-6">
+                <CustomButton
+                  onClick={() => addInvoice()}
+                  className='cursor-pointer'
+                  text={'ADD_INVOICE'}
+                  variant={'primary'}
+                />
+              </div>
+            )}
           </div>
-          <CustomTable
-            isRowClickable={true}
-            handleRowClick={handleRowClick}
-            columns={InvoiceColumns}
-            data={filteredData}
-            totalCount={data?.TotalCount}
-            handlePageSelection={handlePageSelection}
-            rowsPerPage={10} />
-        </div>)}
-        {!isLoading && invoiceList && invoiceList.length == 0 && (<div className="p-10 w-full">
-          No data found
-        </div>)}
-        {(isLoading) && (<div className="p-10 w-full">
-          Loading...
-        </div>)}
+          {isLoading ? (
+            <div>Loading...</div>
+          ) : filteredData.length > 0 ? (
+            <CustomTable
+              isRowClickable={true}
+              handleRowClick={handleRowClick}
+              columns={getInvoiceColumns(isWholeSaler)}
+              data={filteredData}
+              totalCount={data?.TotalCount}
+              handlePageSelection={handlePageSelection}
+              rowsPerPage={10} />
+          ) : (
+            <div>No data found</div>
+          )}
+        </div>
       </div>
     </>
   );

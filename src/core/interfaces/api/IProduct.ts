@@ -42,4 +42,5 @@ export interface IGetProductPayload {
     subCategory?: string;
     minMakingPrice?: number;
     maxMakingPrice?: number;
+    searchTerm?: string;
 }

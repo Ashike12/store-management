@@ -15,6 +15,8 @@ import { IconBox, IconBuildingStore, IconFileInvoice, IconLayoutDashboard } from
 import IconCaretDoubleRight from '@assets/icons/IconCaretDoubleRight';
 import cn from '@core/utils/cn';
 import {useAppThemeMode} from 'theme/theme-provider';
+import { useAppSelector } from '@core/store/hooks';
+import { selectCurrentUserName, selectIsWholeSaler } from '@core/store/slices/auth.slice';
 
 const drawerWidth = DRAWER_WIDTH;
 
@@ -113,8 +115,13 @@ export default function LeftSidebar({
   isLocked = true,
 }: Readonly<ISidebarProps>) {
   const {mode} = useAppThemeMode();
+  const isWholeSaler = useAppSelector(selectIsWholeSaler);
+  const currentUserName = useAppSelector(selectCurrentUserName);
   const navigateTo = useNavigate();
   const location = useLocation();
+  const visibleMenuItems = isWholeSaler
+    ? menuItems.filter(item => ['dashboard', 'invoice'].includes(item.type.toLowerCase()))
+    : menuItems;
   const isActiveItem = (itemType: string) => {
     const pathParts = location.pathname.toLowerCase().split('/');
     const firstSegment = pathParts[1] ?? '';
@@ -151,6 +158,7 @@ export default function LeftSidebar({
   const menuActiveBg = mode === 'dark' ? '#1E293B' : mode === 'pro' ? '#1F3B57' : '#334155';
   const menuHoverBg = mode === 'dark' ? '#334155' : mode === 'pro' ? '#1F3B57' : '#1E293B';
   const sidebarMetaText = mode === 'dark' ? '#94A3B8' : mode === 'pro' ? '#C6D4E1' : '#CBD5E1';
+  const sidebarUserName = currentUserName || 'Logged In User';
 
   return (
     <Drawer
@@ -204,7 +212,7 @@ export default function LeftSidebar({
               alignItems: 'start',
               gap: '8px',
             }}>
-            {menuItems.map(item => (
+            {visibleMenuItems.map(item => (
               <ListItem
                 key={item.path}
                 disablePadding
@@ -304,7 +312,7 @@ export default function LeftSidebar({
                 <div style={{color: sidebarMetaText}}>
                   <TextWrapper
                     className="pr-1"
-                    content={'Ashikur Rahman Nabir'}
+                    content={sidebarUserName}
                     variant={'Caption'}
                   />
                 </div>

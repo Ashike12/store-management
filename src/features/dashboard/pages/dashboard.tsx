@@ -8,7 +8,9 @@ import CountUp from 'react-countup';
 import { useGetDashboardDataQuery } from '@core/store/api/invoiceApi';
 import { useEffect } from 'react';
 import CustomTable from '@components/table/CustomTable';
-import { InvoiceColumns } from '@features/invoice/pages/invoice';
+import { getInvoiceColumns } from '@features/invoice/pages/invoice';
+import { useAppSelector } from '@core/store/hooks';
+import { selectIsWholeSaler } from '@core/store/slices/auth.slice';
 
 const dummySalesData = [
   { date: 'Apr 1', revenue: 2000 },
@@ -35,10 +37,58 @@ const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#d0ed57', '#a4de6b'
 const Dashboard = () => {
   const { data, isLoading, refetch } = useGetDashboardDataQuery({ pageNumber: 1, pageSize: 10, itemId: '' });
   const dashBoardData = data?.Data;
+  const isWholeSaler = useAppSelector(selectIsWholeSaler);
   useEffect(() => {
     // Refetch when component mounts
     refetch();
   }, [refetch]);
+
+  if (isWholeSaler) {
+    return (
+      <div className="p-4 w-full flex flex-col gap-4">
+        <div className='flex flex-row gap-4'>
+          <Card className='lg:basis-1/2 basis-full'>
+            <CardContent>
+              <p className="text-sm">Total Invoices</p>
+              <p className="text-2xl font-bold">
+                <CountUp end={dashBoardData?.ThisMonthTotalInvoice ?? 0} duration={2} />
+              </p>
+            </CardContent>
+          </Card>
+          <Card className='lg:basis-1/2 basis-full'>
+            <CardContent>
+              <p className="text-sm">Total Due Remaining</p>
+              <p className="text-2xl font-bold text-orange-600">
+                <CountUp end={dashBoardData?.TotalDueAmount ?? 0} duration={2} separator="," />
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Card className='basis-full'>
+          <CardContent>
+            <h2 className="text-lg font-bold mb-2">Recent Invoices</h2>
+            <div className="space-y-2">
+              {dashBoardData?.RecentInvoiceData?.length ? (
+                <div className="p-10 w-full">
+                  <CustomTable
+                    isRowClickable={false}
+                    columns={getInvoiceColumns(true)}
+                    hidePagination={true}
+                    data={dashBoardData.RecentInvoiceData}
+                    rowsPerPage={10}
+                  />
+                </div>
+              ) : (
+                <p className="text-sm">No invoices found.</p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="p-4 w-full flex flex-col gap-4">
 
@@ -134,7 +184,7 @@ const Dashboard = () => {
               {dashBoardData && dashBoardData.RecentInvoiceData && dashBoardData.RecentInvoiceData.length > 0 && (<div className="p-10 w-full">
                 <CustomTable
                   isRowClickable={false}
-                  columns={InvoiceColumns}
+                  columns={getInvoiceColumns(false)}
                   hidePagination={true}
                   data={dashBoardData.RecentInvoiceData || []}
                   rowsPerPage={10} />

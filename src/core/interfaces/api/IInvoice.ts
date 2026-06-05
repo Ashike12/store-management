@@ -12,7 +12,7 @@ export interface IInvoice {
     WholeSalerName: string;
     TotalAmount: number;
     PaymentAmount: number;
-    ProfitMargin: number;
+    ProfitMargin?: number;
     InvoiceType: string;
 }
 
@@ -64,12 +64,13 @@ export interface WholesalerDataEntry {
 }
 
 export interface IDashboardData {
-    SalesData: SalesEntry[];
-    ProductSalesInfo: ProductSalesInfoEntry[];
-    WholesalerData: WholesalerDataEntry[];
-    ThisMonthRevenue: number;
+    SalesData?: SalesEntry[];
+    ProductSalesInfo?: ProductSalesInfoEntry[];
+    WholesalerData?: WholesalerDataEntry[];
+    ThisMonthRevenue?: number;
     ThisMonthTotalInvoice: number;
-    ThisMonthTotalSell: number;
+    ThisMonthTotalSell?: number;
+    TotalDueAmount: number;
     RecentInvoiceData: IInvoice[];
 }
 
