@@ -16,7 +16,7 @@ import IconCaretDoubleRight from '@assets/icons/IconCaretDoubleRight';
 import cn from '@core/utils/cn';
 import {useAppThemeMode} from 'theme/theme-provider';
 import { useAppSelector } from '@core/store/hooks';
-import { selectCurrentUserName, selectIsWholeSaler } from '@core/store/slices/auth.slice';
+import { selectIsWholeSaler } from '@core/store/slices/auth.slice';
 
 const drawerWidth = DRAWER_WIDTH;
 
@@ -116,7 +116,6 @@ export default function LeftSidebar({
 }: Readonly<ISidebarProps>) {
   const {mode} = useAppThemeMode();
   const isWholeSaler = useAppSelector(selectIsWholeSaler);
-  const currentUserName = useAppSelector(selectCurrentUserName);
   const navigateTo = useNavigate();
   const location = useLocation();
   const visibleMenuItems = isWholeSaler
@@ -158,7 +157,6 @@ export default function LeftSidebar({
   const menuActiveBg = mode === 'dark' ? '#1E293B' : mode === 'pro' ? '#1F3B57' : '#334155';
   const menuHoverBg = mode === 'dark' ? '#334155' : mode === 'pro' ? '#1F3B57' : '#1E293B';
   const sidebarMetaText = mode === 'dark' ? '#94A3B8' : mode === 'pro' ? '#C6D4E1' : '#CBD5E1';
-  const sidebarUserName = currentUserName || 'Logged In User';
 
   return (
     <Drawer
@@ -308,16 +306,7 @@ export default function LeftSidebar({
         <div className="flex flex-row items-center justify-between pt-2 pb-5">
           {open ? (
             <>
-              <div className="flex flex-row items-center justify-start">
-                <div style={{color: sidebarMetaText}}>
-                  <TextWrapper
-                    className="pr-1"
-                    content={sidebarUserName}
-                    variant={'Caption'}
-                  />
-                </div>
-              </div>
-              <div className="pl-2">
+              <div className="flex w-full justify-end pl-2">
                 <button
                   className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full"
                   style={{
