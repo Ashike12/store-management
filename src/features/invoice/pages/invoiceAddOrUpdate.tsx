@@ -299,7 +299,7 @@ export default function InvoiceAddOrUpdate() {
                         onChange={event => updateWholeSaler(event.target.value)}>
                         {wholesalerList.map(wholesaler => (
                           <MenuItem key={wholesaler.ItemId} value={wholesaler.ItemId}>
-                            {wholesaler.DisplayName}
+                            {`${wholesaler.DisplayName} - ${wholesaler.Address}`}
                           </MenuItem>
                         ))}
                       </Select>
@@ -341,7 +341,7 @@ export default function InvoiceAddOrUpdate() {
                                         }
                                         key={productOption.ItemId}
                                         value={productOption.ItemId}>
-                                        {productOption.ProductName}
+                                        {`${productOption.ProductName} - ${productOption.SubCategory}`}
                                       </MenuItem>
                                     ))}
                                   </TextField>

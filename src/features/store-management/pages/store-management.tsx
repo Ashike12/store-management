@@ -21,6 +21,7 @@ const columns = [
   { key: "Quantity", label: "QUANTITY" },
 ];
 const ALL_OPTION = 'ALL';
+const PRODUCT_PAGE_SIZE = 10;
 
 const initialFormData: IProductForm = {
   ItemId: "",
@@ -62,12 +63,13 @@ export default function StoreManagement() {
   const [selectedSubCategory, setSelectedSubCategory] = useState(ALL_OPTION);
   const [payload, setPayload] = useState({
     pageNumber: 1,
-    pageSize: 1000,
+    pageSize: PRODUCT_PAGE_SIZE,
     itemId: '',
     category: 'MosquitoNet',
     subCategory: ALL_OPTION,
     minMakingPrice: 0,
     maxMakingPrice: 100000,
+    searchTerm: '',
   });
   const { data, isLoading, refetch } = useGetProductQuery(payload);
   const [createProduct, { isLoading: isCreating }] = useCreateProductMutation();
@@ -99,6 +101,7 @@ export default function StoreManagement() {
     setSelectedSubCategory(fallbackSubCategory);
     setPayload((prev) => ({
       ...prev,
+      pageNumber: 1,
       category: nextCategory === ALL_OPTION ? '' : nextCategory,
       subCategory: fallbackSubCategory === ALL_OPTION ? '' : fallbackSubCategory,
     }));
@@ -109,6 +112,7 @@ export default function StoreManagement() {
     setSelectedSubCategory(nextSubCategory);
     setPayload((prev) => ({
       ...prev,
+      pageNumber: 1,
       subCategory: nextSubCategory === ALL_OPTION ? '' : nextSubCategory,
     }));
   };
@@ -118,6 +122,7 @@ export default function StoreManagement() {
     setPriceRange([nextMin, priceRange[1]]);
     setPayload((prev) => ({
       ...prev,
+      pageNumber: 1,
       minMakingPrice: nextMin,
     }));
   };
@@ -127,7 +132,24 @@ export default function StoreManagement() {
     setPriceRange([priceRange[0], nextMax]);
     setPayload((prev) => ({
       ...prev,
+      pageNumber: 1,
       maxMakingPrice: nextMax,
+    }));
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchText(value);
+    setPayload((prev) => ({
+      ...prev,
+      pageNumber: 1,
+      searchTerm: value,
+    }));
+  };
+
+  const handlePageSelection = (page: number) => {
+    setPayload((prev) => ({
+      ...prev,
+      pageNumber: page,
     }));
   };
 
@@ -240,16 +262,7 @@ export default function StoreManagement() {
 
   const isCloneSaveDisabled = !!cloneBaseFormData && !hasCloneIdentityChanged(formData, cloneBaseFormData);
 
-  // Searched data (price range is filtered by backend using MakingPrice)
-  const filteredData = useMemo(() => {
-    if (!data?.Data) return [];
-
-    return data.Data.filter(item => {
-      const matchesSearch = item.ProductName.toLowerCase().includes(searchText.toLowerCase())
-        || item.Description.toLowerCase().includes(searchText.toLowerCase());
-      return matchesSearch;
-    });
-  }, [data, searchText]);
+  const filteredData = useMemo(() => data?.Data || [], [data]);
 
   return (
     <>
@@ -262,7 +275,7 @@ export default function StoreManagement() {
                 placeholder="Search by name or description"
                 className="border p-2 rounded w-full sm:w-1/2"
                 value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
               />
               <CustomButton
                 onClick={() => resetForm()}
@@ -339,7 +352,11 @@ export default function StoreManagement() {
               handleCloneClick={handleCloneProduct}
               columns={columns}
               data={filteredData || []}
-              rowsPerPage={10}
+              totalCount={data?.TotalCount || 0}
+              rowsPerPage={PRODUCT_PAGE_SIZE}
+              currentPage={payload.pageNumber}
+              isServerPaginated={true}
+              handlePageSelection={handlePageSelection}
             />
           ) : (
             <div>No data found</div>

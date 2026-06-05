@@ -1,6 +1,9 @@
 import {
   AppBar as MuiAppBar,
+  Avatar,
+  Divider,
   IconButton,
+  Menu,
   MenuItem,
   Select,
   Toolbar,
@@ -8,14 +11,15 @@ import {
 import { styled } from '@mui/material/styles';
 import TextWrapper from '@components/text/TextWrapper';
 import useGetHeaderTitle from '@core/hooks/useGetHeaderTitle';
-import BusinessLogo from '@assets/images/logo-business.png';
 import cn from '@core/utils/cn';
-import { CustomButton } from '@components/button/CustomButton';
-import { useAppDispatch } from '@core/store/hooks';
-import { removeLogin } from '@core/store/slices/auth.slice';
+import { useAppDispatch, useAppSelector } from '@core/store/hooks';
+import { removeLogin, selectCurrentUserName } from '@core/store/slices/auth.slice';
 import { IconChevronLeft } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 import {AppThemeMode, useAppThemeMode} from 'theme/theme-provider';
+import { MouseEvent, useMemo, useState } from 'react';
+import { useGetCurrentUserQuery } from '@core/store/api';
+import UserProfileDialog from './UserProfileDialog';
 
 interface AppBarProps {
   open?: boolean;
@@ -38,8 +42,25 @@ export default function Header({ isLocked }: Readonly<IHeaderProps>) {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const {mode, setMode} = useAppThemeMode();
+  const tokenUserName = useAppSelector(selectCurrentUserName);
+  const { data: currentUserData } = useGetCurrentUserQuery();
+  const currentUserName = currentUserData?.Data?.DisplayName || tokenUserName || 'User';
+  const initials = useMemo(() => currentUserName.split(' ').filter(Boolean).slice(0, 2).map(part => part[0]?.toUpperCase()).join('') || 'U', [currentUserName]);
+  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
+  const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
   const handleLogout = () => {
     dispatch(removeLogin());
+    navigate('/login');
+  };
+  const handleMenuOpen = (event: MouseEvent<HTMLElement>) => {
+    setMenuAnchor(event.currentTarget);
+  };
+  const handleMenuClose = () => {
+    setMenuAnchor(null);
+  };
+  const handleOpenProfile = () => {
+    setIsProfileDialogOpen(true);
+    handleMenuClose();
   };
   return (
     <AppBar
@@ -85,8 +106,32 @@ export default function Header({ isLocked }: Readonly<IHeaderProps>) {
             <MenuItem value="dark">Dark</MenuItem>
             <MenuItem value="pro">Pro</MenuItem>
           </Select>
-          <img width={50} src={BusinessLogo} alt="expanded logo" />
-          <CustomButton onClick={() => handleLogout()} className='cursor-pointer' text={'LOGOUT'} variant={'primary'}></CustomButton>
+          <button
+            type="button"
+            onClick={handleMenuOpen}
+            className="flex items-center gap-3 rounded-full border px-3 py-2 transition-colors hover:bg-[var(--palette-background-neutral)]"
+            style={{
+              borderColor: 'var(--palette-divider)',
+              color: 'var(--palette-text-primary)',
+            }}>
+            <Avatar sx={{ width: 36, height: 36, bgcolor: 'var(--palette-primary-main)' }}>{initials}</Avatar>
+            <div className="hidden text-left md:block">
+              <div className="text-sm font-semibold">{currentUserName}</div>
+              <div className="text-xs text-[var(--palette-text-secondary)]">Account</div>
+            </div>
+          </button>
+          <Menu
+            anchorEl={menuAnchor}
+            open={Boolean(menuAnchor)}
+            onClose={handleMenuClose}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            transformOrigin={{ vertical: 'top', horizontal: 'right' }}>
+            <MenuItem disabled>{currentUserName}</MenuItem>
+            <Divider />
+            <MenuItem onClick={handleOpenProfile}>Profile Settings</MenuItem>
+            <MenuItem onClick={handleLogout}>Logout</MenuItem>
+          </Menu>
+          <UserProfileDialog open={isProfileDialogOpen} onClose={() => setIsProfileDialogOpen(false)} />
         </div>
       </Toolbar>
     </AppBar>

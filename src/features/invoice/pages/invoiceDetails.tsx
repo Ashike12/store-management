@@ -3,6 +3,8 @@ import CustomTable from "@components/table/CustomTable";
 import TextWrapper from "@components/text/TextWrapper";
 import { InvoiceDetailsResponse } from "@core/interfaces/api/IInvoice";
 import { useGetInvoiceQuery } from "@core/store/api/invoiceApi";
+import { useAppSelector } from "@core/store/hooks";
+import { selectIsWholeSaler } from "@core/store/slices/auth.slice";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTheme } from "@mui/material/styles";
 
@@ -15,6 +17,7 @@ const columns = [
 export default function InvoiceDetails() {
     const { id } = useParams();
     const theme = useTheme();
+    const isWholeSaler = useAppSelector(selectIsWholeSaler);
     const { data } = useGetInvoiceQuery({ pageNumber: 1, pageSize: 10, itemId: id ?? '' });
     const invoiceData = (data?.Data as InvoiceDetailsResponse) || {};
     const getInvoiceTypeLabel = (invoiceType?: string) => {
@@ -51,20 +54,22 @@ export default function InvoiceDetails() {
                           }}>
                             Invoice Details
                         </h2>
-                        <div className="flex gap-4">
-                            <CustomButton
-                                onClick={() => handleButtonAction('add')}
-                                className='cursor-pointer'
-                                text={'ADD_INVOICE'}
-                                variant={'primary'}
-                            />
-                            <CustomButton
-                                onClick={() => handleButtonAction('update')}
-                                className='cursor-pointer'
-                                text={'UPDATE_INVOICE'}
-                                variant={'primary'}
-                            />
-                        </div>
+                        {!isWholeSaler && (
+                            <div className="flex gap-4">
+                                <CustomButton
+                                    onClick={() => handleButtonAction('add')}
+                                    className='cursor-pointer'
+                                    text={'ADD_INVOICE'}
+                                    variant={'primary'}
+                                />
+                                <CustomButton
+                                    onClick={() => handleButtonAction('update')}
+                                    className='cursor-pointer'
+                                    text={'UPDATE_INVOICE'}
+                                    variant={'primary'}
+                                />
+                            </div>
+                        )}
                     </div>
 
                     <div className="mt-4 space-y-2">
@@ -92,12 +97,14 @@ export default function InvoiceDetails() {
                             <TextWrapper variant={'Body1'} content={': ' + (invoiceData.PaymentAmount ?? 'N/A')}>
                             </TextWrapper>
                         </div>
-                        <div>
-                            <TextWrapper variant={'H6'} content={'PROFIT_MARGIN'}>
-                            </TextWrapper>
-                            <TextWrapper variant={'Body1'} content={': ' + (invoiceData.ProfitMargin ?? 'N/A')}>
-                            </TextWrapper>
-                        </div>
+                        {!isWholeSaler && (
+                            <div>
+                                <TextWrapper variant={'H6'} content={'PROFIT_MARGIN'}>
+                                </TextWrapper>
+                                <TextWrapper variant={'Body1'} content={': ' + (invoiceData.ProfitMargin ?? 'N/A')}>
+                                </TextWrapper>
+                            </div>
+                        )}
                         <div>
                             <TextWrapper variant={'H6'} content={'TOTAL_AMOUNT'}>
                             </TextWrapper>

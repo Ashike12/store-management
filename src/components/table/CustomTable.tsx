@@ -24,6 +24,8 @@ interface TableProps<T> {
     isRowClickable?: boolean; // Optional flag to make row clickable
     hidePagination?: boolean; // Optional flag to hide pagination
     handlePageSelection?: (page: number) => void; // Optional page selection handler
+    currentPage?: number; // Optional current page for server-side pagination
+    isServerPaginated?: boolean; // Optional flag to use external pagination state
 }
 
 const CustomTable = <T extends Record<string, any>>({
@@ -38,14 +40,19 @@ const CustomTable = <T extends Record<string, any>>({
     isRowClickable = false,
     hidePagination = false,
     handlePageSelection = (page: number) => { },
+    currentPage: externalCurrentPage = 1,
+    isServerPaginated = false,
 }: TableProps<T>) => {
     const theme = useTheme();
     const [currentPage, setCurrentPage] = useState(1);
-    const totalPages = Math.ceil(totalCount / rowsPerPage);
+    const activePage = isServerPaginated ? externalCurrentPage : currentPage;
+    const totalPages = Math.max(1, Math.ceil(totalCount / rowsPerPage));
     const tableBorderColor = theme.vars.palette.divider;
 
     // Get current page data
-    const currentData = data.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+    const currentData = isServerPaginated
+        ? data
+        : data.slice((activePage - 1) * rowsPerPage, activePage * rowsPerPage);
 
     const isValidDate = (date: any) => {
         return moment(date, moment.ISO_8601, true).isValid();
@@ -126,9 +133,15 @@ const CustomTable = <T extends Record<string, any>>({
                 {/* Pagination Controls */}
                 {!hidePagination && (<div className="flex justify-between items-center mt-4">
                     <button
-                        onClick={() => {setCurrentPage((prev) => Math.max(prev - 1, 1)); handlePageSelection(currentPage - 1)}}
-                        disabled={currentPage === 1}
-                        className={`px-4 py-2 rounded ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+                        onClick={() => {
+                            const nextPage = Math.max(activePage - 1, 1);
+                            if (!isServerPaginated) {
+                                setCurrentPage(nextPage);
+                            }
+                            handlePageSelection(nextPage);
+                        }}
+                        disabled={activePage === 1}
+                        className={`px-4 py-2 rounded ${activePage === 1 ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
                         style={{
                             backgroundColor: theme.vars.palette.background.neutral,
                             color: theme.vars.palette.text.primary,
@@ -138,13 +151,19 @@ const CustomTable = <T extends Record<string, any>>({
                     </button>
 
                     <span style={{color: theme.vars.palette.text.secondary}}>
-                        Page {currentPage} of {totalPages}
+                        Page {activePage} of {totalPages}
                     </span>
 
                     <button
-                        onClick={() => {setCurrentPage((prev) => Math.min(prev + 1, totalPages)); handlePageSelection(currentPage + 1)}}
-                        disabled={currentPage === totalPages}
-                        className={`px-4 py-2 rounded ${currentPage === totalPages ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+                        onClick={() => {
+                            const nextPage = Math.min(activePage + 1, totalPages);
+                            if (!isServerPaginated) {
+                                setCurrentPage(nextPage);
+                            }
+                            handlePageSelection(nextPage);
+                        }}
+                        disabled={activePage === totalPages}
+                        className={`px-4 py-2 rounded ${activePage === totalPages ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
                         style={{
                             backgroundColor: theme.vars.palette.background.neutral,
                             color: theme.vars.palette.text.primary,

@@ -2,7 +2,7 @@ import {createApi} from '@reduxjs/toolkit/query/react';
 import {ApiServiceBaseQuery} from './baseQueries';
 import {APP_CONFIG} from '@core/config/config';
 import {IAuthResponse} from '@core/interfaces/api/IAuthResponse';
-import { ICreateUserPayload, IUser, IUserResponse } from '@core/interfaces/api/IUser';
+import { IChangePasswordPayload, ICreateUserPayload, IUpdateProfilePayload, IUser, IUserDetailsResponse, IUserResponse } from '@core/interfaces/api/IUser';
 
 export const userApi = createApi({
   reducerPath: 'userApi',
@@ -65,8 +65,41 @@ export const userApi = createApi({
       transformResponse: (response: IUserResponse) => {
         return response;
       },
-    })
+    }),
+    getCurrentUser: builder.query<IUserDetailsResponse, void>({
+      query: () => ({
+        url: `${APP_CONFIG.businessUrl}/user/me`,
+        method: 'GET',
+      }),
+      providesTags: (_result, _error) => [{type: 'user'}],
+      transformResponse: (response: IUserDetailsResponse) => {
+        return response;
+      },
+    }),
+    updateCurrentUser: builder.mutation<IAuthResponse, {payload: IUpdateProfilePayload}>({
+      query: (mutation) => ({
+        url: `${APP_CONFIG.businessUrl}/user/update-profile`,
+        method: 'POST',
+        body: mutation.payload,
+      }),
+      invalidatesTags: (_result, _error) => [{type: 'user'}],
+    }),
+    changePassword: builder.mutation<IAuthResponse, {payload: IChangePasswordPayload}>({
+      query: (mutation) => ({
+        url: `${APP_CONFIG.businessUrl}/user/change-password`,
+        method: 'POST',
+        body: mutation.payload,
+      }),
+    }),
   }),
 });
 
-export const {useCreateUserMutation, useUpdateUserMutation, useDeleteUserMutation, useGetUserQuery} = userApi;
+export const {
+  useCreateUserMutation,
+  useUpdateUserMutation,
+  useDeleteUserMutation,
+  useGetUserQuery,
+  useGetCurrentUserQuery,
+  useUpdateCurrentUserMutation,
+  useChangePasswordMutation,
+} = userApi;

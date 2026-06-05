@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { RootState } from '../store';
-import { IAuthResponse } from '@core/interfaces/api/IAuthResponse';
+import { IAuthResponse, IAuthTokenPayload } from '@core/interfaces/api/IAuthResponse';
 import { localStorageService, storagePath } from '@core/services/localStorage.service';
 
 const namespace = 'auth';
@@ -39,6 +39,49 @@ export const selectAppIsLogin = (state: RootState) => {
 
 export const tokenInfo = (state: RootState): IAuthResponse => {
   return state?.persisted?.auth;
+};
+
+const getAccessToken = (state: RootState): string => {
+  return state.persisted.auth.login_token == ''
+    ? localStorageService.getItemLocalStore(storagePath.AccessToken)
+    : state.persisted.auth.login_token;
+};
+
+const getJwtPayload = (token: string): IAuthTokenPayload => {
+  if (!token) {
+    return {};
+  }
+
+  try {
+    const [, payload] = token.split('.');
+    if (!payload) {
+      return {};
+    }
+
+    return JSON.parse(localStorageService.strDecript(payload)) as IAuthTokenPayload;
+  } catch {
+    return {};
+  }
+};
+
+export const selectAuthTokenPayload = (state: RootState): IAuthTokenPayload => {
+  return getJwtPayload(getAccessToken(state));
+};
+
+export const selectCurrentUserRoles = (state: RootState): string[] => {
+  return selectAuthTokenPayload(state).Roles ?? [];
+};
+
+export const selectCurrentUserId = (state: RootState): string => {
+  return selectAuthTokenPayload(state).UserId ?? '';
+};
+
+export const selectCurrentUserName = (state: RootState): string => {
+  return selectAuthTokenPayload(state).UserName ?? '';
+};
+
+export const selectIsWholeSaler = (state: RootState): boolean => {
+  return selectCurrentUserRoles(state).includes('wholesaler');
 };
 
 export default authSlice.reducer;

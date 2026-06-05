@@ -66,6 +66,7 @@ export const productApi = createApi({
           SubCategory: mutation.subCategory ?? '',
           MinMakingPrice: mutation.minMakingPrice,
           MaxMakingPrice: mutation.maxMakingPrice,
+          SearchTerm: mutation.searchTerm ?? '',
         },
       }),
       providesTags: (_result, _error) => [{type: 'product'}], // Cache by ID
