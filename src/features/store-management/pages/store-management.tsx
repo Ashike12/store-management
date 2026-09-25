@@ -34,6 +34,7 @@ const initialFormData: IProductForm = {
   ProductName: "",
   Category: "MosquitoNet",
   SubCategory: "Double",
+  NetHeight: "",
   Description: "",
   ImageLinks: "",
   VideoLink: "",
@@ -49,6 +50,7 @@ const mapProductToForm = (row: IProduct, includeItemId = true): IProductForm => 
   ProductName: row.ProductName,
   Category: row.Category,
   SubCategory: row.SubCategory,
+  NetHeight: row.NetHeight ?? '',
   Description: row.Description,
   ImageLinks: row.ImageLinks?.join('\n') ?? '',
   VideoLink: row.VideoLink,
@@ -62,7 +64,8 @@ const mapProductToForm = (row: IProduct, includeItemId = true): IProductForm => 
 const hasCloneIdentityChanged = (currentFormData: IProductForm, baseFormData: IProductForm) =>
   currentFormData.ProductName !== baseFormData.ProductName ||
   currentFormData.Category !== baseFormData.Category ||
-  currentFormData.SubCategory !== baseFormData.SubCategory;
+  currentFormData.SubCategory !== baseFormData.SubCategory ||
+  currentFormData.NetHeight !== baseFormData.NetHeight;
 
 export default function StoreManagement() {
   const [selectedCategory, setSelectedCategory] = useState('MosquitoNet');
@@ -174,6 +177,9 @@ export default function StoreManagement() {
       ...prev,
       [fieldName]: value,
       ...(fieldName === "Category" ? { SubCategory: "" } : {}),
+      ...(fieldName === "Category" && !["MosquitoNet", "MosquitoNetYard"].includes(String(value))
+        ? { NetHeight: "" }
+        : {}),
     }));
   };
   const handleSubmit = async () => {
@@ -188,6 +194,7 @@ export default function StoreManagement() {
           ProductName: formData.ProductName,
           Category: formData.Category,
           SubCategory: formData.SubCategory,
+          NetHeight: formData.NetHeight,
           Description: formData.Description,
           ImageLinks: parseImageLinks(formData.ImageLinks),
           VideoLink: formData.VideoLink,
@@ -208,6 +215,7 @@ export default function StoreManagement() {
           ProductName: formData.ProductName,
           Category: formData.Category,
           SubCategory: formData.SubCategory,
+          NetHeight: formData.NetHeight,
           Description: formData.Description,
           ImageLinks: parseImageLinks(formData.ImageLinks),
           VideoLink: formData.VideoLink,
@@ -233,6 +241,7 @@ export default function StoreManagement() {
           ProductName: formData.ProductName,
           Category: formData.Category,
           SubCategory: formData.SubCategory,
+          NetHeight: formData.NetHeight,
         },
       }).unwrap();
 

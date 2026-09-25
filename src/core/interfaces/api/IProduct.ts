@@ -8,6 +8,7 @@ export interface ICreateProductPayload {
     ProductName: string;
     Category: string;
     SubCategory: string;
+    NetHeight?: string;
     Description: string;
     ImageLinks: string[];
     VideoLink: string;
@@ -51,6 +52,7 @@ export interface IGenerateAiSuggestionPayload {
     ProductName?: string;
     Category?: string;
     SubCategory?: string;
+    NetHeight?: string;
 }
 
 export interface IAiSuggestionResponse {

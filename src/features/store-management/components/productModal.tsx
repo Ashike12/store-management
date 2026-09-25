@@ -10,6 +10,7 @@ export interface IProductForm {
     ProductName: string;
     Category: string;
     SubCategory: string;
+    NetHeight: string;
     Description: string;
     ImageLinks: string;
     VideoLink: string;
@@ -49,6 +50,7 @@ export default function ProductModal({
     const useTranslation = useLocalization;
     const subCategoryOptions = PRODUCT_CATEGORY_SUBCATEGORY_MAP[formData?.Category] ?? [];
     const hasCustomSubCategory = !!formData?.SubCategory && !subCategoryOptions.includes(formData.SubCategory);
+    const shouldShowNetHeight = ["MosquitoNet", "MosquitoNetYard"].includes(formData?.Category);
 
     return (
         <Modal open={isOpen} onClose={() => handleCancel()}>
@@ -119,6 +121,16 @@ export default function ProductModal({
                             <MenuItem value={formData.SubCategory}>{formData.SubCategory}</MenuItem>
                         )}
                     </TextField>
+                    {shouldShowNetHeight && (
+                        <TextField
+                            label="Net Height"
+                            placeholder="Height in inch"
+                            name="NetHeight"
+                            value={formData?.NetHeight}
+                            onChange={handleFormData}
+                            fullWidth
+                        />
+                    )}
                     <TextField
                         label={useTranslation({content:'MAKING_COST'})}
                         name="MakingPrice"
