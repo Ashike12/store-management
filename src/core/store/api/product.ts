@@ -2,7 +2,15 @@ import {createApi} from '@reduxjs/toolkit/query/react';
 import {ApiServiceBaseQuery} from './baseQueries';
 import {APP_CONFIG} from '@core/config/config';
 import {IAuthResponse} from '@core/interfaces/api/IAuthResponse';
-import { IAddProductionPayload, ICreateProductPayload, IGetProductPayload, IProduct, IProductResponse } from '@core/interfaces/api/IProduct';
+import {
+  IAiSuggestionResponse,
+  IAddProductionPayload,
+  ICreateProductPayload,
+  IGenerateAiSuggestionPayload,
+  IGetProductPayload,
+  IProduct,
+  IProductResponse,
+} from '@core/interfaces/api/IProduct';
 
 export const productApi = createApi({
   reducerPath: 'productApi',
@@ -89,7 +97,21 @@ export const productApi = createApi({
         }
       },
     }),
+    generateAiSuggestion: builder.mutation<IAiSuggestionResponse, {payload: IGenerateAiSuggestionPayload}>({
+      query: (mutation) => ({
+        url: `${APP_CONFIG.businessUrl}/business/GenerateAiSuggestion`,
+        method: 'POST',
+        body: mutation.payload,
+      }),
+    }),
   }),
 });
 
-export const {useAddProductionMutation, useCreateProductMutation, useUpdateProductMutation, useDeleteProductMutation, useGetProductQuery} = productApi;
+export const {
+  useAddProductionMutation,
+  useCreateProductMutation,
+  useUpdateProductMutation,
+  useDeleteProductMutation,
+  useGenerateAiSuggestionMutation,
+  useGetProductQuery,
+} = productApi;

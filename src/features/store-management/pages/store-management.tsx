@@ -1,7 +1,13 @@
 import { CustomButton } from '@components/button/CustomButton';
 import CustomTable from '@components/table/CustomTable';
 import { IProduct } from '@core/interfaces/api/IProduct';
-import { useCreateProductMutation, useDeleteProductMutation, useGetProductQuery, useUpdateProductMutation } from '@core/store/api/product';
+import {
+  useCreateProductMutation,
+  useDeleteProductMutation,
+  useGenerateAiSuggestionMutation,
+  useGetProductQuery,
+  useUpdateProductMutation,
+} from '@core/store/api/product';
 import { SelectChangeEvent } from '@mui/material';
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
 import { useMemo, useState } from 'react';
@@ -75,6 +81,7 @@ export default function StoreManagement() {
   const [createProduct, { isLoading: isCreating }] = useCreateProductMutation();
   const [updateProduct, { isLoading: isUpdating }] = useUpdateProductMutation();
   const [deleteProduct, { isLoading: isDeleting }] = useDeleteProductMutation();
+  const [generateAiSuggestion, { isLoading: isSuggestingDescription }] = useGenerateAiSuggestionMutation();
   const [isOpen, setIsOpen] = useState(false);
   const [isProductionOpen, setIsProductionOpen] = useState(false);
   const [isDelete, setIsDelete] = useState(false);
@@ -216,6 +223,29 @@ export default function StoreManagement() {
       refetch();
     }
   }
+
+  const handleSuggestDescription = async () => {
+    try {
+      const response = await generateAiSuggestion({
+        payload: {
+          FieldName: 'Description',
+          CurrentValue: formData.Description,
+          ProductName: formData.ProductName,
+          Category: formData.Category,
+          SubCategory: formData.SubCategory,
+        },
+      }).unwrap();
+
+      if (response?.Data?.Suggestion) {
+        setFormData((prev) => ({
+          ...prev,
+          Description: response.Data.Suggestion,
+        }));
+      }
+    } catch (error) {
+      alert('AI suggestion is not available right now. Please check backend AI configuration.');
+    }
+  };
 
   const handleCancel = () => {
     setIsOpen(false);
@@ -376,6 +406,8 @@ export default function StoreManagement() {
           handleCancel={handleCancel}
           isSubmitDisabled={isCloneSaveDisabled}
           isSubmitting={isCreating || isUpdating}
+          handleSuggestDescription={handleSuggestDescription}
+          isSuggestingDescription={isSuggestingDescription}
         />
       )}
       {isProductionOpen && (

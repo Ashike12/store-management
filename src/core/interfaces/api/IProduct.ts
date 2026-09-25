@@ -44,3 +44,19 @@ export interface IGetProductPayload {
     maxMakingPrice?: number;
     searchTerm?: string;
 }
+
+export interface IGenerateAiSuggestionPayload {
+    FieldName: string;
+    CurrentValue?: string;
+    ProductName?: string;
+    Category?: string;
+    SubCategory?: string;
+}
+
+export interface IAiSuggestionResponse {
+    IsSuccess: boolean;
+    Data: {
+        Suggestion: string;
+    };
+    ErrorMessage?: string;
+}
