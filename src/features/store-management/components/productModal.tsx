@@ -123,8 +123,8 @@ export default function ProductModal({
                     </TextField>
                     {shouldShowNetHeight && (
                         <TextField
-                            label="Net Height"
-                            placeholder="Height in inch"
+                            label="Net Height (feet)"
+                            placeholder="Height in feet, e.g. 5"
                             name="NetHeight"
                             value={formData?.NetHeight}
                             onChange={handleFormData}
