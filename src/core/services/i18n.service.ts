@@ -3,6 +3,7 @@ import {initReactI18next} from 'react-i18next';
 import {
   enTransLations,
   bnTransLations,
+  zhTransLations,
 } from 'assets/i18n';
 import {DEFAULT_LANGUAGE} from '@core/config/constants';
 
@@ -16,6 +17,9 @@ i18n.use(initReactI18next).init({
     },
     bn: {
       translation: bnTransLations,
+    },
+    zh: {
+      translation: zhTransLations,
     },
   },
 });
