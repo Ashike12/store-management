@@ -34,6 +34,13 @@ export const ROUTE_PATH = {
     subTitle: '',
     backButtonRoute: null
   },
+  orders: {
+    path: '/orders',
+    pathMatch: 'orders',
+    title: 'ORDERS',
+    subTitle: '',
+    backButtonRoute: null
+  },
   invoiceDetails: {
     path: '/invoice/details/:id',
     pathMatch: 'invoice/details',

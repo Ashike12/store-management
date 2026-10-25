@@ -2,6 +2,37 @@ import {createApi} from '@reduxjs/toolkit/query/react';
 import {ApiServiceBaseQuery} from './baseQueries';
 import {APP_CONFIG} from '@core/config/config';
 
+export const ORDER_STATUSES = [
+  'pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled',
+] as const;
+export type OrderStatus = (typeof ORDER_STATUSES)[number];
+export type PaymentStatus = 'unpaid' | 'paid' | 'refunded';
+
+export interface OrderItem {
+  ProductId?: string;
+  ProductName: string;
+  Category?: string;
+  SubCategory?: string;
+  ImageLinks?: string[];
+  Quantity: number;
+  UnitPrice: number;
+  CustomOptions?: Record<string, string>;
+  InventoryRequirements?: {ProductId: string; Quantity: number}[];
+}
+
+export interface OrderAuditEntry {
+  From: string;
+  To: string;
+  By: string;
+  At: string;
+  Note: string;
+}
+
+export interface OrderStockMovement {
+  ProductId: string;
+  Quantity: number;
+}
+
 export interface FollowUpOrder {
   _id: string;
   OrderNumber: string;
@@ -11,17 +42,30 @@ export interface FollowUpOrder {
   Area: string;
   District: string;
   Division: string;
+  PostCode?: string;
+  DeliveryNotes?: string;
+  DeliveryZone?: string;
+  Subtotal?: number;
+  CouponCode?: string;
+  CouponDiscount?: number;
   TotalAmount: number;
   ShippingCost: number;
-  OrderStatus: string;
-  PaymentStatus: 'unpaid';
+  OrderStatus: OrderStatus;
+  PaymentStatus: PaymentStatus;
   PaymentHandling: 'manual';
   RequiresImmediateAction: boolean;
+  StockDeducted?: boolean;
+  FormulaVersion?: string;
+  CreatedDate?: string;
+  createdAt?: string;
+  updatedAt?: string;
   Version: number;
-  Items: {ProductName: string; Quantity: number; UnitPrice: number}[];
+  Items: OrderItem[];
+  StockMovements?: OrderStockMovement[];
+  AuditHistory?: OrderAuditEntry[];
 }
 
-interface OrderResponse<T> {
+export interface OrderResponse<T> {
   IsSuccess: boolean;
   Data: T;
   TotalCount?: number;
@@ -29,9 +73,19 @@ interface OrderResponse<T> {
 
 export interface TransitionOrder {
   ItemId: string;
-  Status: 'confirmed' | 'cancelled';
+  Status: Exclude<OrderStatus, 'pending'>;
   ExpectedVersion: number;
-  Note: string;
+  Note?: string;
+}
+
+export interface ListOrdersRequest {
+  Page: number;
+  Size: number;
+  NeedsAction?: boolean;
+  Status?: OrderStatus;
+  Search?: string;
+  From?: string;
+  To?: string;
 }
 
 const request = (endpoint: string, body: object) => ({
@@ -53,6 +107,10 @@ export const ordersApi = createApi({
       query: pagination => request('ListOrders', {...pagination, NeedsAction: true}),
       providesTags: ['FollowUpOrders'],
     }),
+    listOrders: builder.query<OrderResponse<FollowUpOrder[]>, ListOrdersRequest>({
+      query: filters => request('ListOrders', filters),
+      providesTags: ['FollowUpOrders'],
+    }),
     getFollowUpOrder: builder.query<OrderResponse<FollowUpOrder>, string>({
       query: ItemId => request('GetOrder', {ItemId}),
       providesTags: ['FollowUpOrders'],
@@ -64,4 +122,7 @@ export const ordersApi = createApi({
   }),
 });
 
-export const {useListFollowUpOrdersQuery, useGetFollowUpOrderQuery, useTransitionOrderMutation} = ordersApi;
+export const {
+  useListFollowUpOrdersQuery, useListOrdersQuery, useGetFollowUpOrderQuery,
+  useTransitionOrderMutation,
+} = ordersApi;
