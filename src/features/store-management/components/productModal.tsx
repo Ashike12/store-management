@@ -3,12 +3,14 @@ import { CustomButton } from "@components/button/CustomButton";
 import useLocalization from "@core/hooks/useLocalization";
 import { PRODUCT_CATEGORIES, PRODUCT_CATEGORY_SUBCATEGORY_MAP } from "@core/config/product-category.constants";
 import { Modal, Box, MenuItem, SelectChangeEvent, TextField } from "@mui/material";
+import AiSuggestionButton from "@components/ai-suggestion-button/AiSuggestionButton";
 
 export interface IProductForm {
     ItemId: string;
     ProductName: string;
     Category: string;
     SubCategory: string;
+    NetHeight: string;
     Description: string;
     ImageLinks: string;
     VideoLink: string;
@@ -28,6 +30,8 @@ export default function ProductModal({
     isUpdate,
     isSubmitDisabled = false,
     isSubmitting = false,
+    handleSuggestDescription,
+    isSuggestingDescription = false,
 }: {
     isOpen: boolean;
     handleCancel: () => void;
@@ -39,11 +43,14 @@ export default function ProductModal({
     isUpdate?: boolean;
     isSubmitDisabled?: boolean;
     isSubmitting?: boolean;
+    handleSuggestDescription?: () => void;
+    isSuggestingDescription?: boolean;
 }) {
 
     const useTranslation = useLocalization;
     const subCategoryOptions = PRODUCT_CATEGORY_SUBCATEGORY_MAP[formData?.Category] ?? [];
     const hasCustomSubCategory = !!formData?.SubCategory && !subCategoryOptions.includes(formData.SubCategory);
+    const shouldShowNetHeight = ["MosquitoNet", "MosquitoNetYard"].includes(formData?.Category);
 
     return (
         <Modal open={isOpen} onClose={() => handleCancel()}>
@@ -114,6 +121,16 @@ export default function ProductModal({
                             <MenuItem value={formData.SubCategory}>{formData.SubCategory}</MenuItem>
                         )}
                     </TextField>
+                    {shouldShowNetHeight && (
+                        <TextField
+                            label="Net Height (feet)"
+                            placeholder="Height in feet, e.g. 5"
+                            name="NetHeight"
+                            value={formData?.NetHeight}
+                            onChange={handleFormData}
+                            fullWidth
+                        />
+                    )}
                     <TextField
                         label={useTranslation({content:'MAKING_COST'})}
                         name="MakingPrice"
@@ -161,16 +178,32 @@ export default function ProductModal({
                         onChange={handleFormData}
                         fullWidth
                     />
-                    <TextField
-                        label={useTranslation({content:'PRODUCT_DESCRIPTION'})}
-                        name="Description"
-                        value={formData?.Description}
-                        onChange={handleFormData}
-                        fullWidth
-                        multiline
-                        rows={2}
-                        sx={{ gridColumn: { xs: "1 / -1", sm: "1 / -1" } }}
-                    />
+                    <Box sx={{ gridColumn: { xs: "1 / -1", sm: "1 / -1" }, position: "relative" }}>
+                        <TextField
+                            label={useTranslation({content:'PRODUCT_DESCRIPTION'})}
+                            name="Description"
+                            value={formData?.Description}
+                            onChange={handleFormData}
+                            fullWidth
+                            multiline
+                            rows={2}
+                            sx={{
+                                "& .MuiInputBase-root": {
+                                    pr: handleSuggestDescription ? 7 : undefined,
+                                },
+                            }}
+                        />
+                        {handleSuggestDescription && (
+                            <Box sx={{ position: "absolute", top: 10, right: 10 }}>
+                                <AiSuggestionButton
+                                    onClick={handleSuggestDescription}
+                                    loading={isSuggestingDescription}
+                                    disabled={!formData?.ProductName}
+                                    tooltip="Write a better product description"
+                                />
+                            </Box>
+                        )}
+                    </Box>
                     <TextField
                         label={`${useTranslation({content:'PRODUCT_IMAGE_LINK'})} (one per line)`}
                         name="ImageLinks"

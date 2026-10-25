@@ -1,7 +1,13 @@
 import { CustomButton } from '@components/button/CustomButton';
 import CustomTable from '@components/table/CustomTable';
 import { IProduct } from '@core/interfaces/api/IProduct';
-import { useCreateProductMutation, useDeleteProductMutation, useGetProductQuery, useUpdateProductMutation } from '@core/store/api/product';
+import {
+  useCreateProductMutation,
+  useDeleteProductMutation,
+  useGenerateAiSuggestionMutation,
+  useGetProductQuery,
+  useUpdateProductMutation,
+} from '@core/store/api/product';
 import { SelectChangeEvent } from '@mui/material';
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
 import { useMemo, useState } from 'react';
@@ -28,6 +34,7 @@ const initialFormData: IProductForm = {
   ProductName: "",
   Category: "MosquitoNet",
   SubCategory: "Double",
+  NetHeight: "",
   Description: "",
   ImageLinks: "",
   VideoLink: "",
@@ -43,6 +50,7 @@ const mapProductToForm = (row: IProduct, includeItemId = true): IProductForm => 
   ProductName: row.ProductName,
   Category: row.Category,
   SubCategory: row.SubCategory,
+  NetHeight: row.NetHeight ?? '',
   Description: row.Description,
   ImageLinks: row.ImageLinks?.join('\n') ?? '',
   VideoLink: row.VideoLink,
@@ -56,7 +64,8 @@ const mapProductToForm = (row: IProduct, includeItemId = true): IProductForm => 
 const hasCloneIdentityChanged = (currentFormData: IProductForm, baseFormData: IProductForm) =>
   currentFormData.ProductName !== baseFormData.ProductName ||
   currentFormData.Category !== baseFormData.Category ||
-  currentFormData.SubCategory !== baseFormData.SubCategory;
+  currentFormData.SubCategory !== baseFormData.SubCategory ||
+  currentFormData.NetHeight !== baseFormData.NetHeight;
 
 export default function StoreManagement() {
   const [selectedCategory, setSelectedCategory] = useState('MosquitoNet');
@@ -75,6 +84,7 @@ export default function StoreManagement() {
   const [createProduct, { isLoading: isCreating }] = useCreateProductMutation();
   const [updateProduct, { isLoading: isUpdating }] = useUpdateProductMutation();
   const [deleteProduct, { isLoading: isDeleting }] = useDeleteProductMutation();
+  const [generateAiSuggestion, { isLoading: isSuggestingDescription }] = useGenerateAiSuggestionMutation();
   const [isOpen, setIsOpen] = useState(false);
   const [isProductionOpen, setIsProductionOpen] = useState(false);
   const [isDelete, setIsDelete] = useState(false);
@@ -167,6 +177,9 @@ export default function StoreManagement() {
       ...prev,
       [fieldName]: value,
       ...(fieldName === "Category" ? { SubCategory: "" } : {}),
+      ...(fieldName === "Category" && !["MosquitoNet", "MosquitoNetYard"].includes(String(value))
+        ? { NetHeight: "" }
+        : {}),
     }));
   };
   const handleSubmit = async () => {
@@ -181,6 +194,7 @@ export default function StoreManagement() {
           ProductName: formData.ProductName,
           Category: formData.Category,
           SubCategory: formData.SubCategory,
+          NetHeight: formData.NetHeight,
           Description: formData.Description,
           ImageLinks: parseImageLinks(formData.ImageLinks),
           VideoLink: formData.VideoLink,
@@ -201,6 +215,7 @@ export default function StoreManagement() {
           ProductName: formData.ProductName,
           Category: formData.Category,
           SubCategory: formData.SubCategory,
+          NetHeight: formData.NetHeight,
           Description: formData.Description,
           ImageLinks: parseImageLinks(formData.ImageLinks),
           VideoLink: formData.VideoLink,
@@ -216,6 +231,30 @@ export default function StoreManagement() {
       refetch();
     }
   }
+
+  const handleSuggestDescription = async () => {
+    try {
+      const response = await generateAiSuggestion({
+        payload: {
+          FieldName: 'Description',
+          CurrentValue: formData.Description,
+          ProductName: formData.ProductName,
+          Category: formData.Category,
+          SubCategory: formData.SubCategory,
+          NetHeight: formData.NetHeight,
+        },
+      }).unwrap();
+
+      if (response?.Data?.Suggestion) {
+        setFormData((prev) => ({
+          ...prev,
+          Description: response.Data.Suggestion,
+        }));
+      }
+    } catch (error) {
+      alert('AI suggestion is not available right now. Please check backend AI configuration.');
+    }
+  };
 
   const handleCancel = () => {
     setIsOpen(false);
@@ -376,6 +415,8 @@ export default function StoreManagement() {
           handleCancel={handleCancel}
           isSubmitDisabled={isCloneSaveDisabled}
           isSubmitting={isCreating || isUpdating}
+          handleSuggestDescription={handleSuggestDescription}
+          isSuggestingDescription={isSuggestingDescription}
         />
       )}
       {isProductionOpen && (

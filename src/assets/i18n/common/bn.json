@@ -32,6 +32,8 @@
   "PAID_AMOUNT": "পরিশোধিত টাকা",
   "DUE_AMOUNT": "বাকি টাকা",
   "YOUR_PROFIT": "আপনার লাভ",
+  "GROSS_PROFIT": "মোট লাভ",
+  "REALIZED_CASH_MARGIN": "আদায়কৃত নগদ মার্জিন",
   "INVOICE": "চালান",
   "INVOICE_NUMBER": "চালান নম্বর",
   "INVOICE_TYPE": "চালান ধরন",

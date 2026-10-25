@@ -1,199 +1,292 @@
-// Dashboard.tsx
-import { Card, CardContent } from '@mui/material';
+import {Card, CardContent} from '@mui/material';
 import {
-  LineChart, Line, XAxis, YAxis, Tooltip, BarChart, Bar, PieChart, Pie, Cell,
-  ResponsiveContainer
+  Bar,
+  BarChart,
+  Cell,
+  Legend,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from 'recharts';
 import CountUp from 'react-countup';
-import { useGetDashboardDataQuery } from '@core/store/api/invoiceApi';
-import { useEffect } from 'react';
+import {useGetDashboardDataQuery} from '@core/store/api/invoiceApi';
+import {useEffect, type ReactNode} from 'react';
 import CustomTable from '@components/table/CustomTable';
-import { getInvoiceColumns } from '@features/invoice/pages/invoice';
-import { useAppSelector } from '@core/store/hooks';
-import { selectIsWholeSaler } from '@core/store/slices/auth.slice';
+import {getInvoiceColumns} from '@features/invoice/pages/invoice';
+import {useAppSelector} from '@core/store/hooks';
+import {selectIsWholeSaler} from '@core/store/slices/auth.slice';
 
-const dummySalesData = [
-  { date: 'Apr 1', revenue: 2000 },
-  { date: 'Apr 2', revenue: 3500 },
-  { date: 'Apr 3', revenue: 1800 },
-  { date: 'Apr 4', revenue: 3000 },
-  { date: 'Apr 5', revenue: 4200 },
-];
+const COLORS = ['#2563eb', '#10b981', '#f59e0b', '#0ea5e9', '#64748b'];
 
-const topProducts = [
-  { name: 'Product A', sales: 150 },
-  { name: 'Product B', sales: 90 },
-  { name: 'Product C', sales: 75 },
-];
+type MetricCardProps = {
+  label: string;
+  value: number;
+  tone?: 'default' | 'success' | 'warning' | 'danger';
+  prefix?: ReactNode;
+};
 
-const wholesalerData = [
-  { name: 'Wholesaler 1', value: 4000 },
-  { name: 'Wholesaler 2', value: 2500 },
-  { name: 'Wholesaler 3', value: 1500 },
-];
+const toneClass = {
+  default: 'text-[var(--palette-text-primary)]',
+  success: 'text-[var(--palette-success-main)]',
+  warning: 'text-[var(--palette-warning-main)]',
+  danger: 'text-[var(--palette-error-main)]',
+};
 
-const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#d0ed57', '#a4de6b', '#8dd1e1', '#83a6ed', '#8dd1e1'];
+function MetricCard({label, value, tone = 'default', prefix}: MetricCardProps) {
+  return (
+    <Card className="min-w-0">
+      <CardContent>
+        <p className="text-sm text-[var(--palette-text-secondary)]">{label}</p>
+        <p className={`mt-2 text-2xl font-bold ${toneClass[tone]}`}>
+          {prefix}
+          <CountUp end={value} duration={2} separator="," decimals={2} />
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
 
 const Dashboard = () => {
-  const { data, isLoading, refetch } = useGetDashboardDataQuery({ pageNumber: 1, pageSize: 10, itemId: '' });
+  const {data, refetch} = useGetDashboardDataQuery({
+    pageNumber: 1,
+    pageSize: 10,
+    itemId: '',
+  });
   const dashBoardData = data?.Data;
   const isWholeSaler = useAppSelector(selectIsWholeSaler);
+
   useEffect(() => {
-    // Refetch when component mounts
     refetch();
   }, [refetch]);
 
   if (isWholeSaler) {
     return (
-      <div className="p-4 w-full flex flex-col gap-4">
-        <div className='flex flex-row gap-4'>
-          <Card className='lg:basis-1/2 basis-full'>
-            <CardContent>
-              <p className="text-sm">Total Invoices</p>
-              <p className="text-2xl font-bold">
-                <CountUp end={dashBoardData?.ThisMonthTotalInvoice ?? 0} duration={2} />
-              </p>
-            </CardContent>
-          </Card>
-          <Card className='lg:basis-1/2 basis-full'>
-            <CardContent>
-              <p className="text-sm">Total Due Remaining</p>
-              <p className="text-2xl font-bold text-orange-600">
-                <CountUp end={dashBoardData?.TotalDueAmount ?? 0} duration={2} separator="," />
-              </p>
-            </CardContent>
-          </Card>
+      <div className="flex w-full flex-col gap-4 p-4">
+        <div className="grid gap-4 md:grid-cols-3">
+          <MetricCard
+            label="Invoices this month"
+            value={dashBoardData?.ThisMonthTotalInvoice ?? 0}
+          />
+          <MetricCard
+            label="Outstanding due"
+            value={dashBoardData?.TotalOutstandingDue ?? 0}
+            tone="warning"
+            prefix="Tk "
+          />
+          <MetricCard
+            label="Account credit"
+            value={dashBoardData?.TotalCustomerCredit ?? 0}
+            tone="success"
+            prefix="Tk "
+          />
         </div>
 
-        <Card className='basis-full'>
+        <Card>
           <CardContent>
-            <h2 className="text-lg font-bold mb-2">Recent Invoices</h2>
-            <div className="space-y-2">
-              {dashBoardData?.RecentInvoiceData?.length ? (
-                <div className="p-10 w-full">
-                  <CustomTable
-                    isRowClickable={false}
-                    columns={getInvoiceColumns(true)}
-                    hidePagination={true}
-                    data={dashBoardData.RecentInvoiceData}
-                    rowsPerPage={10}
-                  />
-                </div>
-              ) : (
-                <p className="text-sm">No invoices found.</p>
-              )}
-            </div>
+            <h2 className="mb-2 text-lg font-bold">Recent invoices</h2>
+            {dashBoardData?.RecentInvoiceData?.length ? (
+              <div className="w-full overflow-x-auto py-4">
+                <CustomTable
+                  isRowClickable={false}
+                  columns={getInvoiceColumns(true)}
+                  hidePagination
+                  data={dashBoardData.RecentInvoiceData}
+                  rowsPerPage={10}
+                />
+              </div>
+            ) : (
+              <p className="text-sm text-[var(--palette-text-secondary)]">
+                No invoices found.
+              </p>
+            )}
           </CardContent>
         </Card>
       </div>
     );
   }
 
-  return (
-    <div className="p-4 w-full flex flex-col gap-4">
+  const cashMarginData = dashBoardData?.CashMarginData ?? [];
+  const productSales = dashBoardData?.ProductSalesInfo ?? [];
+  const wholesalerCollections = dashBoardData?.CashCollectedByWholesaler ?? [];
 
-      {/* KPI Cards */}
-      <div className='flex flex-row gap-4'>
-        <Card className='lg:basis-1/3 basis-full'>
-          <CardContent>
-            <p className="text-sm">This month revenue</p>
-            <p className="text-2xl font-bold text-green-600">
-              ₹<CountUp end={dashBoardData?.ThisMonthRevenue ?? 0} duration={5} separator="," />
-            </p>
-          </CardContent>
-        </Card>
-        <Card className='lg:basis-1/3 basis-full'>
-          <CardContent>
-            <p className="text-sm">Total Invoices</p>
-            <p className="text-2xl font-bold">
-              <CountUp end={dashBoardData?.ThisMonthTotalInvoice ?? 0} duration={5} />
-            </p>
-          </CardContent>
-        </Card>
-        <Card className='lg:basis-1/3 basis-full'>
-          <CardContent>
-            <p className="text-sm">Products Sold</p>
-            <p className="text-2xl font-bold">
-              <CountUp end={dashBoardData?.ThisMonthTotalSell ?? 0} duration={5} />
-            </p>
-          </CardContent>
-        </Card>
+  return (
+    <div className="flex w-full flex-col gap-4 p-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <MetricCard
+          label="Cash collected this month"
+          value={dashBoardData?.ThisMonthCashCollected ?? 0}
+          tone="success"
+          prefix="Tk "
+        />
+        <MetricCard
+          label="Gross profit this month"
+          value={dashBoardData?.ThisMonthGrossProfit ?? 0}
+          tone="success"
+          prefix="Tk "
+        />
+        <MetricCard
+          label="Realized cash margin this month"
+          value={dashBoardData?.ThisMonthRealizedCashMargin ?? 0}
+          tone={
+            (dashBoardData?.ThisMonthRealizedCashMargin ?? 0) >= 0
+              ? 'success'
+              : 'danger'
+          }
+          prefix="Tk "
+        />
+        <MetricCard
+          label="Outstanding due"
+          value={dashBoardData?.TotalOutstandingDue ?? 0}
+          tone="warning"
+          prefix="Tk "
+        />
+        <MetricCard
+          label="Cost at risk"
+          value={dashBoardData?.TotalCostAtRisk ?? 0}
+          tone="danger"
+          prefix="Tk "
+        />
+        <MetricCard
+          label="Customer credit"
+          value={dashBoardData?.TotalCustomerCredit ?? 0}
+          tone="success"
+          prefix="Tk "
+        />
+        <MetricCard
+          label="Invoices this month"
+          value={dashBoardData?.ThisMonthTotalInvoice ?? 0}
+        />
+        <MetricCard
+          label="Products sold this month"
+          value={dashBoardData?.ThisMonthTotalSell ?? 0}
+        />
       </div>
 
-      {/* Sales Overview Chart */}
-      <Card className="col-span-1 md:col-span-2">
-        <CardContent>
-          <h2 className="text-lg font-bold mb-2">Sales Overview</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={dashBoardData?.SalesData ?? dummySalesData}>
-              <XAxis dataKey="date" />
-              <YAxis />
-              <Tooltip />
-              <Line type="monotone" dataKey="revenue" stroke="#8884d8" />
-            </LineChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
-
-      {/* Top Selling Products */}
       <Card>
         <CardContent>
-          <h2 className="text-lg font-bold mb-2">Top Selling Products</h2>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={dashBoardData?.ProductSalesInfo ?? topProducts}>
-              <YAxis type="number" />
-              <XAxis dataKey="name" type="category" />
-              <Tooltip />
-              <Bar dataKey="sales" fill="#82ca9d" />
-            </BarChart>
-          </ResponsiveContainer>
+          <h2 className="mb-1 text-lg font-bold">
+            Cash collection and realized margin
+          </h2>
+          <p className="mb-4 text-sm text-[var(--palette-text-secondary)]">
+            Due receipts increase cash and realized margin, but never create
+            additional gross profit.
+          </p>
+          {cashMarginData.length ? (
+            <ResponsiveContainer width="100%" height={320}>
+              <LineChart data={cashMarginData}>
+                <XAxis dataKey="date" />
+                <YAxis />
+                <Tooltip
+                  formatter={value => `Tk ${Number(value).toLocaleString()}`}
+                />
+                <Legend />
+                <Line
+                  type="monotone"
+                  dataKey="cashCollected"
+                  name="Cash collected"
+                  stroke="#2563eb"
+                  strokeWidth={3}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="realizedCashMargin"
+                  name="Realized cash margin"
+                  stroke="#10b981"
+                  strokeWidth={3}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <p className="py-16 text-center text-sm text-[var(--palette-text-secondary)]">
+              No financial activity found.
+            </p>
+          )}
         </CardContent>
       </Card>
 
-      <div className='flex flex-row gap-4'>
-        {/* Wholesaler Contributions Pie Chart */}
-        <Card className='lg:basis-1/2 basis-full'>
+      <div className="grid gap-4 xl:grid-cols-2">
+        <Card>
           <CardContent>
-            <h2 className="text-lg font-bold mb-2">Wholesaler Contributions</h2>
-            <ResponsiveContainer width="100%" height={250}>
-              <PieChart>
-                <Pie
-                  data={dashBoardData?.WholesalerData ?? wholesalerData}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={80}
-                  label
-                >
-                  {(dashBoardData?.WholesalerData ?? wholesalerData).map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
+            <h2 className="mb-2 text-lg font-bold">Top selling products</h2>
+            {productSales.length ? (
+              <ResponsiveContainer width="100%" height={280}>
+                <BarChart data={productSales}>
+                  <YAxis type="number" />
+                  <XAxis dataKey="name" type="category" />
+                  <Tooltip />
+                  <Bar dataKey="sales" name="Quantity sold" fill="#10b981" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="py-16 text-center text-sm text-[var(--palette-text-secondary)]">
+                No product sales found.
+              </p>
+            )}
           </CardContent>
         </Card>
 
-        {/* Recent Transactions List */}
-        <Card className='lg:basis-1/2 basis-full'>
+        <Card>
           <CardContent>
-            <h2 className="text-lg font-bold mb-2">Recent Invoices</h2>
-            <div className="space-y-2">
-              {dashBoardData && dashBoardData.RecentInvoiceData && dashBoardData.RecentInvoiceData.length > 0 && (<div className="p-10 w-full">
-                <CustomTable
-                  isRowClickable={false}
-                  columns={getInvoiceColumns(false)}
-                  hidePagination={true}
-                  data={dashBoardData.RecentInvoiceData || []}
-                  rowsPerPage={10} />
-              </div>)}
-            </div>
+            <h2 className="mb-2 text-lg font-bold">
+              Cash collected by customer
+            </h2>
+            {wholesalerCollections.length ? (
+              <ResponsiveContainer width="100%" height={280}>
+                <PieChart>
+                  <Pie
+                    data={wholesalerCollections}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={90}
+                    label>
+                    {wholesalerCollections.map((entry, index) => (
+                      <Cell
+                        key={`${entry.name}-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    formatter={value => `Tk ${Number(value).toLocaleString()}`}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="py-16 text-center text-sm text-[var(--palette-text-secondary)]">
+                No collections found.
+              </p>
+            )}
           </CardContent>
         </Card>
       </div>
 
+      <Card>
+        <CardContent>
+          <h2 className="mb-2 text-lg font-bold">Recent invoices</h2>
+          {dashBoardData?.RecentInvoiceData?.length ? (
+            <div className="w-full overflow-x-auto py-4">
+              <CustomTable
+                isRowClickable={false}
+                columns={getInvoiceColumns(false)}
+                hidePagination
+                data={dashBoardData.RecentInvoiceData}
+                rowsPerPage={10}
+              />
+            </div>
+          ) : (
+            <p className="text-sm text-[var(--palette-text-secondary)]">
+              No invoices found.
+            </p>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };

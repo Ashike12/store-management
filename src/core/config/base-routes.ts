@@ -32,6 +32,13 @@ const BASE_ROUTES: IRoute[] = [
     Component: React.lazy(() => import('@features/invoice/pages/invoice')),
   },
   {
+    title: ROUTE_PATH.orders.title,
+    path: ROUTE_PATH.orders.path,
+    pathMatch: ROUTE_PATH.orders.pathMatch,
+    exact: true,
+    Component: React.lazy(() => import('@features/orders/pages/orders')),
+  },
+  {
     title: ROUTE_PATH.wholesalerDetails.title,
     path: ROUTE_PATH.wholesalerDetails.path,
     pathMatch: ROUTE_PATH.wholesalerDetails.pathMatch,

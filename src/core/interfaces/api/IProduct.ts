@@ -8,6 +8,7 @@ export interface ICreateProductPayload {
     ProductName: string;
     Category: string;
     SubCategory: string;
+    NetHeight?: string;
     Description: string;
     ImageLinks: string[];
     VideoLink: string;
@@ -43,4 +44,21 @@ export interface IGetProductPayload {
     minMakingPrice?: number;
     maxMakingPrice?: number;
     searchTerm?: string;
+}
+
+export interface IGenerateAiSuggestionPayload {
+    FieldName: string;
+    CurrentValue?: string;
+    ProductName?: string;
+    Category?: string;
+    SubCategory?: string;
+    NetHeight?: string;
+}
+
+export interface IAiSuggestionResponse {
+    IsSuccess: boolean;
+    Data: {
+        Suggestion: string;
+    };
+    ErrorMessage?: string;
 }

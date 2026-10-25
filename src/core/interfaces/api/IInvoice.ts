@@ -1,81 +1,100 @@
 export interface IInvoiceResponse {
-    IsSuccess: boolean;
-    TotalCount: number;
-    Data: IInvoice[] | InvoiceDetailsResponse;
+  IsSuccess: boolean;
+  TotalCount: number;
+  Data: IInvoice[] | InvoiceDetailsResponse;
+  Summary?: IInvoiceFinancialSummary;
 }
 
 export interface IInvoice {
-    ItemId: string;
-    InvoiceNumber?: string;
-    CreatedDate?: string;
-    WholeSalerId: string;
-    WholeSalerName: string;
-    TotalAmount: number;
-    PaymentAmount: number;
-    ProfitMargin?: number;
-    InvoiceType: string;
+  ItemId: string;
+  InvoiceNumber?: string;
+  CreatedDate?: string;
+  WholeSalerId: string;
+  WholeSalerName: string;
+  TotalAmount: number;
+  PaymentAmount: number;
+  ProductCostAmount?: number;
+  GrossProfit?: number;
+  RealizedCashMargin?: number;
+  InvoiceType: string;
 }
 
 export interface ICreateInvoicePayload {
-    PaymentAmount: number;
-    WholeSalerId: string;
-    InvoiceType: string;
-    ProductSellInfo: IProductSellInfo[];
+  PaymentAmount: number;
+  WholeSalerId: string;
+  InvoiceType: string;
+  ProductSellInfo: IProductSellInfo[];
 }
 
 export interface IUpdateInvoicePayload extends ICreateInvoicePayload {
-    ItemId: string;
+  ItemId: string;
 }
 
 export interface IProductSellInfo {
-    ItemId: string;
-    ProductId: string;
-    Quantity: number;
-    SellingPrice: number;
-    SellingDate: string;
+  ItemId: string;
+  ProductId: string;
+  Quantity: number;
+  SellingPrice: number;
+  SellingDate: string;
 }
 
 export interface IProductSellInfoResponse extends IProductSellInfo {
-    CreatedDate: string;
-    ItemId: string;
-    ProductId: string;
-    ProductName: string;
-    WholeSalerId: string;
-    WholeSalerName: string;
+  CreatedDate: string;
+  ItemId: string;
+  ProductId: string;
+  ProductName: string;
+  WholeSalerId: string;
+  WholeSalerName: string;
 }
 
 export interface InvoiceDetailsResponse extends IInvoice {
-    ProductSellInfo: IProductSellInfoResponse[];
+  ProductSellInfo: IProductSellInfoResponse[];
 }
 
-export interface SalesEntry {
-    revenue: number;
-    date: string; // Format: 'YYYY-MM-DD'
+export interface CashMarginEntry {
+  cashCollected: number;
+  realizedCashMargin: number;
+  date: string; // Format: 'YYYY-MM-DD'
 }
 
 export interface ProductSalesInfoEntry {
-    sales: number;
-    name: string;
+  sales: number;
+  name: string;
 }
 
 export interface WholesalerDataEntry {
-    value: number;
-    name: string;
+  value: number;
+  name: string;
 }
 
 export interface IDashboardData {
-    SalesData?: SalesEntry[];
-    ProductSalesInfo?: ProductSalesInfoEntry[];
-    WholesalerData?: WholesalerDataEntry[];
-    ThisMonthRevenue?: number;
-    ThisMonthTotalInvoice: number;
-    ThisMonthTotalSell?: number;
-    TotalDueAmount: number;
-    RecentInvoiceData: IInvoice[];
+  CashMarginData?: CashMarginEntry[];
+  ProductSalesInfo?: ProductSalesInfoEntry[];
+  CashCollectedByWholesaler?: WholesalerDataEntry[];
+  ThisMonthCashCollected?: number;
+  ThisMonthGrossProfit?: number;
+  ThisMonthRealizedCashMargin?: number;
+  ThisMonthTotalInvoice: number;
+  ThisMonthTotalSell?: number;
+  TotalOutstandingDue: number;
+  TotalCustomerCredit: number;
+  TotalCostAtRisk?: number;
+  RecentInvoiceData: IInvoice[];
+}
+
+export interface IInvoiceFinancialSummary {
+  TotalBilled: number;
+  ProductCostAmount?: number;
+  CashCollected: number;
+  GrossProfit?: number;
+  RealizedCashMargin?: number;
+  OutstandingDue: number;
+  CustomerCredit: number;
+  CostAtRisk?: number;
 }
 
 export interface IDashboardResponse {
-    IsSuccess: boolean;
-    TotalCount: number;
-    Data: IDashboardData;
+  IsSuccess: boolean;
+  TotalCount: number;
+  Data: IDashboardData;
 }

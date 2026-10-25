@@ -32,6 +32,8 @@
   "PAID_AMOUNT": "Paid Amount",
   "DUE_AMOUNT": "Due Amount",
   "YOUR_PROFIT": "Your Profit",
+  "GROSS_PROFIT": "Gross profit",
+  "REALIZED_CASH_MARGIN": "Realized cash margin",
   "INVOICE": "Invoice",
   "INVOICE_NUMBER": "Invoice number",
   "INVOICE_TYPE": "Invoice type",
