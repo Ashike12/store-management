@@ -11,12 +11,13 @@ import BASE_ROUTES from '@core/config/base-routes';
 import { useLocation, useNavigate } from 'react-router-dom';
 import IconCaretDoubleLeft from '@assets/icons/IconCaretDoubleLeft';
 import TextWrapper from '@components/text/TextWrapper';
-import { IconBox, IconBuildingStore, IconFileInvoice, IconLayoutDashboard } from '@tabler/icons-react';
+import { IconBox, IconBuildingStore, IconFileInvoice, IconLayoutDashboard, IconPackage } from '@tabler/icons-react';
 import IconCaretDoubleRight from '@assets/icons/IconCaretDoubleRight';
 import cn from '@core/utils/cn';
 import {useAppThemeMode} from 'theme/theme-provider';
 import { useAppSelector } from '@core/store/hooks';
-import { selectIsWholeSaler } from '@core/store/slices/auth.slice';
+import { selectCurrentUserRoles, selectIsWholeSaler } from '@core/store/slices/auth.slice';
+import {canAccessOrderFulfillment} from '@features/orders/orderFulfillment';
 
 const drawerWidth = DRAWER_WIDTH;
 
@@ -105,6 +106,13 @@ const menuItems = [
     text: BASE_ROUTES[3].title,
     path: BASE_ROUTES[3].path,
   },
+  {
+    type: BASE_ROUTES[4].pathMatch,
+    OutlineIcon: IconPackage,
+    FilledIcon: IconPackage,
+    text: BASE_ROUTES[4].title,
+    path: BASE_ROUTES[4].path,
+  },
 ];
 
 export default function LeftSidebar({
@@ -116,11 +124,14 @@ export default function LeftSidebar({
 }: Readonly<ISidebarProps>) {
   const {mode} = useAppThemeMode();
   const isWholeSaler = useAppSelector(selectIsWholeSaler);
+  const canAccessOrders = useAppSelector(state =>
+    canAccessOrderFulfillment(selectCurrentUserRoles(state)),
+  );
   const navigateTo = useNavigate();
   const location = useLocation();
   const visibleMenuItems = isWholeSaler
     ? menuItems.filter(item => ['dashboard', 'invoice'].includes(item.type.toLowerCase()))
-    : menuItems;
+    : menuItems.filter(item => item.type !== 'orders' || canAccessOrders);
   const isActiveItem = (itemType: string) => {
     const pathParts = location.pathname.toLowerCase().split('/');
     const firstSegment = pathParts[1] ?? '';
@@ -148,6 +159,10 @@ export default function LeftSidebar({
 
     if (normalizedType === 'invoice') {
       return firstSegment === 'invoice';
+    }
+
+    if (normalizedType === 'orders') {
+      return firstSegment === 'orders';
     }
 
     return false;

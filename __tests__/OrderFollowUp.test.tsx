@@ -5,7 +5,7 @@ import {configureStore} from '@reduxjs/toolkit';
 import {Provider} from 'react-redux';
 import {createTheme, ThemeProvider} from '@mui/material/styles';
 import OrderFollowUp from '../src/components/header/OrderFollowUp';
-import {FollowUpOrder, ordersApi} from '../src/core/store/api/ordersApi';
+import {FollowUpOrder, OrderStatus, ordersApi} from '../src/core/store/api/ordersApi';
 import i18n from '../src/core/services/i18n.service';
 import {enOrderFollowUp, bnOrderFollowUp, zhOrderFollowUp} from '../src/assets/i18n/orderFollowUp';
 
@@ -117,7 +117,7 @@ beforeEach(async () => {
     if (endpoint === 'TransitionOrder') {
       if (holdTransition) await new Promise<void>(resolve => {releaseTransition = resolve;});
       if (transitionFailure) return response({IsSuccess: false, Message: 'Stock unavailable'}, transitionFailure);
-      order = {...order, OrderStatus: String(body.Status), RequiresImmediateAction: false,
+      order = {...order, OrderStatus: String(body.Status) as OrderStatus, RequiresImmediateAction: false,
         Version: order.Version + 1};
       return response({IsSuccess: true, Data: order});
     }

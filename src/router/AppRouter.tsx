@@ -6,7 +6,9 @@ import {LinearProgress, linearProgressClasses} from '@mui/material';
 import {varAlpha} from 'theme/styles';
 import NotFoundView from '@components/not-found/NotFoundView';
 import { useAppSelector } from '@core/store/hooks';
-import { selectIsWholeSaler } from '@core/store/slices/auth.slice';
+import { selectCurrentUserRoles, selectIsWholeSaler } from '@core/store/slices/auth.slice';
+import {ROUTE_PATH} from '@core/config/routePath';
+import {canAccessOrderFulfillment} from '@features/orders/orderFulfillment';
 
 const renderFallback = (
   <div className="flex h-screen w-full flex-1 items-center justify-center">
@@ -24,6 +26,9 @@ const renderFallback = (
 
 export default function AppRouter() {
   const isWholeSaler = useAppSelector(selectIsWholeSaler);
+  const canAccessOrders = useAppSelector(state =>
+    canAccessOrderFulfillment(selectCurrentUserRoles(state)),
+  );
   const allowedRoutePaths = isWholeSaler
     ? new Set(['/dashboard', '/invoice', '/invoice/details/:id'])
     : null;
@@ -43,7 +48,10 @@ export default function AppRouter() {
           index
           element={<Navigate to='/dashboard' replace />}
         />
-        {BASE_ROUTES.filter(({path}) => !allowedRoutePaths || allowedRoutePaths.has(path)).map(({path, Component}) => (
+        {BASE_ROUTES.filter(({path}) =>
+          (!allowedRoutePaths || allowedRoutePaths.has(path)) &&
+          (path !== ROUTE_PATH.orders.path || canAccessOrders),
+        ).map(({path, Component}) => (
           <Route key={path} path={path} element={<Component />} />
         ))}
       </Route>
