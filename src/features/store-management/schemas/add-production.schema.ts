@@ -5,10 +5,8 @@ export const addProductionValidationSchema = Yup.object({
         .of(
             Yup.object({
                 ProductId: Yup.string().required("Product ID is required"),
-                CurrentQuantity: Yup.number()
-                    .required("CurrentQuantity is required")
-                    .positive("CurrentQuantity must be positive")
-                    .integer("CurrentQuantity must be an integer"),
+                // Current quantity is display-only and zero is a valid stock state.
+                CurrentQuantity: Yup.number().min(0),
                     ProductionAmount: Yup.number()
                     .required("ProductionAmount is required")
                     .positive("ProductionAmount must be positive")

@@ -1,11 +1,11 @@
 import TextWrapper from "@components/text/TextWrapper";
 import { CustomButton } from "@components/button/CustomButton";
-import { IAddProductionPayload } from "@core/interfaces/api/IProduct";
 import { useAddProductionMutation, useGetProductQuery } from "@core/store/api/product";
-import { Modal, Box, TextField, MenuItem } from "@mui/material";
+import { Alert, Modal, Box, TextField, MenuItem } from "@mui/material";
 import { ErrorMessage, FieldArray, Form, Formik } from "formik";
 import { addProductionValidationSchema } from "../schemas/add-production.schema";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
+import { buildProductionPayload, createInventoryRequestLifecycle } from "../inventoryRequest";
 
 export interface IEachProduction {
     ProductId: string,
@@ -35,26 +35,31 @@ export default function ProductionModal({
 
     const { data: productData, isLoading: isProductLoading, refetch } = useGetProductQuery({ pageNumber: 1, pageSize: 1000, itemId: '' });
     const [createProduction, { isLoading: isCreating }] = useAddProductionMutation();
+    const requestLifecycle = useRef(createInventoryRequestLifecycle());
+    const [submissionError, setSubmissionError] = useState('');
     const productList = productData?.Data || [];
     const submitInvoice = async (values: IProductionForm) => {
-        let payload: IAddProductionPayload = { ProductionInfo: [] };
-        values.ProductionInfo.forEach((item) => {
-            if (item.ProductId === '') return;
-            payload.ProductionInfo.push({
-                ProductId: item.ProductId,
-                Quantity: item.CurrentQuantity
-            })
-        })
-        await createProduction({ payload }).unwrap();
-        handleClose();
+        setSubmissionError('');
+        const payload = buildProductionPayload(values, requestLifecycle.current.begin());
+        try {
+            await createProduction({ payload }).unwrap();
+            requestLifecycle.current.end();
+            handleClose();
+        } catch {
+            setSubmissionError('Production could not be saved. Please try again.');
+        }
     }
+    const closeModal = () => {
+        requestLifecycle.current.end();
+        handleClose();
+    };
       useEffect(() => {
         // Refetch when component mounts
         refetch();
       }, [refetch]);
 
     return (
-        <Modal open={isOpen} onClose={() => handleClose()}>
+        <Modal open={isOpen} onClose={closeModal}>
             <Box
                 sx={{
                     position: "absolute",
@@ -73,12 +78,11 @@ export default function ProductionModal({
                 <Formik
                     initialValues={createProductionInitialValues}
                     validationSchema={addProductionValidationSchema}
-                    onSubmit={(values) => {
-                    }}
+                    onSubmit={submitInvoice}
                 >
-                    {({ values, setFieldValue, errors, touched }) => {
+                    {({ values, setFieldValue }) => {
                         const selectedProducts = values.ProductionInfo.map(
-                            (product: any) => product.ProductId
+                            product => product.ProductId
                         );
 
                         return (
@@ -145,9 +149,6 @@ export default function ProductionModal({
                                                                 value={product.ProductionAmount}
                                                                 onChange={(e) => {
                                                                     setFieldValue(`ProductionInfo[${index}].ProductionAmount`, e.target.value)
-                                                                    const currentProdId = values.ProductionInfo[index].ProductId;
-                                                                    const selectedProduct = productList.find((productOption) => productOption.ItemId === currentProdId);
-                                                                    setFieldValue(`ProductionInfo[${index}].CurrentQuantity`, Number(e.target.value) + Number(selectedProduct?.Quantity || 0));
                                                                 }
                                                                 }
                                                             />
@@ -169,7 +170,7 @@ export default function ProductionModal({
                                             ))}
 
                                             {/* Add Product Button */}
-                                            {selectedProducts.length != productList.length && (
+                                            {selectedProducts.length !== productList.length && (
                                                 <CustomButton
                                                     type="button"
                                                     variant="outline"
@@ -189,18 +190,25 @@ export default function ProductionModal({
                                 />
 
                                 {/* Buttons */}
+                                {submissionError && (
+                                    <Alert severity="error" role="alert" className="mt-4">
+                                        {submissionError}
+                                    </Alert>
+                                )}
                                 <Box display="flex" justifyContent="flex-end" className="gap-4 mt-4">
                                     <CustomButton
                                         variant="secondary"
                                         size="md"
                                         text="Cancel"
-                                        onClick={() => handleClose()}
+                                        onClick={closeModal}
                                     />
                                     <CustomButton
                                         variant="primary"
                                         size="md"
                                         text="Save"
-                                        onClick={() => submitInvoice(values)}
+                                        type="submit"
+                                        disabled={isCreating || isProductLoading}
+                                        loading={isCreating}
                                     />
                                 </Box>
                             </Form>

@@ -10,11 +10,16 @@ import {
 } from '@core/store/api/product';
 import { SelectChangeEvent } from '@mui/material';
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import ProductModal, { IProductForm } from '../components/productModal';
 import DeleteConfirmationModal from '@components/confirmation-modal/delete-confirmation.modal';
 import ProductionModal from '../components/productionModal';
 import { PRODUCT_CATEGORY_SUBCATEGORY_MAP } from '@core/config/product-category.constants';
+import {IconButton, Tooltip} from '@mui/material';
+import {IconPackages} from '@tabler/icons-react';
+import {useTheme} from '@mui/material/styles';
+import InventoryTraceability from '../components/InventoryTraceability';
+import {createInventoryRequestLifecycle} from '../inventoryRequest';
 
 // Define table columns
 const columns = [
@@ -68,6 +73,7 @@ const hasCloneIdentityChanged = (currentFormData: IProductForm, baseFormData: IP
   currentFormData.NetHeight !== baseFormData.NetHeight;
 
 export default function StoreManagement() {
+  const theme = useTheme();
   const [selectedCategory, setSelectedCategory] = useState('MosquitoNet');
   const [selectedSubCategory, setSelectedSubCategory] = useState(ALL_OPTION);
   const [payload, setPayload] = useState({
@@ -83,7 +89,7 @@ export default function StoreManagement() {
   const { data, isLoading, refetch } = useGetProductQuery(payload);
   const [createProduct, { isLoading: isCreating }] = useCreateProductMutation();
   const [updateProduct, { isLoading: isUpdating }] = useUpdateProductMutation();
-  const [deleteProduct, { isLoading: isDeleting }] = useDeleteProductMutation();
+  const [deleteProduct] = useDeleteProductMutation();
   const [generateAiSuggestion, { isLoading: isSuggestingDescription }] = useGenerateAiSuggestionMutation();
   const [isOpen, setIsOpen] = useState(false);
   const [isProductionOpen, setIsProductionOpen] = useState(false);
@@ -91,6 +97,8 @@ export default function StoreManagement() {
   const [isUpdate, setIsUpdate] = useState(false);
   const [formData, setFormData] = useState<IProductForm>(initialFormData);
   const [cloneBaseFormData, setCloneBaseFormData] = useState<IProductForm | null>(null);
+  const createRequestLifecycle = useRef(createInventoryRequestLifecycle());
+  const [inventoryProduct, setInventoryProduct] = useState<IProduct | null>(null);
   const [searchText, setSearchText] = useState('');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 100000]);
   const categoryOptions = [ALL_OPTION, ...Object.keys(PRODUCT_CATEGORY_SUBCATEGORY_MAP)];
@@ -210,8 +218,10 @@ export default function StoreManagement() {
       setCloneBaseFormData(null);
       refetch();
     } else {
+      const requestId = createRequestLifecycle.current.begin();
       await createProduct({
         payload: {
+          RequestId: requestId,
           ProductName: formData.ProductName,
           Category: formData.Category,
           SubCategory: formData.SubCategory,
@@ -228,6 +238,7 @@ export default function StoreManagement() {
       }).unwrap();
       setIsOpen(false);
       setCloneBaseFormData(null);
+      createRequestLifecycle.current.end();
       refetch();
     }
   }
@@ -251,7 +262,7 @@ export default function StoreManagement() {
           Description: response.Data.Suggestion,
         }));
       }
-    } catch (error) {
+    } catch {
       alert('AI suggestion is not available right now. Please check backend AI configuration.');
     }
   };
@@ -261,6 +272,7 @@ export default function StoreManagement() {
     setIsUpdate(false);
     setCloneBaseFormData(null);
     setFormData(initialFormData);
+    createRequestLifecycle.current.end();
   }
 
   const handleRowClick = async (row: IProduct, isDelete: boolean) => {
@@ -280,6 +292,8 @@ export default function StoreManagement() {
     const clonedFormData = mapProductToForm(row, false);
     setFormData(clonedFormData);
     setCloneBaseFormData(clonedFormData);
+    createRequestLifecycle.current.end();
+    createRequestLifecycle.current.begin();
     setIsUpdate(false);
     setIsOpen(true);
   };
@@ -296,6 +310,8 @@ export default function StoreManagement() {
     setFormData(initialFormData);
     setCloneBaseFormData(null);
     setIsUpdate(false);
+    createRequestLifecycle.current.end();
+    createRequestLifecycle.current.begin();
     setIsOpen(true);
   }
 
@@ -389,6 +405,17 @@ export default function StoreManagement() {
               showCloneButton={true}
               handleRowClick={handleRowClick}
               handleCloneClick={handleCloneProduct}
+              renderRowActions={(row) => (
+                <Tooltip title="Inspect inventory batches">
+                  <IconButton
+                    aria-label={`Inspect inventory for ${row.ProductName}`}
+                    onClick={() => setInventoryProduct(row)}
+                    size="small"
+                    className="!ml-2 px-5">
+                    <IconPackages color={theme.vars.palette.info.main} />
+                  </IconButton>
+                </Tooltip>
+              )}
               columns={columns}
               data={filteredData || []}
               totalCount={data?.TotalCount || 0}
@@ -426,6 +453,10 @@ export default function StoreManagement() {
       {isDelete && (
         <DeleteConfirmationModal handleConfirm={handleDelete} isOpen={true} />
       )}
+      <InventoryTraceability
+        product={inventoryProduct}
+        onClose={() => setInventoryProduct(null)}
+      />
     </>
   );
 }

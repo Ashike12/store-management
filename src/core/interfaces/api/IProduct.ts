@@ -4,7 +4,7 @@ export interface IProductResponse {
     Data: IProduct[];
 }
 
-export interface ICreateProductPayload {
+export interface IProductInput {
     ProductName: string;
     Category: string;
     SubCategory: string;
@@ -19,7 +19,11 @@ export interface ICreateProductPayload {
     Quantity: number;
 }
 
-export interface IProduct extends ICreateProductPayload {
+export interface ICreateProductPayload extends IProductInput {
+    RequestId: string;
+}
+
+export interface IProduct extends IProductInput {
     ItemId: string;
     CreatedDate?: string;
 }
@@ -27,12 +31,48 @@ export interface IProduct extends ICreateProductPayload {
 
 
 export interface IAddProductionPayload {
+    RequestId: string;
     ProductionInfo: IAddProduction[];
 }
 
 export interface IAddProduction {
     ProductId: string;
     Quantity: number;
+}
+
+export interface IProductBatch {
+    BatchId: string;
+    ProductId: string;
+    QuantityReceived: number;
+    CreatedBy?: string;
+    CreatedDate: string;
+}
+
+export interface IBatchItem {
+    SerialNumber: string;
+    BatchId: string;
+    ProductId: string;
+    UnitIndex: number;
+    CreatedDate: string;
+}
+
+export interface IPaginatedResponse<T> {
+    IsSuccess: boolean;
+    Data: T[];
+    TotalCount: number;
+    ErrorMessage?: string;
+}
+
+export interface IListProductBatchesPayload {
+    ProductId: string;
+    Page: number;
+    Size: number;
+}
+
+export interface IListBatchItemsPayload {
+    BatchId: string;
+    Page: number;
+    Size: number;
 }
 
 export interface IGetProductPayload {
