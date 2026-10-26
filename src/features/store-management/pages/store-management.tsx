@@ -16,10 +16,11 @@ import DeleteConfirmationModal from '@components/confirmation-modal/delete-confi
 import ProductionModal from '../components/productionModal';
 import { PRODUCT_CATEGORY_SUBCATEGORY_MAP } from '@core/config/product-category.constants';
 import {IconButton, Tooltip} from '@mui/material';
-import {IconPackages} from '@tabler/icons-react';
+import {IconPackages, IconQrcode} from '@tabler/icons-react';
 import {useTheme} from '@mui/material/styles';
 import InventoryTraceability from '../components/InventoryTraceability';
 import {createInventoryRequestLifecycle} from '../inventoryRequest';
+import ProductQrManager from '../components/ProductQrManager';
 
 // Define table columns
 const columns = [
@@ -99,6 +100,7 @@ export default function StoreManagement() {
   const [cloneBaseFormData, setCloneBaseFormData] = useState<IProductForm | null>(null);
   const createRequestLifecycle = useRef(createInventoryRequestLifecycle());
   const [inventoryProduct, setInventoryProduct] = useState<IProduct | null>(null);
+  const [qrProduct, setQrProduct] = useState<IProduct | null>(null);
   const [searchText, setSearchText] = useState('');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 100000]);
   const categoryOptions = [ALL_OPTION, ...Object.keys(PRODUCT_CATEGORY_SUBCATEGORY_MAP)];
@@ -406,15 +408,26 @@ export default function StoreManagement() {
               handleRowClick={handleRowClick}
               handleCloneClick={handleCloneProduct}
               renderRowActions={(row) => (
-                <Tooltip title="Inspect inventory batches">
-                  <IconButton
-                    aria-label={`Inspect inventory for ${row.ProductName}`}
-                    onClick={() => setInventoryProduct(row)}
-                    size="small"
-                    className="!ml-2 px-5">
-                    <IconPackages color={theme.vars.palette.info.main} />
-                  </IconButton>
-                </Tooltip>
+                <>
+                  <Tooltip title="Manage product QR">
+                    <IconButton
+                      aria-label={`Manage QR for ${row.ProductName}`}
+                      onClick={() => setQrProduct(row)}
+                      size="small"
+                      className="!ml-2 px-5">
+                      <IconQrcode color={row.QrVerificationEnabled ? theme.vars.palette.success.main : theme.vars.palette.text.secondary} />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Inspect inventory batches">
+                    <IconButton
+                      aria-label={`Inspect inventory for ${row.ProductName}`}
+                      onClick={() => setInventoryProduct(row)}
+                      size="small"
+                      className="!ml-2 px-5">
+                      <IconPackages color={theme.vars.palette.info.main} />
+                    </IconButton>
+                  </Tooltip>
+                </>
               )}
               columns={columns}
               data={filteredData || []}
@@ -456,6 +469,12 @@ export default function StoreManagement() {
       <InventoryTraceability
         product={inventoryProduct}
         onClose={() => setInventoryProduct(null)}
+      />
+      <ProductQrManager
+        key={qrProduct?.ItemId ?? 'closed-qr-manager'}
+        product={qrProduct}
+        onClose={() => setQrProduct(null)}
+        onUpdated={refetch}
       />
     </>
   );
