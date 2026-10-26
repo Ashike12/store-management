@@ -7,6 +7,8 @@ import {
   IAddProductionPayload,
   IBatchItem,
   ICreateProductPayload,
+  IConfigureProductQrPayload,
+  IConfigureProductQrResponse,
   IGenerateAiSuggestionPayload,
   IGetProductPayload,
   IProduct,
@@ -25,6 +27,12 @@ export const buildListProductBatchesRequest = (payload: IListProductBatchesPaylo
 
 export const buildListBatchItemsRequest = (payload: IListBatchItemsPayload) => ({
   url: `${APP_CONFIG.businessUrl}/business/ListBatchItems`,
+  method: 'POST' as const,
+  body: payload,
+});
+
+export const buildConfigureProductQrRequest = (payload: IConfigureProductQrPayload) => ({
+  url: `${APP_CONFIG.businessUrl}/business/ConfigureProductQr`,
   method: 'POST' as const,
   body: payload,
 });
@@ -96,6 +104,10 @@ export const productApi = createApi({
         {type: 'BatchItem', id: payload.BatchId},
       ],
     }),
+    configureProductQr: builder.mutation<IConfigureProductQrResponse, IConfigureProductQrPayload>({
+      query: buildConfigureProductQrRequest,
+      invalidatesTags: ['product'],
+    }),
     generateAiSuggestion: builder.mutation<IAiSuggestionResponse, {payload: IGenerateAiSuggestionPayload}>({
       query: (mutation) => ({
         url: `${APP_CONFIG.businessUrl}/business/GenerateAiSuggestion`,
@@ -115,4 +127,5 @@ export const {
   useGetProductQuery,
   useListProductBatchesQuery,
   useListBatchItemsQuery,
+  useConfigureProductQrMutation,
 } = productApi;

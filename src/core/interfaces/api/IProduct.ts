@@ -26,6 +26,25 @@ export interface ICreateProductPayload extends IProductInput {
 export interface IProduct extends IProductInput {
     ItemId: string;
     CreatedDate?: string;
+    QrVerificationEnabled?: boolean;
+    QrVerificationUrl?: string | null;
+}
+
+export type ProductQrAction = 'enable' | 'disable' | 'rotate';
+
+export interface IConfigureProductQrPayload {
+    ItemId: string;
+    Action: ProductQrAction;
+}
+
+export interface IConfigureProductQrResponse {
+    IsSuccess: boolean;
+    Data: {
+        ItemId: string;
+        QrVerificationEnabled: boolean;
+        QrVerificationUrl: string | null;
+    };
+    ErrorMessage?: string;
 }
 
 
