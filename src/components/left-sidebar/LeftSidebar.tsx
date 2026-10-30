@@ -11,12 +11,12 @@ import BASE_ROUTES from '@core/config/base-routes';
 import { useLocation, useNavigate } from 'react-router-dom';
 import IconCaretDoubleLeft from '@assets/icons/IconCaretDoubleLeft';
 import TextWrapper from '@components/text/TextWrapper';
-import { IconBox, IconBuildingStore, IconFileInvoice, IconLayoutDashboard, IconPackage } from '@tabler/icons-react';
+import { IconBox, IconBuildingStore, IconFileInvoice, IconLayoutDashboard, IconPackage, IconUserCog, IconBriefcase } from '@tabler/icons-react';
 import IconCaretDoubleRight from '@assets/icons/IconCaretDoubleRight';
 import cn from '@core/utils/cn';
 import {useAppThemeMode} from 'theme/theme-provider';
 import { useAppSelector } from '@core/store/hooks';
-import { selectCurrentUserRoles, selectIsWholeSaler } from '@core/store/slices/auth.slice';
+import { selectCurrentUserRoles, selectIsEmployee, selectIsWholeSaler } from '@core/store/slices/auth.slice';
 import {canAccessOrderFulfillment} from '@features/orders/orderFulfillment';
 
 const drawerWidth = DRAWER_WIDTH;
@@ -113,6 +113,20 @@ const menuItems = [
     text: BASE_ROUTES[4].title,
     path: BASE_ROUTES[4].path,
   },
+  {
+    type: 'employees',
+    OutlineIcon: IconUserCog,
+    FilledIcon: IconUserCog,
+    text: 'EMPLOYEES',
+    path: '/employees',
+  },
+  {
+    type: 'employee-portal',
+    OutlineIcon: IconBriefcase,
+    FilledIcon: IconBriefcase,
+    text: 'MY WORK',
+    path: '/employee-portal',
+  },
 ];
 
 export default function LeftSidebar({
@@ -124,14 +138,17 @@ export default function LeftSidebar({
 }: Readonly<ISidebarProps>) {
   const {mode} = useAppThemeMode();
   const isWholeSaler = useAppSelector(selectIsWholeSaler);
+  const isEmployee = useAppSelector(selectIsEmployee);
   const canAccessOrders = useAppSelector(state =>
     canAccessOrderFulfillment(selectCurrentUserRoles(state)),
   );
   const navigateTo = useNavigate();
   const location = useLocation();
-  const visibleMenuItems = isWholeSaler
-    ? menuItems.filter(item => ['dashboard', 'invoice'].includes(item.type.toLowerCase()))
-    : menuItems.filter(item => item.type !== 'orders' || canAccessOrders);
+  const visibleMenuItems = isEmployee
+    ? menuItems.filter(item => item.type === 'employee-portal')
+    : isWholeSaler
+      ? menuItems.filter(item => ['dashboard', 'invoice'].includes(item.type.toLowerCase()))
+      : menuItems.filter(item => item.type !== 'employee-portal' && (item.type !== 'orders' || canAccessOrders));
   const isActiveItem = (itemType: string) => {
     const pathParts = location.pathname.toLowerCase().split('/');
     const firstSegment = pathParts[1] ?? '';
@@ -163,6 +180,10 @@ export default function LeftSidebar({
 
     if (normalizedType === 'orders') {
       return firstSegment === 'orders';
+    }
+
+    if (normalizedType === 'employees' || normalizedType === 'employee-portal') {
+      return firstSegment === normalizedType;
     }
 
     return false;

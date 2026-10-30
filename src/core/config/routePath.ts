@@ -41,6 +41,20 @@ export const ROUTE_PATH = {
     subTitle: '',
     backButtonRoute: null
   },
+  employees: {
+    path: '/employees',
+    pathMatch: 'employees',
+    title: 'EMPLOYEES',
+    subTitle: '',
+    backButtonRoute: null
+  },
+  employeePortal: {
+    path: '/employee-portal',
+    pathMatch: 'employee-portal',
+    title: 'MY WORK',
+    subTitle: '',
+    backButtonRoute: null
+  },
   invoiceDetails: {
     path: '/invoice/details/:id',
     pathMatch: 'invoice/details',

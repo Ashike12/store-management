@@ -4,6 +4,7 @@ import useLocalization from "@core/hooks/useLocalization";
 import { PRODUCT_CATEGORIES, PRODUCT_CATEGORY_SUBCATEGORY_MAP } from "@core/config/product-category.constants";
 import { Modal, Box, MenuItem, SelectChangeEvent, TextField } from "@mui/material";
 import AiSuggestionButton from "@components/ai-suggestion-button/AiSuggestionButton";
+import {useListEmployeesQuery} from "@core/store/api/employeeApi";
 
 export interface IProductForm {
     ItemId: string;
@@ -19,6 +20,7 @@ export interface IProductForm {
     EndUserPrice: string;
     EndUserDiscountedPrice: string;
     Quantity: string;
+    MadeByEmployeeId: string;
 }
 
 export default function ProductModal({
@@ -51,6 +53,7 @@ export default function ProductModal({
     const subCategoryOptions = PRODUCT_CATEGORY_SUBCATEGORY_MAP[formData?.Category] ?? [];
     const hasCustomSubCategory = !!formData?.SubCategory && !subCategoryOptions.includes(formData.SubCategory);
     const shouldShowNetHeight = ["MosquitoNet", "MosquitoNetYard"].includes(formData?.Category);
+    const employees = useListEmployeesQuery({Status: 'active', Page: 1, Size: 100}, {skip: !isOpen || Boolean(isUpdate)});
 
     return (
         <Modal open={isOpen} onClose={() => handleCancel()}>
@@ -171,6 +174,22 @@ export default function ProductModal({
                         onChange={handleFormData}
                         fullWidth
                     />
+                    {!isUpdate && (
+                        <TextField
+                            label="Made by employee (optional)"
+                            name="MadeByEmployeeId"
+                            value={formData?.MadeByEmployeeId}
+                            onChange={handleFormData}
+                            select
+                            fullWidth
+                            helperText="Attributes the initial stock batch; it does not create a wage entry."
+                        >
+                            <MenuItem value="">Not assigned</MenuItem>
+                            {employees.data?.Data.map(employee => (
+                                <MenuItem key={employee.ItemId} value={employee.ItemId}>{employee.DisplayName}</MenuItem>
+                            ))}
+                        </TextField>
+                    )}
                     <TextField
                         label={useTranslation({content:'PRODUCT_VIDEO_LINK'})}
                         name="VideoLink"

@@ -3,6 +3,7 @@ import { authApi } from './api/authAPI';
 import { invoiceApi } from './api/invoiceApi';
 import { productApi } from './api/product';
 import { ordersApi } from './api/ordersApi';
+import { employeeApi } from './api/employeeApi';
 
 // Set up the API reducers dynamically
 export const apiReducers = {
@@ -11,6 +12,7 @@ export const apiReducers = {
   [authApi.reducerPath]: authApi.reducer,
   [productApi.reducerPath]: productApi.reducer,
   [invoiceApi.reducerPath]: invoiceApi.reducer,
+  [employeeApi.reducerPath]: employeeApi.reducer,
 };
 
 // Dynamically collect all API middlewares
@@ -20,4 +22,5 @@ export const apiMiddlewares = [
   authApi.middleware,
   productApi.middleware,
   invoiceApi.middleware,
+  employeeApi.middleware,
 ];

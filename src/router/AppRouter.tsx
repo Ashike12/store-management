@@ -9,6 +9,7 @@ import { useAppSelector } from '@core/store/hooks';
 import { selectCurrentUserRoles, selectIsWholeSaler } from '@core/store/slices/auth.slice';
 import {ROUTE_PATH} from '@core/config/routePath';
 import {canAccessOrderFulfillment} from '@features/orders/orderFulfillment';
+import {allowedEmployeeRoutePaths, authenticatedHomePath, isEmployeeRole} from '@features/employees/employeeAccess';
 
 const renderFallback = (
   <div className="flex h-screen w-full flex-1 items-center justify-center">
@@ -26,12 +27,16 @@ const renderFallback = (
 
 export default function AppRouter() {
   const isWholeSaler = useAppSelector(selectIsWholeSaler);
+  const roles = useAppSelector(selectCurrentUserRoles);
+  const isEmployee = isEmployeeRole(roles);
   const canAccessOrders = useAppSelector(state =>
     canAccessOrderFulfillment(selectCurrentUserRoles(state)),
   );
-  const allowedRoutePaths = isWholeSaler
-    ? new Set(['/dashboard', '/invoice', '/invoice/details/:id'])
-    : null;
+  const allowedRoutePaths = isEmployee
+    ? allowedEmployeeRoutePaths(roles)
+    : isWholeSaler
+      ? new Set(['/dashboard', '/invoice', '/invoice/details/:id'])
+      : null;
 
   return (
     <Routes>
@@ -46,7 +51,7 @@ export default function AppRouter() {
         }>
         <Route
           index
-          element={<Navigate to='/dashboard' replace />}
+          element={<Navigate to={authenticatedHomePath(roles)} replace />}
         />
         {BASE_ROUTES.filter(({path}) =>
           (!allowedRoutePaths || allowedRoutePaths.has(path)) &&
@@ -56,7 +61,7 @@ export default function AppRouter() {
         ))}
       </Route>
       <Route path="404" element={<NotFoundView />} />
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      <Route path="*" element={<Navigate to={authenticatedHomePath(roles)} replace />} />
     </Routes>
   );
 }

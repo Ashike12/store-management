@@ -4,7 +4,7 @@ export interface IProductResponse {
     Data: IProduct[];
 }
 
-export interface ICreateProductPayload {
+export interface IProductInput {
     ProductName: string;
     Category: string;
     SubCategory: string;
@@ -17,22 +17,85 @@ export interface ICreateProductPayload {
     EndUserPrice: number;
     EndUserDiscountedPrice: number;
     Quantity: number;
+    MadeByEmployeeId?: string;
 }
 
-export interface IProduct extends ICreateProductPayload {
+export interface ICreateProductPayload extends IProductInput {
+    RequestId: string;
+}
+
+export interface IProduct extends IProductInput {
     ItemId: string;
     CreatedDate?: string;
+    QrVerificationEnabled?: boolean;
+    QrVerificationUrl?: string | null;
+}
+
+export type ProductQrAction = 'enable' | 'disable' | 'rotate';
+
+export interface IConfigureProductQrPayload {
+    ItemId: string;
+    Action: ProductQrAction;
+}
+
+export interface IConfigureProductQrResponse {
+    IsSuccess: boolean;
+    Data: {
+        ItemId: string;
+        QrVerificationEnabled: boolean;
+        QrVerificationUrl: string | null;
+    };
+    ErrorMessage?: string;
 }
 
 
 
 export interface IAddProductionPayload {
+    RequestId: string;
     ProductionInfo: IAddProduction[];
 }
 
 export interface IAddProduction {
     ProductId: string;
     Quantity: number;
+    MadeByEmployeeId?: string;
+}
+
+export interface IProductBatch {
+    BatchId: string;
+    ProductId: string;
+    QuantityReceived: number;
+    CreatedBy?: string;
+    MadeByEmployeeId?: string;
+    MakerName?: string | null;
+    CreatedDate: string;
+}
+
+export interface IBatchItem {
+    SerialNumber: string;
+    BatchId: string;
+    ProductId: string;
+    UnitIndex: number;
+    CreatedDate: string;
+}
+
+export interface IPaginatedResponse<T> {
+    IsSuccess: boolean;
+    Data: T[];
+    TotalCount: number;
+    ErrorMessage?: string;
+}
+
+export interface IListProductBatchesPayload {
+    ProductId: string;
+    Page: number;
+    Size: number;
+}
+
+export interface IListBatchItemsPayload {
+    BatchId: string;
+    Page: number;
+    Size: number;
 }
 
 export interface IGetProductPayload {
