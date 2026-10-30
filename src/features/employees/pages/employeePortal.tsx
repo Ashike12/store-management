@@ -4,7 +4,6 @@ import {
   Button,
   Card,
   Chip,
-  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -18,6 +17,7 @@ import {
 } from '@mui/material';
 import {useMemo, useState} from 'react';
 import {useGetEmployeeOverviewQuery, useSubmitFeedbackMutation} from '@core/store/api/employeeApi';
+import {DashboardSkeleton} from '@components/loaders/AdminSkeleton';
 
 const money = (value: number) => `Tk ${Number(value || 0).toLocaleString('en-BD', {minimumFractionDigits: 2})}`;
 
@@ -32,7 +32,7 @@ export default function EmployeePortal() {
     [overview.data],
   );
 
-  if (overview.isLoading) return <Box p={4}><CircularProgress /></Box>;
+  if (overview.isLoading) return <DashboardSkeleton />;
   if (overview.isError || !overview.data) return <Box p={4}><Alert severity="error">Your work history could not be loaded. Please try again.</Alert></Box>;
   const data = overview.data.Data;
   const summary = data.Summary;

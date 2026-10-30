@@ -4,7 +4,7 @@ import {
   Button,
   Card,
   Chip,
-  CircularProgress,
+  Skeleton,
   Dialog,
   DialogActions,
   DialogContent,
@@ -14,7 +14,6 @@ import {
   List,
   ListItemButton,
   ListItemText,
-  MenuItem,
   Stack,
   Tab,
   Tabs,
@@ -39,6 +38,7 @@ import {
   useUpdatePaymentEntryMutation,
   useUpdateWorkEntryMutation,
 } from '@core/store/api/employeeApi';
+import {DetailSkeleton} from '@components/loaders/AdminSkeleton';
 
 const money = (value: number) => `Tk ${Number(value || 0).toLocaleString('en-BD', {minimumFractionDigits: 2})}`;
 const today = () => new Date().toLocaleDateString('en-CA', {timeZone: 'Asia/Dhaka'});
@@ -47,6 +47,16 @@ type LedgerDialogState =
   | {kind: 'work'; value?: IWorkEntry}
   | {kind: 'payment'; value?: IPaymentEntry}
   | null;
+
+type EmployeeForm = {
+  FirstName: string;
+  LastName: string;
+  DisplayName: string;
+  Email: string;
+  Phone: string;
+  Address: string;
+  Password: string;
+};
 
 export default function EmployeeManagement() {
   const employees = useListEmployeesQuery({Status: 'all', Page: 1, Size: 100});
@@ -105,7 +115,9 @@ export default function EmployeeManagement() {
         <Card variant="outlined" sx={{alignSelf: 'start'}}>
           <Box p={2}><Typography fontWeight={800}>Team</Typography><Typography variant="caption" color="text.secondary">{employees.data?.TotalCount ?? 0} employees</Typography></Box>
           <Divider />
-          {employees.isLoading && <CircularProgress size={24} sx={{m: 2}} />}
+          {employees.isLoading && <Stack gap="12px" sx={{p: '16px'}} role="status" aria-label="Loading employees">
+            {Array.from({length: 6}, (_, index) => <Skeleton key={index} animation="wave" variant="rounded" height={52} />)}
+          </Stack>}
           <List disablePadding>
             {employees.data?.Data.map(employee => (
               <ListItemButton key={employee.ItemId} selected={selectedId === employee.ItemId} onClick={() => setSelectedId(employee.ItemId)}>
@@ -121,7 +133,7 @@ export default function EmployeeManagement() {
 
         <Box minWidth={0}>
           {!selectedId && <Alert severity="info">Add or select an employee to manage their ledger.</Alert>}
-          {overview.isFetching && <CircularProgress />}
+          {overview.isFetching && <DetailSkeleton rows={6} />}
           {overview.isError && <Alert severity="error">Employee details could not be loaded.</Alert>}
           {overview.data && summary && (
             <Stack gap={3}>
@@ -239,12 +251,12 @@ export default function EmployeeManagement() {
   );
 }
 
-function EmployeeDialog({value, onClose, onSave}: {value: IEmployeeSummary | 'new' | null; onClose: () => void; onSave: (value: any) => Promise<void>}) {
+function EmployeeDialog({value, onClose, onSave}: {value: IEmployeeSummary | 'new' | null; onClose: () => void; onSave: (value: EmployeeForm) => Promise<void>}) {
   const employee = value && value !== 'new' ? value : null;
-  const [form, setForm] = useState<any>({FirstName: '', LastName: '', DisplayName: '', Email: '', Phone: '', Address: '', Password: ''});
+  const [form, setForm] = useState<EmployeeForm>({FirstName: '', LastName: '', DisplayName: '', Email: '', Phone: '', Address: '', Password: ''});
   useEffect(() => setForm(employee ? {...employee, Password: ''} : {FirstName: '', LastName: '', DisplayName: '', Email: '', Phone: '', Address: '', Password: ''}), [employee, value]);
-  return <Dialog open={Boolean(value)} onClose={onClose} fullWidth maxWidth="sm"><DialogTitle>{value === 'new' ? 'Add employee' : 'Edit employee'}</DialogTitle><DialogContent><Box sx={{display: 'grid', gridTemplateColumns: {xs: '1fr', sm: '1fr 1fr'}, gap: 2, mt: 1}}>
-    {['FirstName', 'LastName', 'DisplayName', 'Email', 'Phone', 'Address', ...(value === 'new' ? ['Password'] : [])].map(field => <TextField key={field} label={field.replace(/([A-Z])/g, ' $1').trim()} type={field === 'Password' ? 'password' : 'text'} value={form[field] ?? ''} disabled={field === 'Email' && value !== 'new'} onChange={event => setForm({...form, [field]: event.target.value})} required={!['DisplayName'].includes(field)} sx={field === 'Address' ? {gridColumn: '1 / -1'} : undefined} />)}
+  return <Dialog open={Boolean(value)} onClose={onClose} fullWidth maxWidth="sm"><DialogTitle>{value === 'new' ? 'Add employee' : 'Edit employee'}</DialogTitle><DialogContent><Box sx={{display: 'grid', gridTemplateColumns: {xs: '1fr', sm: '1fr 1fr'}, columnGap: '16px', rowGap: '20px', mt: '8px'}}>
+    {(['FirstName', 'LastName', 'DisplayName', 'Email', 'Phone', 'Address', ...(value === 'new' ? ['Password'] : [])] as Array<keyof EmployeeForm>).map(field => <TextField key={field} label={field.replace(/([A-Z])/g, ' $1').trim()} type={field === 'Password' ? 'password' : 'text'} value={form[field] ?? ''} disabled={field === 'Email' && value !== 'new'} onChange={event => setForm({...form, [field]: event.target.value})} required={field !== 'DisplayName'} sx={field === 'Address' ? {gridColumn: '1 / -1'} : undefined} />)}
   </Box></DialogContent><DialogActions><Button onClick={onClose}>Cancel</Button><Button variant="contained" onClick={() => onSave(form)} disabled={!form.FirstName || !form.LastName || !form.Email || !form.Phone || !form.Address || (value === 'new' && !form.Password)}>Save</Button></DialogActions></Dialog>;
 }
 
@@ -255,7 +267,7 @@ function LedgerDialog({state, onClose, onSave}: {state: LedgerDialogState; onClo
     if (state?.kind === 'work') setForm({date: value?.WorkDate ?? today(), amount: value?.Amount?.toString() ?? '', description: value?.Description ?? '', reference: value?.BatchId ?? ''});
     if (state?.kind === 'payment') setForm({date: value?.PaymentDate ?? today(), amount: value?.Amount?.toString() ?? '', description: value?.Note ?? '', reference: value?.Reference ?? ''});
   }, [state, value]);
-  return <Dialog open={Boolean(state)} onClose={onClose} fullWidth maxWidth="sm"><DialogTitle>{value ? 'Edit' : 'Add'} {state?.kind === 'work' ? 'work entry' : 'payment'}</DialogTitle><DialogContent><Stack gap={2} mt={1}>
+  return <Dialog open={Boolean(state)} onClose={onClose} fullWidth maxWidth="sm"><DialogTitle>{value ? 'Edit' : 'Add'} {state?.kind === 'work' ? 'work entry' : 'payment'}</DialogTitle><DialogContent><Stack gap="20px" mt="8px">
     <TextField label="Date" type="date" value={form.date} onChange={event => setForm({...form, date: event.target.value})} InputLabelProps={{shrink: true}} required />
     <TextField label="Amount (Tk)" type="number" inputProps={{min: 0.01, step: 0.01}} value={form.amount} onChange={event => setForm({...form, amount: event.target.value})} required />
     <TextField label={state?.kind === 'work' ? 'Work description' : 'Payment note'} value={form.description} onChange={event => setForm({...form, description: event.target.value})} required={state?.kind === 'work'} multiline rows={2} />

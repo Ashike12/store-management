@@ -4,6 +4,9 @@ import { IconCopy, IconEdit, IconTrash } from "@tabler/icons-react";
 import { useState } from "react";
 import moment from "moment";
 import {useTheme} from "@mui/material/styles";
+import {Box} from "@mui/material";
+import EmptyTableState, {type EmptyTableStateProps} from "@components/empty-state/EmptyTableState";
+import {TableSkeleton} from "@components/loaders/AdminSkeleton";
 
 // Define types for table columns and data
 interface Column {
@@ -27,6 +30,9 @@ interface TableProps<T> {
     currentPage?: number; // Optional current page for server-side pagination
     isServerPaginated?: boolean; // Optional flag to use external pagination state
     renderRowActions?: (row: T) => React.ReactNode;
+    isLoading?: boolean;
+    skeletonRows?: number;
+    emptyState?: EmptyTableStateProps;
 }
 
 const CustomTable = <T extends object>({
@@ -44,6 +50,9 @@ const CustomTable = <T extends object>({
     currentPage: externalCurrentPage = 1,
     isServerPaginated = false,
     renderRowActions,
+    isLoading = false,
+    skeletonRows = 6,
+    emptyState,
 }: TableProps<T>) => {
     const theme = useTheme();
     const [currentPage, setCurrentPage] = useState(1);
@@ -73,7 +82,8 @@ const CustomTable = <T extends object>({
                     color: theme.vars.palette.text.primary,
                 }}
             >
-                <table className="w-full border rounded-sm" style={{borderColor: tableBorderColor}}>
+                <Box sx={{width: '100%', overflowX: 'auto'}}>
+                <table className="w-full min-w-[680px] border rounded-sm" style={{borderColor: tableBorderColor}} aria-busy={isLoading}>
                     <thead style={{backgroundColor: theme.vars.palette.background.neutral}}>
                         <tr>
                             {columns.map((col) => (
@@ -89,7 +99,9 @@ const CustomTable = <T extends object>({
                         </tr>
                     </thead>
                     <tbody>
-                        {currentData.map((row, rowIndex) => (
+                        {isLoading ? (
+                            <TableSkeleton columns={columns.length + (showActionButtons ? 1 : 0)} rows={skeletonRows} />
+                        ) : currentData.map((row, rowIndex) => (
                             <tr
                                 key={rowIndex}
                                 style={{transition: 'background-color 120ms ease'}}
@@ -129,9 +141,12 @@ const CustomTable = <T extends object>({
                         ))}
                     </tbody>
                 </table>
+                </Box>
+
+                {!isLoading && currentData.length === 0 && <EmptyTableState {...emptyState} />}
 
                 {/* Pagination Controls */}
-                {!hidePagination && (<div className="flex justify-between items-center mt-4">
+                {!isLoading && currentData.length > 0 && !hidePagination && (<div className="flex justify-between items-center mt-4 gap-3">
                     <button
                         onClick={() => {
                             const nextPage = Math.max(activePage - 1, 1);

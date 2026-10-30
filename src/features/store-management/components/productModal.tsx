@@ -77,10 +77,11 @@ export default function ProductModal({
                 {/* Form Fields */}
                 <Box
                     sx={{
-                        mt: 4,
+                        mt: "16px",
                         display: "grid",
                         gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
-                        gap: 4,
+                        columnGap: "16px",
+                        rowGap: "20px",
                     }}
                 >
                     <TextField

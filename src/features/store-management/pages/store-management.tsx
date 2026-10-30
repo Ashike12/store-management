@@ -327,7 +327,7 @@ export default function StoreManagement() {
   return (
     <>
       <div className='w-full'>
-        {data && data && (<div className="p-10 w-full">
+        <div className="p-10 w-full">
           <div className="flex flex-wrap gap-3 mb-6 items-center">
             <div className="flex gap-2 items-center w-full flex-wrap">
               <input
@@ -404,8 +404,7 @@ export default function StoreManagement() {
               </div>
             </div>
           </div>
-          {data?.Data?.length > 0 ? (
-            <CustomTable
+          <CustomTable
               showActionButtons={true}
               showCloneButton={true}
               handleRowClick={handleRowClick}
@@ -439,14 +438,17 @@ export default function StoreManagement() {
               currentPage={payload.pageNumber}
               isServerPaginated={true}
               handlePageSelection={handlePageSelection}
+              isLoading={isLoading}
+              emptyState={{
+                title: searchText ? 'No products match your filters' : 'Build your product catalogue',
+                description: searchText
+                  ? 'Try another name, category, subcategory or making-price range.'
+                  : 'Add your first product to manage stock, pricing, batches and QR verification.',
+                actionLabel: searchText ? undefined : 'Add product',
+                onAction: searchText ? undefined : resetForm,
+              }}
             />
-          ) : (
-            <div>No data found</div>
-          )}
-        </div>)}
-        {(isLoading) && (<div className="p-10 w-full">
-          Loading...
-        </div>)}
+        </div>
       </div>
       {isOpen && (
         <ProductModal

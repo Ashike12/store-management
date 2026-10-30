@@ -28,9 +28,9 @@ const initialFormData: IUserForm = {
 
 export default function StoreManagement() {
   const { data, isLoading, refetch } = useGetUserQuery({ pageNumber: 1, pageSize: 10, itemId: '' });
-  const [createProduct, { isLoading: isCreating }] = useCreateUserMutation();
-  const [updateProduct, { isLoading: isUpdating }] = useUpdateUserMutation();
-  const [deleteProduct, { isLoading: isDeleting }] = useDeleteUserMutation();
+  const [createProduct] = useCreateUserMutation();
+  const [updateProduct] = useUpdateUserMutation();
+  const [deleteProduct] = useDeleteUserMutation();
   const [isOpen, setIsOpen] = useState(false);
   const [isDelete, setIsDelete] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
@@ -132,7 +132,7 @@ export default function StoreManagement() {
     <>
       <div className='w-full'>
 
-        {data && data && data?.Data?.length > 0 && (<div className="p-10 w-full">
+        <div className="p-10 w-full">
           <div className="flex flex-wrap gap-4 mb-6">
             <input
               type="text"
@@ -154,14 +154,17 @@ export default function StoreManagement() {
             handleRowClick={handleRowClick}
             columns={columns}
             data={filteredData}
-            rowsPerPage={10} />
-        </div>)}
-        {!isLoading && data && data && data?.Data?.length == 0 && (<div className="p-10 w-full">
-          No data found
-        </div>)}
-        {(isLoading) && (<div className="p-10 w-full">
-          Loading...
-        </div>)}
+            rowsPerPage={10}
+            isLoading={isLoading}
+            emptyState={{
+              title: searchText ? 'No wholesalers match your search' : 'Your wholesaler network starts here',
+              description: searchText
+                ? 'Try a different name or clear the search to see every wholesaler.'
+                : 'Add your first wholesaler to track invoices, payments and outstanding balances.',
+              actionLabel: searchText ? undefined : 'Add wholesaler',
+              onAction: searchText ? undefined : resetForm,
+            }} />
+        </div>
       </div>
       {isOpen && (
         <UserModal isUpdate={isUpdate} handleSubmit={handleSubmit} formData={formData} isOpen={isOpen} handleFormData={handleSave} handleCancel={handleCancel} />

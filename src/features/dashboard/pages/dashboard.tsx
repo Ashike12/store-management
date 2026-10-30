@@ -20,6 +20,7 @@ import CustomTable from '@components/table/CustomTable';
 import {getInvoiceColumns} from '@features/invoice/pages/invoice';
 import {useAppSelector} from '@core/store/hooks';
 import {selectIsWholeSaler} from '@core/store/slices/auth.slice';
+import {DashboardSkeleton} from '@components/loaders/AdminSkeleton';
 
 const COLORS = ['#2563eb', '#10b981', '#f59e0b', '#0ea5e9', '#64748b'];
 
@@ -52,7 +53,7 @@ function MetricCard({label, value, tone = 'default', prefix}: MetricCardProps) {
 }
 
 const Dashboard = () => {
-  const {data, refetch} = useGetDashboardDataQuery({
+  const {data, isLoading, refetch} = useGetDashboardDataQuery({
     pageNumber: 1,
     pageSize: 10,
     itemId: '',
@@ -63,6 +64,10 @@ const Dashboard = () => {
   useEffect(() => {
     refetch();
   }, [refetch]);
+
+  if (isLoading) {
+    return <DashboardSkeleton />;
+  }
 
   if (isWholeSaler) {
     return (
@@ -89,21 +94,19 @@ const Dashboard = () => {
         <Card>
           <CardContent>
             <h2 className="mb-2 text-lg font-bold">Recent invoices</h2>
-            {dashBoardData?.RecentInvoiceData?.length ? (
-              <div className="w-full overflow-x-auto py-4">
+            <div className="w-full overflow-x-auto py-4">
                 <CustomTable
                   isRowClickable={false}
                   columns={getInvoiceColumns(true)}
                   hidePagination
-                  data={dashBoardData.RecentInvoiceData}
+                  data={dashBoardData?.RecentInvoiceData ?? []}
                   rowsPerPage={10}
+                  emptyState={{
+                    title: 'No invoices yet',
+                    description: 'Your recent wholesaler invoices will appear here.',
+                  }}
                 />
-              </div>
-            ) : (
-              <p className="text-sm text-[var(--palette-text-secondary)]">
-                No invoices found.
-              </p>
-            )}
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -270,21 +273,19 @@ const Dashboard = () => {
       <Card>
         <CardContent>
           <h2 className="mb-2 text-lg font-bold">Recent invoices</h2>
-          {dashBoardData?.RecentInvoiceData?.length ? (
-            <div className="w-full overflow-x-auto py-4">
+          <div className="w-full overflow-x-auto py-4">
               <CustomTable
                 isRowClickable={false}
                 columns={getInvoiceColumns(false)}
                 hidePagination
-                data={dashBoardData.RecentInvoiceData}
+                data={dashBoardData?.RecentInvoiceData ?? []}
                 rowsPerPage={10}
+                emptyState={{
+                  title: 'No invoices yet',
+                  description: 'Recent invoices will appear here as sales are recorded.',
+                }}
               />
-            </div>
-          ) : (
-            <p className="text-sm text-[var(--palette-text-secondary)]">
-              No invoices found.
-            </p>
-          )}
+          </div>
         </CardContent>
       </Card>
     </div>

@@ -144,10 +144,7 @@ export default function Invoice() {
               </div>
             )}
           </div>
-          {isLoading ? (
-            <div>Loading...</div>
-          ) : filteredData.length > 0 ? (
-            <CustomTable
+          <CustomTable
               isRowClickable={true}
               handleRowClick={handleRowClick}
               columns={getInvoiceColumns(isWholeSaler)}
@@ -155,10 +152,18 @@ export default function Invoice() {
               totalCount={data?.TotalCount}
               handlePageSelection={handlePageSelection}
               rowsPerPage={10}
+              isLoading={isLoading}
+              emptyState={{
+                title: searchTerm || fromDate || toDate ? 'No invoices match these filters' : 'No invoices recorded yet',
+                description: searchTerm || fromDate || toDate
+                  ? 'Adjust the date range or search text and try again.'
+                  : isWholeSaler
+                    ? 'Your invoices will appear here after they are created.'
+                    : 'Create the first invoice to begin tracking sales and payments.',
+                actionLabel: !isWholeSaler && !searchTerm && !fromDate && !toDate ? 'Add invoice' : undefined,
+                onAction: !isWholeSaler && !searchTerm && !fromDate && !toDate ? addInvoice : undefined,
+              }}
             />
-          ) : (
-            <div>No data found</div>
-          )}
         </div>
       </div>
     </>
