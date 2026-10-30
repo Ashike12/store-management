@@ -12,4 +12,7 @@ export const bnTransLations = {
 };
 
 // Untranslated console keys continue to use the configured English fallback.
-export const zhTransLations = {ORDER_FOLLOW_UP: zhOrderFollowUp};
+export const zhTransLations = {
+  ...common.zhTranslations,
+  ORDER_FOLLOW_UP: zhOrderFollowUp,
+};
