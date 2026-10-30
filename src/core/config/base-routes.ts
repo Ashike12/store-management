@@ -39,6 +39,20 @@ const BASE_ROUTES: IRoute[] = [
     Component: React.lazy(() => import('@features/orders/pages/orders')),
   },
   {
+    title: ROUTE_PATH.employees.title,
+    path: ROUTE_PATH.employees.path,
+    pathMatch: ROUTE_PATH.employees.pathMatch,
+    exact: true,
+    Component: React.lazy(() => import('@features/employees/pages/employeeManagement')),
+  },
+  {
+    title: ROUTE_PATH.employeePortal.title,
+    path: ROUTE_PATH.employeePortal.path,
+    pathMatch: ROUTE_PATH.employeePortal.pathMatch,
+    exact: true,
+    Component: React.lazy(() => import('@features/employees/pages/employeePortal')),
+  },
+  {
     title: ROUTE_PATH.wholesalerDetails.title,
     path: ROUTE_PATH.wholesalerDetails.path,
     pathMatch: ROUTE_PATH.wholesalerDetails.pathMatch,

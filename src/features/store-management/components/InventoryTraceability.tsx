@@ -251,6 +251,9 @@ const InventoryTraceability = ({
                           sx={{opacity: 0.8}}>
                           By {batch.CreatedBy || 'Unknown admin'}
                         </Typography>
+                        <Typography variant="caption" display="block" noWrap sx={{opacity: 0.8}}>
+                          Maker: {batch.MakerName || 'Not assigned'}
+                        </Typography>
                       </Box>
                     </Button>
                   );

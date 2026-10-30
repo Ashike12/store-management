@@ -49,6 +49,7 @@ const initialFormData: IProductForm = {
   EndUserPrice: "",
   EndUserDiscountedPrice: "",
   Quantity: "",
+  MadeByEmployeeId: "",
 }
 
 const mapProductToForm = (row: IProduct, includeItemId = true): IProductForm => ({
@@ -65,6 +66,7 @@ const mapProductToForm = (row: IProduct, includeItemId = true): IProductForm => 
   EndUserPrice: row.EndUserPrice.toString(),
   EndUserDiscountedPrice: row.EndUserDiscountedPrice.toString(),
   Quantity: row.Quantity.toString(),
+  MadeByEmployeeId: '',
 });
 
 const hasCloneIdentityChanged = (currentFormData: IProductForm, baseFormData: IProductForm) =>
@@ -236,6 +238,7 @@ export default function StoreManagement() {
           EndUserPrice: Number(formData.EndUserPrice),
           EndUserDiscountedPrice: Number(formData.EndUserDiscountedPrice),
           Quantity: Number(formData.Quantity),
+          MadeByEmployeeId: formData.MadeByEmployeeId || undefined,
         }
       }).unwrap();
       setIsOpen(false);

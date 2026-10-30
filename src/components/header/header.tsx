@@ -21,6 +21,7 @@ import { MouseEvent, useMemo, useState } from 'react';
 import { useGetCurrentUserQuery } from '@core/store/api';
 import UserProfileDialog from './UserProfileDialog';
 import OrderFollowUp from './OrderFollowUp';
+import EmployeeNotifications from './EmployeeNotifications';
 
 interface AppBarProps {
   open?: boolean;
@@ -95,6 +96,7 @@ export default function Header({ isLocked }: Readonly<IHeaderProps>) {
         </div>
         <div className='flex flex-wrap items-center justify-end gap-3'>
           <OrderFollowUp />
+          <EmployeeNotifications />
           <Select
             size="small"
             value={mode}

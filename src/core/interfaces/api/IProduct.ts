@@ -17,6 +17,7 @@ export interface IProductInput {
     EndUserPrice: number;
     EndUserDiscountedPrice: number;
     Quantity: number;
+    MadeByEmployeeId?: string;
 }
 
 export interface ICreateProductPayload extends IProductInput {
@@ -57,6 +58,7 @@ export interface IAddProductionPayload {
 export interface IAddProduction {
     ProductId: string;
     Quantity: number;
+    MadeByEmployeeId?: string;
 }
 
 export interface IProductBatch {
@@ -64,6 +66,8 @@ export interface IProductBatch {
     ProductId: string;
     QuantityReceived: number;
     CreatedBy?: string;
+    MadeByEmployeeId?: string;
+    MakerName?: string | null;
     CreatedDate: string;
 }
 

@@ -6,11 +6,13 @@ import { ErrorMessage, FieldArray, Form, Formik } from "formik";
 import { addProductionValidationSchema } from "../schemas/add-production.schema";
 import { useEffect, useRef, useState } from "react";
 import { buildProductionPayload, createInventoryRequestLifecycle } from "../inventoryRequest";
+import {useListEmployeesQuery} from "@core/store/api/employeeApi";
 
 export interface IEachProduction {
     ProductId: string,
     CurrentQuantity: number,
     ProductionAmount: number,
+    MadeByEmployeeId: string,
 }
 
 export interface IProductionForm {
@@ -22,6 +24,7 @@ const createProductionInitialValues: IProductionForm = {
         ProductId: '',
         CurrentQuantity: 0,
         ProductionAmount: 0,
+        MadeByEmployeeId: '',
     }]
 }
 
@@ -37,6 +40,7 @@ export default function ProductionModal({
     const [createProduction, { isLoading: isCreating }] = useAddProductionMutation();
     const requestLifecycle = useRef(createInventoryRequestLifecycle());
     const [submissionError, setSubmissionError] = useState('');
+    const employees = useListEmployeesQuery({Status: 'active', Page: 1, Size: 100});
     const productList = productData?.Data || [];
     const submitInvoice = async (values: IProductionForm) => {
         setSubmissionError('');
@@ -121,6 +125,21 @@ export default function ProductionModal({
                                                             </TextField>
                                                             <ErrorMessage name={`ProductionInfo[${index}].ProductId`} component="div" className="text-red-500" />
                                                         </div>
+
+                                                        <div className="flex-1">
+                                                            <TextField
+                                                                label="Made by (optional)"
+                                                                name={`ProductionInfo[${index}].MadeByEmployeeId`}
+                                                                fullWidth
+                                                                select
+                                                                value={product.MadeByEmployeeId}
+                                                                onChange={(e) => setFieldValue(`ProductionInfo[${index}].MadeByEmployeeId`, e.target.value)}
+                                                                helperText="Batch attribution only"
+                                                            >
+                                                                <MenuItem value="">Not assigned</MenuItem>
+                                                                {employees.data?.Data.map(employee => <MenuItem key={employee.ItemId} value={employee.ItemId}>{employee.DisplayName}</MenuItem>)}
+                                                            </TextField>
+                                                        </div>
                                                         {/* CurrentQuantity */}
                                                         <div className="flex-1">
                                                             <TextField
@@ -181,6 +200,7 @@ export default function ProductionModal({
                                                             ProductId: '',
                                                             CurrentQuantity: 0,
                                                             ProductionAmount: 0,
+                                                            MadeByEmployeeId: '',
                                                         })
                                                     }
                                                 />
