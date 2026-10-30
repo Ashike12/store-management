@@ -84,4 +84,8 @@ export const selectIsWholeSaler = (state: RootState): boolean => {
   return selectCurrentUserRoles(state).includes('wholesaler');
 };
 
+export const selectIsEmployee = (state: RootState): boolean => {
+  return selectCurrentUserRoles(state).includes('employee');
+};
+
 export default authSlice.reducer;

@@ -33,6 +33,17 @@ vi.mock('../src/core/store/api/product', () => ({
   useAddProductionMutation: () => [apiMocks.addProduction, {isLoading: false}],
 }));
 
+vi.mock('../src/core/store/api/employeeApi', () => ({
+  useListEmployeesQuery: () => ({
+    data: {
+      IsSuccess: true,
+      TotalCount: 1,
+      Data: [{ItemId: 'employee-1', DisplayName: 'Net Maker'}],
+    },
+    isLoading: false,
+  }),
+}));
+
 vi.mock('@components/button/CustomButton', () => ({
   CustomButton: ({
     text,

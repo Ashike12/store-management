@@ -49,6 +49,7 @@ export const buildProductionPayload = (
     item => ({
       ProductId: item.ProductId,
       Quantity: Number(item.ProductionAmount),
+      MadeByEmployeeId: item.MadeByEmployeeId || undefined,
     }),
   ),
 });
