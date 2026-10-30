@@ -128,6 +128,13 @@ describe('InventoryTraceability', () => {
 
     expect(await screen.findByText('BATCH-001_0001')).toBeInTheDocument();
     fireEvent.click(
+      screen.getByRole('button', {name: 'Copy batch ID BATCH-001'}),
+    );
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith('BATCH-001');
+    expect(
+      await screen.findByText('Batch ID BATCH-001 copied'),
+    ).toBeInTheDocument();
+    fireEvent.click(
       screen.getByRole('listitem', {name: 'Select batch BATCH-002'}),
     );
     expect(await screen.findByText('BATCH-002_0001')).toBeInTheDocument();

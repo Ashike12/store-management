@@ -14,8 +14,8 @@ import {
   Typography,
   useMediaQuery,
 } from '@mui/material';
-import {useTheme} from '@mui/material/styles';
-import {IconCopy, IconPackage, IconRefresh, IconX} from '@tabler/icons-react';
+import {alpha, useTheme} from '@mui/material/styles';
+import {IconCopy, IconPackage, IconRefresh, IconUsers, IconX} from '@tabler/icons-react';
 import {useEffect, useState} from 'react';
 import {IProduct, IProductBatch} from '@core/interfaces/api/IProduct';
 import {
@@ -97,6 +97,21 @@ const InventoryTraceability = ({
     }
   };
 
+  const copyBatchId = async (batchId: string) => {
+    try {
+      if (!navigator.clipboard?.writeText) {
+        throw new Error('Clipboard API is unavailable');
+      }
+      await navigator.clipboard.writeText(batchId);
+      setCopyFeedback({message: `Batch ID ${batchId} copied`, severity: 'success'});
+    } catch {
+      setCopyFeedback({
+        message: 'Could not copy the batch ID. Please copy it manually.',
+        severity: 'error',
+      });
+    }
+  };
+
   const batchCount = Math.max(
     1,
     Math.ceil((batches.currentData?.TotalCount ?? 0) / PAGE_SIZE),
@@ -113,21 +128,25 @@ const InventoryTraceability = ({
       onClose={onClose}
       PaperProps={{
         'aria-label': 'Inventory traceability',
-        sx: {width: fullScreen ? '100%' : 760, maxWidth: '100%'},
+        sx: {
+          width: fullScreen ? '100%' : 980,
+          maxWidth: '100%',
+          backgroundImage: 'none',
+        },
       }}>
       {product && (
-        <Box sx={{display: 'flex', minHeight: '100%', flexDirection: 'column'}}>
-          <Box sx={{p: {xs: 2, sm: 3}}}>
+        <Box sx={{display: 'flex', height: '100%', minHeight: 0, flexDirection: 'column'}}>
+          <Box sx={{px: {xs: '16px', sm: '24px'}, py: {xs: '16px', sm: '20px'}, background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.12)}, transparent 58%)`}}>
             <Stack
               direction="row"
               alignItems="flex-start"
               justifyContent="space-between"
               gap={2}>
-              <Box>
+              <Box minWidth={0}>
                 <Typography variant="overline" color="text.secondary">
                   Inventory traceability
                 </Typography>
-                <Typography variant="h5" component="h2">
+                <Typography variant="h5" component="h2" fontWeight={800}>
                   {product.ProductName}
                 </Typography>
                 <Stack direction="row" gap={1} mt={1} flexWrap="wrap">
@@ -158,13 +177,18 @@ const InventoryTraceability = ({
             sx={{
               display: 'grid',
               flex: 1,
-              gridTemplateColumns: {xs: '1fr', md: '280px minmax(0, 1fr)'},
+              gridTemplateColumns: {xs: '1fr', md: '340px minmax(0, 1fr)'},
               minHeight: 0,
+              overflow: {xs: 'auto', md: 'hidden'},
             }}>
             <Box
               sx={{
                 borderRight: {md: `1px solid ${theme.palette.divider}`},
-                p: 2,
+                borderBottom: {xs: `1px solid ${theme.palette.divider}`, md: 0},
+                bgcolor: alpha(theme.palette.background.default, 0.42),
+                minHeight: 0,
+                overflowY: {md: 'auto'},
+                p: {xs: '16px', sm: '20px'},
               }}>
               <Stack
                 direction="row"
@@ -212,52 +236,66 @@ const InventoryTraceability = ({
                     No inventory batches exist for this product yet.
                   </Alert>
                 )}
-              <Stack gap={1} role="list" aria-label="Product batches">
+              <Stack gap="12px" role="list" aria-label="Product batches">
                 {batches.currentData?.Data.map(batch => {
                   const selected = selectedBatch?.BatchId === batch.BatchId;
                   return (
-                    <Button
-                      key={batch.BatchId}
-                      role="listitem"
-                      aria-label={`Select batch ${batch.BatchId}`}
-                      aria-pressed={selected}
-                      onClick={() => selectBatch(batch)}
-                      variant={selected ? 'contained' : 'outlined'}
-                      sx={{
-                        justifyContent: 'flex-start',
-                        p: 1.25,
-                        textAlign: 'left',
-                        textTransform: 'none',
-                      }}>
-                      <Box minWidth={0} width="100%">
-                        <Typography
-                          noWrap
-                          fontFamily="monospace"
-                          fontSize={13}
-                          fontWeight={700}>
-                          {batch.BatchId}
-                        </Typography>
-                        <Typography variant="body2" fontWeight={700}>
-                          +{batch.QuantityReceived} received
-                        </Typography>
-                        <Typography
-                          variant="caption"
-                          display="block"
-                          sx={{opacity: 0.8}}>
-                          {formatDate(batch.CreatedDate)}
-                        </Typography>
-                        <Typography
-                          variant="caption"
-                          display="block"
-                          noWrap
-                          sx={{opacity: 0.8}}>
-                          By {batch.CreatedBy || 'Unknown admin'}
-                        </Typography>
-                        <Typography variant="caption" display="block" noWrap sx={{opacity: 0.8}}>
-                          Maker: {batch.MakerName || 'Not assigned'}
-                        </Typography>
-                      </Box>
-                    </Button>
+                    <Box key={batch.BatchId} position="relative">
+                      <Button
+                        role="listitem"
+                        aria-label={`Select batch ${batch.BatchId}`}
+                        aria-pressed={selected}
+                        onClick={() => selectBatch(batch)}
+                        variant="outlined"
+                        fullWidth
+                        sx={{
+                          justifyContent: 'flex-start',
+                          borderColor: selected ? 'primary.main' : 'divider',
+                          borderRadius: '14px',
+                          bgcolor: selected ? alpha(theme.palette.primary.main, 0.12) : 'background.paper',
+                          color: 'text.primary',
+                          p: '14px',
+                          textAlign: 'left',
+                          textTransform: 'none',
+                          boxShadow: selected ? `0 10px 28px ${alpha(theme.palette.primary.main, 0.12)}` : 'none',
+                          '&:hover': {
+                            borderColor: 'primary.main',
+                            bgcolor: alpha(theme.palette.primary.main, 0.08),
+                          },
+                        }}>
+                        <Box minWidth={0} width="100%">
+                          <Typography variant="overline" color="text.secondary" lineHeight={1}>
+                            Batch ID
+                          </Typography>
+                          <Typography
+                            fontFamily="monospace"
+                            fontSize={12}
+                            fontWeight={800}
+                            sx={{overflowWrap: 'anywhere', pr: '34px', mt: '4px'}}>
+                            {batch.BatchId}
+                          </Typography>
+                          <Stack direction="row" gap="6px" flexWrap="wrap" mt="10px">
+                            <Chip size="small" color="primary" variant="outlined" label={`+${batch.QuantityReceived} received`} />
+                            <Chip size="small" variant="outlined" label={formatDate(batch.CreatedDate)} />
+                          </Stack>
+                          <Typography variant="caption" color="text.secondary" display="block" mt="8px" noWrap>
+                            Added by {batch.CreatedBy || 'Unknown admin'}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary" display="block" noWrap>
+                            Maker: {batch.MakerName || 'Not assigned'}
+                          </Typography>
+                        </Box>
+                      </Button>
+                      <Tooltip title="Copy batch ID for employee work">
+                        <IconButton
+                          aria-label={`Copy batch ID ${batch.BatchId}`}
+                          size="small"
+                          onClick={() => copyBatchId(batch.BatchId)}
+                          sx={{position: 'absolute', top: '9px', right: '9px', color: 'primary.main'}}>
+                          <IconCopy size={17} />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
                   );
                 })}
               </Stack>
@@ -272,12 +310,12 @@ const InventoryTraceability = ({
                     setItemPage(1);
                   }}
                   size="small"
-                  sx={{mt: 2}}
+                  sx={{mt: '20px', display: 'flex', justifyContent: 'center'}}
                 />
               )}
             </Box>
 
-            <Box sx={{p: 2, minWidth: 0}}>
+            <Box sx={{p: {xs: '16px', sm: '24px'}, minWidth: 0, minHeight: 0, overflowY: {md: 'auto'}}}>
               <Typography variant="subtitle1" fontWeight={700}>
                 Serialized items
               </Typography>
@@ -288,6 +326,49 @@ const InventoryTraceability = ({
                 mb={2}>
                 Admin-only unit identifiers for the selected batch
               </Typography>
+
+              {selectedBatch && (
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: {xs: 'flex-start', sm: 'center'},
+                    justifyContent: 'space-between',
+                    flexDirection: {xs: 'column', sm: 'row'},
+                    gap: '14px',
+                    mb: '20px',
+                    border: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
+                    borderRadius: '16px',
+                    bgcolor: alpha(theme.palette.primary.main, 0.07),
+                    p: '16px',
+                  }}>
+                  <Box minWidth={0}>
+                    <Stack direction="row" alignItems="center" gap="8px" mb="5px">
+                      <IconUsers size={18} color={theme.palette.primary.main} />
+                      <Typography variant="caption" color="text.secondary" fontWeight={700}>
+                        USE THIS ID FOR EMPLOYEE WORK
+                      </Typography>
+                    </Stack>
+                    <Typography
+                      fontFamily="monospace"
+                      fontSize={13}
+                      fontWeight={800}
+                      sx={{overflowWrap: 'anywhere'}}>
+                      {selectedBatch.BatchId}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Do not include the unit suffix shown in the serial numbers below.
+                    </Typography>
+                  </Box>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    startIcon={<IconCopy size={16} />}
+                    onClick={() => copyBatchId(selectedBatch.BatchId)}
+                    sx={{flexShrink: 0}}>
+                    Copy batch ID
+                  </Button>
+                </Box>
+              )}
 
               {!selectedBatch && !batches.isFetching && (
                 <Alert severity="info">
@@ -316,25 +397,35 @@ const InventoryTraceability = ({
                     This batch has no serialized items.
                   </Alert>
                 )}
-              <Stack divider={<Divider flexItem />}>
+              <Stack gap="10px">
                 {items.currentData?.Data.map(item => (
                   <Stack
                     key={item.SerialNumber}
                     direction="row"
                     alignItems="center"
                     justifyContent="space-between"
-                    gap={1}
-                    py={1.25}>
+                    gap="12px"
+                    sx={{
+                      border: `1px solid ${theme.palette.divider}`,
+                      borderRadius: '12px',
+                      bgcolor: 'background.paper',
+                      px: '14px',
+                      py: '12px',
+                    }}>
                     <Box minWidth={0}>
+                      <Typography variant="caption" color="primary.main" fontWeight={800}>
+                        UNIT {item.UnitIndex}
+                      </Typography>
                       <Typography
                         fontFamily="monospace"
+                        fontSize={13}
                         fontWeight={700}
-                        noWrap
-                        title={item.SerialNumber}>
+                        title={item.SerialNumber}
+                        sx={{overflowWrap: 'anywhere'}}>
                         {item.SerialNumber}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
-                        Unit {item.UnitIndex} · {formatDate(item.CreatedDate)}
+                        Created {formatDate(item.CreatedDate)}
                       </Typography>
                     </Box>
                     <Tooltip title="Copy serial number">
@@ -353,7 +444,7 @@ const InventoryTraceability = ({
                   count={itemCount}
                   page={itemPage}
                   onChange={(_event, page) => setItemPage(page)}
-                  sx={{mt: 2}}
+                  sx={{mt: '20px', display: 'flex', justifyContent: 'center'}}
                 />
               )}
             </Box>
