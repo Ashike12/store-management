@@ -3,7 +3,7 @@ import {
   Box,
   Button,
   Chip,
-  CircularProgress,
+  Skeleton,
   Divider,
   Drawer,
   IconButton,
@@ -192,7 +192,9 @@ const InventoryTraceability = ({
               </Stack>
 
               {batches.isFetching && !batches.currentData && (
-                <CircularProgress size={24} aria-label="Loading batches" />
+                <Stack gap="10px" role="status" aria-label="Loading batches">
+                  {Array.from({length: 5}, (_, index) => <Skeleton key={index} animation="wave" variant="rounded" height={78} />)}
+                </Stack>
               )}
               {batches.isError && (
                 <Alert
@@ -293,7 +295,9 @@ const InventoryTraceability = ({
                 </Alert>
               )}
               {items.isFetching && selectedBatch && (
-                <CircularProgress size={24} aria-label="Loading serial items" />
+                <Stack gap="12px" role="status" aria-label="Loading serial items">
+                  {Array.from({length: 7}, (_, index) => <Skeleton key={index} animation="wave" variant="rounded" height={48} />)}
+                </Stack>
               )}
               {items.isError && selectedBatch && (
                 <Alert

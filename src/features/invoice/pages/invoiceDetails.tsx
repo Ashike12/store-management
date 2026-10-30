@@ -7,6 +7,7 @@ import {useAppSelector} from '@core/store/hooks';
 import {selectIsWholeSaler} from '@core/store/slices/auth.slice';
 import {useNavigate, useParams} from 'react-router-dom';
 import {useTheme} from '@mui/material/styles';
+import {DetailSkeleton} from '@components/loaders/AdminSkeleton';
 
 const columns = [
   {key: 'ProductName', label: 'PRODUCT_NAME'},
@@ -18,7 +19,7 @@ export default function InvoiceDetails() {
   const {id} = useParams();
   const theme = useTheme();
   const isWholeSaler = useAppSelector(selectIsWholeSaler);
-  const {data} = useGetInvoiceQuery({
+  const {data, isLoading} = useGetInvoiceQuery({
     pageNumber: 1,
     pageSize: 10,
     itemId: id ?? '',
@@ -40,6 +41,9 @@ export default function InvoiceDetails() {
     }
     navigate(`/invoice/${action}/${id}?isUpdate=${action === 'update'}`);
   };
+  if (isLoading) {
+    return <div className="w-full p-8"><DetailSkeleton rows={7} /></div>;
+  }
   return (
     <>
       <div className="w-full">

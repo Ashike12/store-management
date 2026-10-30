@@ -24,7 +24,7 @@ export default function WholesalerDetails() {
   const [searchParams] = useSearchParams();
   const phoneNumber = searchParams.get('phoneNumber')?.trim();
   const wholesalerName = searchParams.get('wholesalerName') ?? 'N/A';
-  const {data} = useGetInvoiceQuery({
+  const {data, isLoading} = useGetInvoiceQuery({
     pageNumber: 1,
     pageSize: 10,
     itemId: '',
@@ -176,17 +176,22 @@ export default function WholesalerDetails() {
                 content={' ' + realizedCashMargin + ' tk'}
               />
             </div>
-            {invoiceData && invoiceData?.length > 0 && (
-              <div className="w-full p-10">
+              <div className="w-full py-8">
                 <CustomTable
                   isRowClickable={true}
                   handleRowClick={handleRowClick}
                   columns={columns}
                   data={invoiceData || []}
                   rowsPerPage={10}
+                  isLoading={isLoading}
+                  emptyState={{
+                    title: 'No invoices for this wholesaler',
+                    description: 'Create an invoice to begin tracking purchases, payments and due amounts.',
+                    actionLabel: 'Add invoice',
+                    onAction: addInvoice,
+                  }}
                 />
               </div>
-            )}
           </div>
         </div>
       </div>

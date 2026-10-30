@@ -3,7 +3,6 @@ import {
   Alert,
   Box,
   Button,
-  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -12,6 +11,7 @@ import {
   Tabs,
   TextField,
   Typography,
+  Skeleton,
 } from '@mui/material';
 import { useChangePasswordMutation, useGetCurrentUserQuery, useUpdateCurrentUserMutation } from '@core/store/api';
 import { IUpdateProfilePayload } from '@core/interfaces/api/IUser';
@@ -28,6 +28,14 @@ const defaultProfile: IUpdateProfilePayload = {
   Phone: '',
   Address: '',
   DateOfBirth: null,
+};
+
+const getApiErrorMessage = (error: unknown, fallback: string) => {
+  if (typeof error === 'object' && error !== null && 'data' in error) {
+    const data = (error as {data?: {message?: string}}).data;
+    return data?.message || fallback;
+  }
+  return fallback;
 };
 
 export default function UserProfileDialog({ open, onClose }: Readonly<IUserProfileDialogProps>) {
@@ -100,10 +108,10 @@ export default function UserProfileDialog({ open, onClose }: Readonly<IUserProfi
     try {
       await updateCurrentUser({ payload: profileForm }).unwrap();
       setProfileMessage({ type: 'success', text: 'Profile updated successfully.' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       setProfileMessage({
         type: 'error',
-        text: error?.data?.message || 'Unable to update profile.',
+        text: getApiErrorMessage(error, 'Unable to update profile.'),
       });
     }
   };
@@ -127,10 +135,10 @@ export default function UserProfileDialog({ open, onClose }: Readonly<IUserProfi
         ConfirmPassword: '',
       });
       setPasswordMessage({ type: 'success', text: 'Password changed successfully.' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       setPasswordMessage({
         type: 'error',
-        text: error?.data?.message || 'Unable to change password.',
+        text: getApiErrorMessage(error, 'Unable to change password.'),
       });
     }
   };
@@ -145,8 +153,13 @@ export default function UserProfileDialog({ open, onClose }: Readonly<IUserProfi
       <DialogTitle>Profile Settings</DialogTitle>
       <DialogContent dividers>
         {isFetching ? (
-          <Box className="flex items-center justify-center py-10">
-            <CircularProgress size={28} />
+          <Box role="status" aria-label="Loading profile" sx={{display: 'grid', gap: '16px', py: '16px'}}>
+            <Skeleton animation="wave" width="45%" height={32} />
+            <Skeleton animation="wave" width="68%" height={20} />
+            <Skeleton animation="wave" variant="rounded" height={48} />
+            <Box sx={{display: 'grid', gridTemplateColumns: {xs: '1fr', sm: '1fr 1fr'}, gap: '16px'}}>
+              {Array.from({length: 6}, (_, index) => <Skeleton key={index} animation="wave" variant="rounded" height={56} />)}
+            </Box>
           </Box>
         ) : (
           <>

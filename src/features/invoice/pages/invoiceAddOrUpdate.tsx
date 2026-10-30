@@ -11,11 +11,12 @@ import {useGetUserQuery} from "@core/store/api";
 import {useCreateInvoiceMutation, useGetInvoiceQuery, useUpdateInvoiceMutation} from "@core/store/api/invoiceApi";
 import {useGetProductQuery} from "@core/store/api/product";
 import {useTheme} from "@mui/material/styles";
-import {CircularProgress, FormControl, InputLabel, MenuItem, Select, Tab, Tabs, TextField} from "@mui/material";
+import {FormControl, InputLabel, MenuItem, Select, Tab, Tabs, TextField} from "@mui/material";
 import {ErrorMessage, FieldArray, Form, Formik, useFormikContext} from "formik";
 import {useNavigate, useParams, useSearchParams} from "react-router-dom";
 import {invoiceValidationSchema} from "../schemas/invoice-form.schema";
 import {useEffect, useMemo, useState} from "react";
+import {FormSkeleton} from '@components/loaders/AdminSkeleton';
 
 const EMPTY_PRODUCT_ROW: IProductSellInfo = {
   ItemId: "",
@@ -145,7 +146,7 @@ export default function InvoiceAddOrUpdate() {
   }, [wholesalerInvoices?.Data]);
 
   if (isProductLoading || isUserLoading || (isUpdate && isInvoiceLoading)) {
-    return <CircularProgress />;
+    return <FormSkeleton />;
   }
 
   const handleRedirection = (action: string) => {
