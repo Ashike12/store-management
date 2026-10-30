@@ -243,7 +243,7 @@ function EmployeeDialog({value, onClose, onSave}: {value: IEmployeeSummary | 'ne
   const employee = value && value !== 'new' ? value : null;
   const [form, setForm] = useState<any>({FirstName: '', LastName: '', DisplayName: '', Email: '', Phone: '', Address: '', Password: ''});
   useEffect(() => setForm(employee ? {...employee, Password: ''} : {FirstName: '', LastName: '', DisplayName: '', Email: '', Phone: '', Address: '', Password: ''}), [employee, value]);
-  return <Dialog open={Boolean(value)} onClose={onClose} fullWidth maxWidth="sm"><DialogTitle>{value === 'new' ? 'Add employee' : 'Edit employee'}</DialogTitle><DialogContent><Box sx={{display: 'grid', gridTemplateColumns: {xs: '1fr', sm: '1fr 1fr'}, gap: 2, mt: 1}}>
+  return <Dialog open={Boolean(value)} onClose={onClose} fullWidth maxWidth="sm"><DialogTitle>{value === 'new' ? 'Add employee' : 'Edit employee'}</DialogTitle><DialogContent><Box sx={{display: 'grid', gridTemplateColumns: {xs: '1fr', sm: '1fr 1fr'}, columnGap: '16px', rowGap: '20px', mt: '8px'}}>
     {['FirstName', 'LastName', 'DisplayName', 'Email', 'Phone', 'Address', ...(value === 'new' ? ['Password'] : [])].map(field => <TextField key={field} label={field.replace(/([A-Z])/g, ' $1').trim()} type={field === 'Password' ? 'password' : 'text'} value={form[field] ?? ''} disabled={field === 'Email' && value !== 'new'} onChange={event => setForm({...form, [field]: event.target.value})} required={!['DisplayName'].includes(field)} sx={field === 'Address' ? {gridColumn: '1 / -1'} : undefined} />)}
   </Box></DialogContent><DialogActions><Button onClick={onClose}>Cancel</Button><Button variant="contained" onClick={() => onSave(form)} disabled={!form.FirstName || !form.LastName || !form.Email || !form.Phone || !form.Address || (value === 'new' && !form.Password)}>Save</Button></DialogActions></Dialog>;
 }
@@ -255,7 +255,7 @@ function LedgerDialog({state, onClose, onSave}: {state: LedgerDialogState; onClo
     if (state?.kind === 'work') setForm({date: value?.WorkDate ?? today(), amount: value?.Amount?.toString() ?? '', description: value?.Description ?? '', reference: value?.BatchId ?? ''});
     if (state?.kind === 'payment') setForm({date: value?.PaymentDate ?? today(), amount: value?.Amount?.toString() ?? '', description: value?.Note ?? '', reference: value?.Reference ?? ''});
   }, [state, value]);
-  return <Dialog open={Boolean(state)} onClose={onClose} fullWidth maxWidth="sm"><DialogTitle>{value ? 'Edit' : 'Add'} {state?.kind === 'work' ? 'work entry' : 'payment'}</DialogTitle><DialogContent><Stack gap={2} mt={1}>
+  return <Dialog open={Boolean(state)} onClose={onClose} fullWidth maxWidth="sm"><DialogTitle>{value ? 'Edit' : 'Add'} {state?.kind === 'work' ? 'work entry' : 'payment'}</DialogTitle><DialogContent><Stack gap="20px" mt="8px">
     <TextField label="Date" type="date" value={form.date} onChange={event => setForm({...form, date: event.target.value})} InputLabelProps={{shrink: true}} required />
     <TextField label="Amount (Tk)" type="number" inputProps={{min: 0.01, step: 0.01}} value={form.amount} onChange={event => setForm({...form, amount: event.target.value})} required />
     <TextField label={state?.kind === 'work' ? 'Work description' : 'Payment note'} value={form.description} onChange={event => setForm({...form, description: event.target.value})} required={state?.kind === 'work'} multiline rows={2} />
