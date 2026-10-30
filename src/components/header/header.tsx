@@ -22,6 +22,7 @@ import { useGetCurrentUserQuery } from '@core/store/api';
 import UserProfileDialog from './UserProfileDialog';
 import OrderFollowUp from './OrderFollowUp';
 import EmployeeNotifications from './EmployeeNotifications';
+import LanguageSwitcher from './LanguageSwitcher';
 
 interface AppBarProps {
   open?: boolean;
@@ -97,6 +98,7 @@ export default function Header({ isLocked }: Readonly<IHeaderProps>) {
         <div className='flex flex-wrap items-center justify-end gap-3'>
           <OrderFollowUp />
           <EmployeeNotifications />
+          <LanguageSwitcher />
           <Select
             size="small"
             value={mode}

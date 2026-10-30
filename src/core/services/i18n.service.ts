@@ -10,7 +10,9 @@ import {DEFAULT_LANGUAGE} from '@core/config/constants';
 i18n.use(initReactI18next).init({
   lng: DEFAULT_LANGUAGE,
   fallbackLng: DEFAULT_LANGUAGE,
-  preload: [DEFAULT_LANGUAGE],
+  supportedLngs: ['en', 'bn', 'zh'],
+  load: 'languageOnly',
+  interpolation: {escapeValue: false},
   resources: {
     en: {
       translation: enTransLations,
