@@ -2,12 +2,12 @@ import {describe, expect, it} from 'vitest';
 import {createTheme} from './create-theme';
 
 describe('admin portal spacing theme', () => {
-  it('uses the standard MUI spacing rhythm for forms and layouts', () => {
+  it('preserves the portal spacing scale used by navigation and dashboard layouts', () => {
     const theme = createTheme();
 
-    expect(theme.spacing(1)).toBe('calc(1 * var(--spacing, 8px))');
-    expect(theme.spacing(2)).toBe('calc(2 * var(--spacing, 8px))');
-    expect(theme.spacing(3)).toBe('calc(3 * var(--spacing, 8px))');
+    expect(theme.spacing(1)).toBe('var(--spacing-1, 1px)');
+    expect(theme.spacing(2)).toBe('var(--spacing-2, 2px)');
+    expect(theme.spacing(9)).toBe('var(--spacing-9, 256px)');
   });
 
   it('provides shared dialog and input component styling', () => {
