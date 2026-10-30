@@ -104,26 +104,26 @@ export default function EmployeeManagement() {
   const selected = employees.data?.Data.find(item => item.ItemId === selectedId);
 
   return (
-    <Box sx={{p: {xs: 2, md: 4}, maxWidth: 1500, mx: 'auto'}}>
-      <Stack direction={{xs: 'column', sm: 'row'}} justifyContent="space-between" gap={2} mb={3}>
+    <Box sx={{p: {xs: '16px', md: '32px'}, maxWidth: 1500, mx: 'auto'}}>
+      <Stack direction={{xs: 'column', sm: 'row'}} justifyContent="space-between" gap="20px" mb="32px">
         <Box>
           <Typography variant="h4" fontWeight={800}>Employee management</Typography>
           <Typography color="text.secondary">Work, payments, balances and review requests in one place.</Typography>
         </Box>
         <Button variant="contained" startIcon={<IconPlus />} onClick={() => setEmployeeDialog('new')}>Add employee</Button>
       </Stack>
-      {message && <Alert severity={message.severity} onClose={() => setMessage(null)} sx={{mb: 2}}>{message.text}</Alert>}
+      {message && <Alert severity={message.severity} onClose={() => setMessage(null)} sx={{mb: '20px'}}>{message.text}</Alert>}
 
-      <Box sx={{display: 'grid', gridTemplateColumns: {xs: '1fr', lg: '330px minmax(0,1fr)'}, gap: 3}}>
+      <Box sx={{display: 'grid', gridTemplateColumns: {xs: '1fr', md: '300px minmax(0,1fr)', lg: '320px minmax(0,1fr)'}, gap: '24px'}}>
         <Card variant="outlined" sx={{alignSelf: 'start'}}>
-          <Box p={2}><Typography fontWeight={800}>Team</Typography><Typography variant="caption" color="text.secondary">{employees.data?.TotalCount ?? 0} employees</Typography></Box>
+          <Box p="20px"><Typography fontWeight={800}>Team</Typography><Typography variant="caption" color="text.secondary">{employees.data?.TotalCount ?? 0} employees</Typography></Box>
           <Divider />
           {employees.isLoading && <Stack gap="12px" sx={{p: '16px'}} role="status" aria-label="Loading employees">
             {Array.from({length: 6}, (_, index) => <Skeleton key={index} animation="wave" variant="rounded" height={52} />)}
           </Stack>}
           <List disablePadding>
             {employees.data?.Data.map(employee => (
-              <ListItemButton key={employee.ItemId} selected={selectedId === employee.ItemId} onClick={() => setSelectedId(employee.ItemId)}>
+              <ListItemButton key={employee.ItemId} selected={selectedId === employee.ItemId} onClick={() => setSelectedId(employee.ItemId)} sx={{px: '18px', py: '14px', gap: '12px'}}>
                 <ListItemText
                   primary={employee.DisplayName}
                   secondary={`${employee.Active ? 'Active' : 'Inactive'} | Balance ${money(employee.Balance)}`}
@@ -139,18 +139,18 @@ export default function EmployeeManagement() {
           {overview.isFetching && <DetailSkeleton rows={6} />}
           {overview.isError && <Alert severity="error">Employee details could not be loaded.</Alert>}
           {overview.data && summary && (
-            <Stack gap={3}>
-              <Card variant="outlined" sx={{p: 3}}>
-                <Stack direction={{xs: 'column', sm: 'row'}} justifyContent="space-between" gap={2}>
+            <Stack gap="24px">
+              <Card variant="outlined" sx={{p: {xs: '20px', md: '24px'}}}>
+                <Stack direction={{xs: 'column', sm: 'row'}} justifyContent="space-between" gap="20px">
                   <Box>
-                    <Stack direction="row" gap={1} alignItems="center">
+                    <Stack direction="row" gap="8px" alignItems="center" flexWrap="wrap">
                       <Typography variant="h5" fontWeight={800}>{overview.data.Data.Employee.DisplayName}</Typography>
                       <Chip size="small" label={overview.data.Data.Employee.Active ? 'Active' : 'Inactive'} color={overview.data.Data.Employee.Active ? 'success' : 'default'} />
                     </Stack>
                     <Typography color="text.secondary">{overview.data.Data.Employee.Phone} | {overview.data.Data.Employee.Email}</Typography>
                     <Typography color="text.secondary">{overview.data.Data.Employee.Address}</Typography>
                   </Box>
-                  <Stack direction="row" gap={1} alignItems="flex-start">
+                  <Stack direction="row" gap="8px" alignItems="flex-start" flexWrap="wrap">
                     {selected && <Button startIcon={<IconEdit />} onClick={() => setEmployeeDialog(selected)}>Edit</Button>}
                     {overview.data.Data.Employee.Active ? <Button color="warning" startIcon={<IconUserOff />} onClick={async () => {
                       if (!window.confirm('Deactivate this employee login? Ledger history will remain.')) return;
@@ -164,13 +164,13 @@ export default function EmployeeManagement() {
                 </Stack>
               </Card>
 
-              <Box sx={{display: 'grid', gridTemplateColumns: {xs: '1fr', sm: 'repeat(3,1fr)'}, gap: 2}}>
+              <Box sx={{display: 'grid', gridTemplateColumns: {xs: '1fr', sm: 'repeat(3,1fr)'}, gap: '16px'}}>
                 {[
                   ['Earned', summary.TotalEarned, 'primary'],
                   ['Paid', summary.TotalPaid, 'info'],
                   [summary.BalanceDirection === 'business_owes_employee' ? 'We owe employee' : summary.BalanceDirection === 'employee_owes_business' ? 'Employee advance' : 'Settled', Math.abs(summary.Balance), summary.Balance === 0 ? 'success' : 'warning'],
                 ].map(([label, value, color]) => (
-                  <Card key={String(label)} variant="outlined" sx={{p: 2, borderTop: 3, borderTopColor: `${color}.main`}}>
+                  <Card key={String(label)} variant="outlined" sx={{p: '20px', borderTop: 3, borderTopColor: `${color}.main`}}>
                     <Typography variant="caption" color="text.secondary">{label}</Typography>
                     <Typography variant="h5" fontWeight={800}>{money(Number(value))}</Typography>
                   </Card>
@@ -178,36 +178,36 @@ export default function EmployeeManagement() {
               </Box>
 
               <Card variant="outlined">
-                <Tabs value={tab} onChange={(_event, value) => setTab(value)} variant="scrollable">
+                <Tabs value={tab} onChange={(_event, value) => setTab(value)} variant="scrollable" sx={{px: '12px', pt: '8px'}}>
                   <Tab label={`Work (${overview.data.Data.WorkEntries.length})`} />
                   <Tab label={`Payments (${overview.data.Data.PaymentEntries.length})`} />
                   <Tab label={`Review requests (${overview.data.Data.Feedback.length})`} />
                 </Tabs>
                 <Divider />
-                <Box p={2}>
+                <Box p={{xs: '16px', md: '24px'}}>
                   {tab === 0 && <>
-                    <Button variant="contained" startIcon={<IconPlus />} onClick={() => setLedgerDialog({kind: 'work'})} sx={{mb: 2}}>Add work</Button>
+                    <Button variant="contained" startIcon={<IconPlus />} onClick={() => setLedgerDialog({kind: 'work'})} sx={{mb: '16px'}}>Add work</Button>
                     <Stack divider={<Divider flexItem />}>
-                      {overview.data.Data.WorkEntries.map(entry => <Stack key={entry.ItemId} direction="row" justifyContent="space-between" alignItems="center" py={1.5} gap={2}>
+                      {overview.data.Data.WorkEntries.map(entry => <Stack key={entry.ItemId} direction={{xs: 'column', sm: 'row'}} justifyContent="space-between" alignItems={{sm: 'center'}} py="16px" gap="16px">
                         <Box><Typography fontWeight={700}>{entry.Description}</Typography><Typography variant="caption" color="text.secondary">{entry.WorkDate}{entry.BatchId ? ` | Batch ${entry.BatchId}` : ''}</Typography></Box>
-                        <Stack direction="row" alignItems="center"><Typography fontWeight={800}>{money(entry.Amount)}</Typography><IconButton aria-label="Edit work" onClick={() => setLedgerDialog({kind: 'work', value: entry})}><IconEdit size={18} /></IconButton><IconButton aria-label="Delete work" color="error" onClick={() => removeLedger('work', entry.ItemId)}><IconTrash size={18} /></IconButton></Stack>
+                        <Stack direction="row" alignItems="center" gap="4px"><Typography fontWeight={800} mr="8px">{money(entry.Amount)}</Typography><IconButton aria-label="Edit work" onClick={() => setLedgerDialog({kind: 'work', value: entry})}><IconEdit size={18} /></IconButton><IconButton aria-label="Delete work" color="error" onClick={() => removeLedger('work', entry.ItemId)}><IconTrash size={18} /></IconButton></Stack>
                       </Stack>)}
                     </Stack>
                   </>}
                   {tab === 1 && <>
-                    <Button variant="contained" startIcon={<IconPlus />} onClick={() => setLedgerDialog({kind: 'payment'})} sx={{mb: 2}}>Add payment</Button>
+                    <Button variant="contained" startIcon={<IconPlus />} onClick={() => setLedgerDialog({kind: 'payment'})} sx={{mb: '16px'}}>Add payment</Button>
                     <Stack divider={<Divider flexItem />}>
-                      {overview.data.Data.PaymentEntries.map(entry => <Stack key={entry.ItemId} direction="row" justifyContent="space-between" alignItems="center" py={1.5} gap={2}>
+                      {overview.data.Data.PaymentEntries.map(entry => <Stack key={entry.ItemId} direction={{xs: 'column', sm: 'row'}} justifyContent="space-between" alignItems={{sm: 'center'}} py="16px" gap="16px">
                         <Box><Typography fontWeight={700}>{entry.Note || 'Employee payment'}</Typography><Typography variant="caption" color="text.secondary">{entry.PaymentDate}{entry.Reference ? ` | ${entry.Reference}` : ''}</Typography></Box>
-                        <Stack direction="row" alignItems="center"><Typography fontWeight={800}>{money(entry.Amount)}</Typography><IconButton aria-label="Edit payment" onClick={() => setLedgerDialog({kind: 'payment', value: entry})}><IconEdit size={18} /></IconButton><IconButton aria-label="Delete payment" color="error" onClick={() => removeLedger('payment', entry.ItemId)}><IconTrash size={18} /></IconButton></Stack>
+                        <Stack direction="row" alignItems="center" gap="4px"><Typography fontWeight={800} mr="8px">{money(entry.Amount)}</Typography><IconButton aria-label="Edit payment" onClick={() => setLedgerDialog({kind: 'payment', value: entry})}><IconEdit size={18} /></IconButton><IconButton aria-label="Delete payment" color="error" onClick={() => removeLedger('payment', entry.ItemId)}><IconTrash size={18} /></IconButton></Stack>
                       </Stack>)}
                     </Stack>
                   </>}
-                  {tab === 2 && <Stack gap={2}>
+                  {tab === 2 && <Stack gap="16px">
                     {overview.data.Data.Feedback.length === 0 && <Alert severity="info">No review requests.</Alert>}
-                    {overview.data.Data.Feedback.map(item => <Card key={item.ItemId} variant="outlined" sx={{p: 2}}>
-                      <Stack direction="row" justifyContent="space-between" gap={2}><Box><Typography fontWeight={700}>{item.TargetType === 'work' ? 'Work entry' : 'Payment entry'} review</Typography><Typography>{item.Explanation}</Typography>{item.ResolutionNote && <Typography variant="body2" color="text.secondary">Resolution: {item.ResolutionNote}</Typography>}</Box><Chip size="small" label={item.Status} color={item.Status === 'pending' ? 'warning' : item.Status === 'accepted' ? 'success' : 'default'} /></Stack>
-                      {item.Status === 'pending' && <Stack direction="row" gap={1} mt={2}><Button size="small" variant="contained" color="success" onClick={async () => {
+                    {overview.data.Data.Feedback.map(item => <Card key={item.ItemId} variant="outlined" sx={{p: '20px'}}>
+                      <Stack direction={{xs: 'column', sm: 'row'}} justifyContent="space-between" gap="16px"><Box><Typography fontWeight={700}>{item.TargetType === 'work' ? 'Work entry' : 'Payment entry'} review</Typography><Typography>{item.Explanation}</Typography>{item.ResolutionNote && <Typography variant="body2" color="text.secondary">Resolution: {item.ResolutionNote}</Typography>}</Box><Chip size="small" label={item.Status} color={item.Status === 'pending' ? 'warning' : item.Status === 'accepted' ? 'success' : 'default'} /></Stack>
+                      {item.Status === 'pending' && <Stack direction="row" gap="8px" mt="16px"><Button size="small" variant="contained" color="success" onClick={async () => {
                         const note = window.prompt('Resolution note (required)'); if (!note?.trim()) return;
                         await resolveFeedback({FeedbackId: item.ItemId, Status: 'accepted', ResolutionNote: note}).unwrap(); notify('Feedback accepted. Edit the ledger separately if an amount must change.');
                       }}>Accept</Button><Button size="small" variant="outlined" color="error" onClick={async () => {
