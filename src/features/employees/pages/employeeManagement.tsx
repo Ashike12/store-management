@@ -42,6 +42,12 @@ import {
   useUpdateWorkEntryMutation,
 } from '@core/store/api/employeeApi';
 import {DetailSkeleton} from '@components/loaders/AdminSkeleton';
+import {
+  buildCreatePaymentPayload,
+  buildCreateWorkPayload,
+  buildUpdatePaymentPayload,
+  buildUpdateWorkPayload,
+} from '../employeeLedgerPayload';
 
 const money = (value: number) => `Tk ${Number(value || 0).toLocaleString('en-BD', {minimumFractionDigits: 2})}`;
 const today = () => new Date().toLocaleDateString('en-CA', {timeZone: 'Asia/Dhaka'});
@@ -241,11 +247,17 @@ export default function EmployeeManagement() {
         onSave={async form => {
           try {
             if (ledgerDialog?.kind === 'work') {
-              const payload = {EmployeeId: selectedId, WorkDate: form.date, Description: form.description, Amount: Number(form.amount), BatchId: form.reference || undefined};
-              if (ledgerDialog.value) await updateWork({ItemId: ledgerDialog.value.ItemId, ...payload}).unwrap(); else await createWork(payload).unwrap();
+              if (ledgerDialog.value) {
+                await updateWork(buildUpdateWorkPayload(ledgerDialog.value.ItemId, form)).unwrap();
+              } else {
+                await createWork(buildCreateWorkPayload(selectedId, form)).unwrap();
+              }
             } else if (ledgerDialog?.kind === 'payment') {
-              const payload = {EmployeeId: selectedId, PaymentDate: form.date, Amount: Number(form.amount), Note: form.description, Reference: form.reference};
-              if (ledgerDialog.value) await updatePayment({ItemId: ledgerDialog.value.ItemId, ...payload}).unwrap(); else await createPayment(payload).unwrap();
+              if (ledgerDialog.value) {
+                await updatePayment(buildUpdatePaymentPayload(ledgerDialog.value.ItemId, form)).unwrap();
+              } else {
+                await createPayment(buildCreatePaymentPayload(selectedId, form)).unwrap();
+              }
             }
             setLedgerDialog(null); notify('Ledger entry saved.');
           } catch { notify('Ledger entry could not be saved. Check the date, amount, and optional batch.', 'error'); }
