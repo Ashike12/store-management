@@ -9,12 +9,4 @@ describe('admin portal spacing theme', () => {
     expect(theme.spacing(2)).toBe('var(--spacing-2, 2px)');
     expect(theme.spacing(9)).toBe('var(--spacing-9, 256px)');
   });
-
-  it('provides shared dialog and input component styling', () => {
-    const theme = createTheme();
-
-    expect(theme.components?.MuiDialogContent).toBeDefined();
-    expect(theme.components?.MuiDialogActions).toBeDefined();
-    expect(theme.components?.MuiInputLabel).toBeDefined();
-  });
 });

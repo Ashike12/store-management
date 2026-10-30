@@ -55,89 +55,9 @@ const MuiCardHeader: Components<Theme>['MuiCardHeader'] = {
 
 const MuiOutlinedInput: Components<Theme>['MuiOutlinedInput'] = {
   styleOverrides: {
-    root: ({theme}) => ({
-      minWidth: 0,
-      backgroundColor: theme.vars.palette.background.paper,
-      '&:hover .MuiOutlinedInput-notchedOutline': {
-        borderColor: theme.vars.palette.text.secondary,
-      },
-      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-        borderWidth: 2,
-      },
-    }),
     notchedOutline: ({theme}) => ({
       borderColor: varAlpha(theme.vars.palette.grey['500Channel'], 0.2),
     }),
-  },
-};
-
-const MuiInputLabel: Components<Theme>['MuiInputLabel'] = {
-  styleOverrides: {
-    root: ({theme}) => ({
-      color: theme.vars.palette.text.secondary,
-      '&.Mui-focused': {
-        color: theme.vars.palette.primary.main,
-      },
-      '&.MuiInputLabel-shrink': {
-        paddingInline: 4,
-        marginLeft: -4,
-        backgroundColor: theme.vars.palette.background.paper,
-      },
-    }),
-  },
-};
-
-const MuiFormHelperText: Components<Theme>['MuiFormHelperText'] = {
-  styleOverrides: {
-    root: {
-      marginTop: 6,
-      marginLeft: 2,
-      marginRight: 2,
-      lineHeight: 1.4,
-    },
-  },
-};
-
-const MuiDialog: Components<Theme>['MuiDialog'] = {
-  styleOverrides: {
-    paper: ({theme}) => ({
-      margin: 16,
-      maxHeight: 'calc(100% - 32px)',
-      border: `1px solid ${theme.vars.palette.divider}`,
-      borderRadius: theme.shape.borderRadius * 2,
-    }),
-  },
-};
-
-const MuiDialogTitle: Components<Theme>['MuiDialogTitle'] = {
-  styleOverrides: {
-    root: {
-      padding: '24px 24px 12px',
-      fontWeight: 700,
-    },
-  },
-};
-
-const MuiDialogContent: Components<Theme>['MuiDialogContent'] = {
-  styleOverrides: {
-    root: {
-      padding: '16px 24px 24px',
-      '&:first-of-type': {
-        paddingTop: 16,
-      },
-    },
-  },
-};
-
-const MuiDialogActions: Components<Theme>['MuiDialogActions'] = {
-  styleOverrides: {
-    root: {
-      gap: 8,
-      padding: '8px 24px 24px',
-      '& > :not(style) ~ :not(style)': {
-        marginLeft: 0,
-      },
-    },
   },
 };
 
@@ -243,11 +163,5 @@ export const components = {
   MuiTableCell,
   MuiCardHeader,
   MuiOutlinedInput,
-  MuiInputLabel,
-  MuiFormHelperText,
-  MuiDialog,
-  MuiDialogTitle,
-  MuiDialogContent,
-  MuiDialogActions,
   MuiFormControlLabel,
 };
