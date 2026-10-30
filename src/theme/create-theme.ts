@@ -14,7 +14,9 @@ import {
 
 export function createTheme(): Theme {
   const initialTheme = {
-    spacing: [0, 1, 2, 4, 8, 16, 32, 64, 128, 256],
+    // MUI spacing values are multipliers. The previous array made `gap: 2`
+    // resolve to 2px instead of the standard 16px and compressed every form.
+    spacing: 8,
     colorSchemes,
     colorSchemeSelector: 'class',
     shadows: shadows(),
