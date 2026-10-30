@@ -32,6 +32,16 @@ export interface IWorkEntry {
   BatchId?: string;
 }
 
+export interface IEmployeeBatchOption {
+  BatchId: string;
+  ProductId: string;
+  ProductName: string;
+  Category: string;
+  SubCategory: string;
+  QuantityReceived: number;
+  CreatedDate: string;
+}
+
 export interface IPaymentEntry {
   ItemId: string;
   EmployeeId: string;

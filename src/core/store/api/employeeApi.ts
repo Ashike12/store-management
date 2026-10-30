@@ -3,6 +3,7 @@ import {APP_CONFIG} from '@core/config/config';
 import {
   ICommandResponse,
   IEmployeeFeedback,
+  IEmployeeBatchOption,
   IEmployeeInput,
   IEmployeeOverview,
   IEmployeeSummary,
@@ -22,7 +23,7 @@ export const buildEmployeeRequest = <T>(name: string, body: T) => ({
 export const employeeApi = createApi({
   reducerPath: 'employeeApi',
   baseQuery: ApiServiceBaseQuery,
-  tagTypes: ['Employee', 'EmployeeOverview', 'EmployeeNotification'],
+  tagTypes: ['Employee', 'EmployeeOverview', 'EmployeeNotification', 'EmployeeBatch'],
   endpoints: builder => ({
     listEmployees: builder.query<IPaginatedEmployeeResponse<IEmployeeSummary>, {SearchTerm?: string; Status?: 'all' | 'active' | 'inactive'; Page?: number; Size?: number}>({
       query: payload => ({url: endpoint('ListEmployees'), method: 'POST', body: {Status: 'active', Page: 1, Size: 50, ...payload}}),
@@ -43,6 +44,10 @@ export const employeeApi = createApi({
     getEmployeeOverview: builder.query<ICommandResponse<IEmployeeOverview>, {EmployeeId?: string}>({
       query: payload => ({url: endpoint('GetOverview'), method: 'POST', body: payload}),
       providesTags: ['EmployeeOverview'],
+    }),
+    listEmployeeBatches: builder.query<IPaginatedEmployeeResponse<IEmployeeBatchOption>, {EmployeeId: string; SearchTerm?: string; Page?: number; Size?: number}>({
+      query: payload => ({url: endpoint('ListEmployeeBatches'), method: 'POST', body: {Page: 1, Size: 20, ...payload}}),
+      providesTags: (_result, _error, payload) => [{type: 'EmployeeBatch', id: payload.EmployeeId}],
     }),
     createWorkEntry: builder.mutation<ICommandResponse, Omit<IWorkEntry, 'ItemId'>>({
       query: payload => ({url: endpoint('CreateWorkEntry'), method: 'POST', body: payload}),
@@ -93,6 +98,7 @@ export const {
   useUpdateEmployeeMutation,
   useDeactivateEmployeeMutation,
   useGetEmployeeOverviewQuery,
+  useListEmployeeBatchesQuery,
   useCreateWorkEntryMutation,
   useUpdateWorkEntryMutation,
   useDeleteWorkEntryMutation,
