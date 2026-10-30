@@ -271,6 +271,11 @@ function LedgerDialog({state, onClose, onSave}: {state: LedgerDialogState; onClo
     <TextField label="Date" type="date" value={form.date} onChange={event => setForm({...form, date: event.target.value})} InputLabelProps={{shrink: true}} required />
     <TextField label="Amount (Tk)" type="number" inputProps={{min: 0.01, step: 0.01}} value={form.amount} onChange={event => setForm({...form, amount: event.target.value})} required />
     <TextField label={state?.kind === 'work' ? 'Work description' : 'Payment note'} value={form.description} onChange={event => setForm({...form, description: event.target.value})} required={state?.kind === 'work'} multiline rows={2} />
-    <TextField label={state?.kind === 'work' ? 'Related batch ID (optional)' : 'Reference (optional)'} value={form.reference} onChange={event => setForm({...form, reference: event.target.value})} />
+    <TextField
+      label={state?.kind === 'work' ? 'Related batch ID (optional)' : 'Reference (optional)'}
+      helperText={state?.kind === 'work' ? 'Use only the BAT... batch ID, without the unit serial after the underscore.' : undefined}
+      value={form.reference}
+      onChange={event => setForm({...form, reference: event.target.value})}
+    />
   </Stack></DialogContent><DialogActions><Button onClick={onClose}>Cancel</Button><Button variant="contained" onClick={() => onSave(form)} disabled={!form.date || Number(form.amount) <= 0 || (state?.kind === 'work' && !form.description.trim())}>Save</Button></DialogActions></Dialog>;
 }
