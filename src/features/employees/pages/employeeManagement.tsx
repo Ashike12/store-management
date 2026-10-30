@@ -1,9 +1,11 @@
 import {
   Alert,
+  Autocomplete,
   Box,
   Button,
   Card,
   Chip,
+  CircularProgress,
   Skeleton,
   Dialog,
   DialogActions,
@@ -23,7 +25,7 @@ import {
 import {IconEdit, IconPlus, IconTrash, IconUserOff} from '@tabler/icons-react';
 import {useEffect, useState} from 'react';
 import {useSearchParams} from 'react-router-dom';
-import {IEmployeeSummary, IPaymentEntry, IWorkEntry} from '@core/interfaces/api/IEmployee';
+import {IEmployeeBatchOption, IEmployeeSummary, IPaymentEntry, IWorkEntry} from '@core/interfaces/api/IEmployee';
 import {
   useCreateEmployeeMutation,
   useCreatePaymentEntryMutation,
@@ -33,6 +35,7 @@ import {
   useDeleteWorkEntryMutation,
   useGetEmployeeOverviewQuery,
   useListEmployeesQuery,
+  useListEmployeeBatchesQuery,
   useResolveFeedbackMutation,
   useUpdateEmployeeMutation,
   useUpdatePaymentEntryMutation,
@@ -233,6 +236,7 @@ export default function EmployeeManagement() {
       />
       <LedgerDialog
         state={ledgerDialog}
+        employeeId={selectedId}
         onClose={() => setLedgerDialog(null)}
         onSave={async form => {
           try {
@@ -260,22 +264,70 @@ function EmployeeDialog({value, onClose, onSave}: {value: IEmployeeSummary | 'ne
   </Box></DialogContent><DialogActions><Button onClick={onClose}>Cancel</Button><Button variant="contained" onClick={() => onSave(form)} disabled={!form.FirstName || !form.LastName || !form.Email || !form.Phone || !form.Address || (value === 'new' && !form.Password)}>Save</Button></DialogActions></Dialog>;
 }
 
-function LedgerDialog({state, onClose, onSave}: {state: LedgerDialogState; onClose: () => void; onSave: (value: {date: string; amount: string; description: string; reference: string}) => Promise<void>}) {
+export function LedgerDialog({state, employeeId, onClose, onSave}: {state: LedgerDialogState; employeeId: string; onClose: () => void; onSave: (value: {date: string; amount: string; description: string; reference: string}) => Promise<void>}) {
   const value = state?.value;
   const [form, setForm] = useState({date: today(), amount: '', description: '', reference: ''});
+  const [batchSearch, setBatchSearch] = useState('');
+  const [debouncedBatchSearch, setDebouncedBatchSearch] = useState('');
+  const batchOptions = useListEmployeeBatchesQuery(
+    {EmployeeId: employeeId, SearchTerm: debouncedBatchSearch, Page: 1, Size: 20},
+    {skip: state?.kind !== 'work' || !employeeId},
+  );
   useEffect(() => {
-    if (state?.kind === 'work') setForm({date: value?.WorkDate ?? today(), amount: value?.Amount?.toString() ?? '', description: value?.Description ?? '', reference: value?.BatchId ?? ''});
+    if (state?.kind === 'work') {
+      setForm({date: value?.WorkDate ?? today(), amount: value?.Amount?.toString() ?? '', description: value?.Description ?? '', reference: value?.BatchId ?? ''});
+      setBatchSearch(value?.BatchId ?? '');
+    }
     if (state?.kind === 'payment') setForm({date: value?.PaymentDate ?? today(), amount: value?.Amount?.toString() ?? '', description: value?.Note ?? '', reference: value?.Reference ?? ''});
   }, [state, value]);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedBatchSearch(batchSearch.trim()), 300);
+    return () => window.clearTimeout(timer);
+  }, [batchSearch]);
+  const availableBatches = batchOptions.data?.Data ?? [];
+  const selectedBatch = availableBatches.find(batch => batch.BatchId === form.reference) ?? null;
   return <Dialog open={Boolean(state)} onClose={onClose} fullWidth maxWidth="sm"><DialogTitle>{value ? 'Edit' : 'Add'} {state?.kind === 'work' ? 'work entry' : 'payment'}</DialogTitle><DialogContent><Stack gap="20px" mt="8px">
     <TextField label="Date" type="date" value={form.date} onChange={event => setForm({...form, date: event.target.value})} InputLabelProps={{shrink: true}} required />
     <TextField label="Amount (Tk)" type="number" inputProps={{min: 0.01, step: 0.01}} value={form.amount} onChange={event => setForm({...form, amount: event.target.value})} required />
     <TextField label={state?.kind === 'work' ? 'Work description' : 'Payment note'} value={form.description} onChange={event => setForm({...form, description: event.target.value})} required={state?.kind === 'work'} multiline rows={2} />
-    <TextField
-      label={state?.kind === 'work' ? 'Related batch ID (optional)' : 'Reference (optional)'}
-      helperText={state?.kind === 'work' ? 'Use only the BAT... batch ID, without the unit serial after the underscore.' : undefined}
-      value={form.reference}
-      onChange={event => setForm({...form, reference: event.target.value})}
-    />
+    {state?.kind === 'work' ? (
+      <Autocomplete<IEmployeeBatchOption>
+        options={availableBatches}
+        value={selectedBatch}
+        loading={batchOptions.isFetching}
+        openOnFocus
+        filterOptions={options => options}
+        getOptionLabel={option => `${option.ProductName} - ${option.BatchId}`}
+        isOptionEqualToValue={(option, selected) => option.BatchId === selected.BatchId}
+        onInputChange={(_event, input, reason) => {
+          if (reason === 'input') setBatchSearch(input);
+          if (reason === 'clear') setBatchSearch('');
+        }}
+        onChange={(_event, selected) => setForm({...form, reference: selected?.BatchId ?? ''})}
+        noOptionsText={batchSearch ? 'No attributed batches match your search.' : 'No batches are attributed to this employee.'}
+        renderOption={(props, option) => (
+          <Box component="li" {...props} key={option.BatchId} sx={{display: 'block !important'}}>
+            <Typography fontWeight={700}>{option.ProductName}</Typography>
+            <Typography variant="caption" fontFamily="monospace" sx={{overflowWrap: 'anywhere'}}>{option.BatchId}</Typography>
+            <Typography variant="caption" color="text.secondary" display="block">
+              {option.Category} / {option.SubCategory} - {option.QuantityReceived} units
+            </Typography>
+          </Box>
+        )}
+        renderInput={params => (
+          <TextField
+            {...params}
+            label="Related production batch (optional)"
+            helperText="Search by product name or batch ID. Only batches attributed to this employee are shown."
+            InputProps={{
+              ...params.InputProps,
+              endAdornment: <>{batchOptions.isFetching ? <CircularProgress color="inherit" size={18} /> : null}{params.InputProps.endAdornment}</>,
+            }}
+          />
+        )}
+      />
+    ) : (
+      <TextField label="Reference (optional)" value={form.reference} onChange={event => setForm({...form, reference: event.target.value})} />
+    )}
   </Stack></DialogContent><DialogActions><Button onClick={onClose}>Cancel</Button><Button variant="contained" onClick={() => onSave(form)} disabled={!form.date || Number(form.amount) <= 0 || (state?.kind === 'work' && !form.description.trim())}>Save</Button></DialogActions></Dialog>;
 }
