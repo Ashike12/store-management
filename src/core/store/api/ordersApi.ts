@@ -3,10 +3,16 @@ import {ApiServiceBaseQuery} from './baseQueries';
 import {APP_CONFIG} from '@core/config/config';
 
 export const ORDER_STATUSES = [
-  'pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled',
+  'pending',
+  'confirmed',
+  'processing',
+  'shipped',
+  'delivered',
+  'cancelled',
 ] as const;
 export type OrderStatus = (typeof ORDER_STATUSES)[number];
 export type PaymentStatus = 'unpaid' | 'paid' | 'refunded';
+export type OrderUpdateChannel = 'Email' | 'PhoneCall' | 'Messaging';
 
 export interface OrderItem {
   ProductId?: string;
@@ -26,6 +32,9 @@ export interface OrderAuditEntry {
   By: string;
   At: string;
   Note: string;
+  EventType?: 'order_info_updated';
+  UpdateDoneBy?: OrderUpdateChannel;
+  ChangedFields?: string[];
 }
 
 export interface OrderStockMovement {
@@ -78,6 +87,22 @@ export interface TransitionOrder {
   Note?: string;
 }
 
+export interface UpdateOrderInfo {
+  ItemId: string;
+  ExpectedVersion: number;
+  CustomerName: string;
+  PhoneNumber: string;
+  Division: string;
+  District: string;
+  Area: string;
+  PostCode: string;
+  Address: string;
+  DeliveryNotes?: string;
+  DeliveryZone: 'inside_dhaka' | 'outside_dhaka';
+  UpdateDoneBy: OrderUpdateChannel;
+  Note?: string;
+}
+
 export interface ListOrdersRequest {
   Page: number;
   Size: number;
@@ -94,7 +119,9 @@ const request = (endpoint: string, body: object) => ({
   body,
   // Business failures can be returned with HTTP 200.
   validateStatus: (response: Response, result: OrderResponse<unknown>) =>
-    response.status >= 200 && response.status < 300 && result?.IsSuccess === true,
+    response.status >= 200 &&
+    response.status < 300 &&
+    result?.IsSuccess === true,
 });
 
 export const ordersApi = createApi({
@@ -103,11 +130,18 @@ export const ordersApi = createApi({
   tagTypes: ['FollowUpOrders'],
   keepUnusedDataFor: 0,
   endpoints: builder => ({
-    listFollowUpOrders: builder.query<OrderResponse<FollowUpOrder[]>, {Page: number; Size: number}>({
-      query: pagination => request('ListOrders', {...pagination, NeedsAction: true}),
+    listFollowUpOrders: builder.query<
+      OrderResponse<FollowUpOrder[]>,
+      {Page: number; Size: number}
+    >({
+      query: pagination =>
+        request('ListOrders', {...pagination, NeedsAction: true}),
       providesTags: ['FollowUpOrders'],
     }),
-    listOrders: builder.query<OrderResponse<FollowUpOrder[]>, ListOrdersRequest>({
+    listOrders: builder.query<
+      OrderResponse<FollowUpOrder[]>,
+      ListOrdersRequest
+    >({
       query: filters => request('ListOrders', filters),
       providesTags: ['FollowUpOrders'],
     }),
@@ -115,14 +149,27 @@ export const ordersApi = createApi({
       query: ItemId => request('GetOrder', {ItemId}),
       providesTags: ['FollowUpOrders'],
     }),
-    transitionOrder: builder.mutation<OrderResponse<FollowUpOrder>, TransitionOrder>({
+    transitionOrder: builder.mutation<
+      OrderResponse<FollowUpOrder>,
+      TransitionOrder
+    >({
       query: body => request('TransitionOrder', body),
+      invalidatesTags: ['FollowUpOrders'],
+    }),
+    updateOrderInfo: builder.mutation<
+      OrderResponse<FollowUpOrder>,
+      UpdateOrderInfo
+    >({
+      query: body => request('UpdateOrderInfo', body),
       invalidatesTags: ['FollowUpOrders'],
     }),
   }),
 });
 
 export const {
-  useListFollowUpOrdersQuery, useListOrdersQuery, useGetFollowUpOrderQuery,
+  useListFollowUpOrdersQuery,
+  useListOrdersQuery,
+  useGetFollowUpOrderQuery,
   useTransitionOrderMutation,
+  useUpdateOrderInfoMutation,
 } = ordersApi;

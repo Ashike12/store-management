@@ -46,10 +46,12 @@ import {selectCurrentUserRoles} from '@core/store/slices/auth.slice';
 import {
   FollowUpOrder,
   ORDER_STATUSES,
+  OrderUpdateChannel,
   OrderStatus,
   useGetFollowUpOrderQuery,
   useListOrdersQuery,
   useTransitionOrderMutation,
+  useUpdateOrderInfoMutation,
 } from '@core/store/api/ordersApi';
 import {
   buildOrdersRequest,
@@ -78,6 +80,37 @@ const actionLabels: Record<Exclude<OrderStatus, 'pending'>, string> = {
   delivered: 'Mark as delivered',
   cancelled: 'Cancel order',
 };
+
+const updateChannels: {value: OrderUpdateChannel; label: string}[] = [
+  {value: 'PhoneCall', label: 'Phone call'},
+  {value: 'Messaging', label: 'Messaging'},
+  {value: 'Email', label: 'Email'},
+];
+
+interface OrderInfoDraft {
+  CustomerName: string;
+  PhoneNumber: string;
+  Division: string;
+  District: string;
+  Area: string;
+  PostCode: string;
+  Address: string;
+  DeliveryNotes: string;
+  DeliveryZone: 'inside_dhaka' | 'outside_dhaka';
+}
+
+const orderInfoDraft = (order: FollowUpOrder): OrderInfoDraft => ({
+  CustomerName: order.CustomerName ?? '',
+  PhoneNumber: order.PhoneNumber ?? '',
+  Division: order.Division ?? '',
+  District: order.District ?? '',
+  Area: order.Area ?? '',
+  PostCode: order.PostCode ?? '',
+  Address: order.Address ?? '',
+  DeliveryNotes: order.DeliveryNotes ?? '',
+  DeliveryZone:
+    order.DeliveryZone === 'outside_dhaka' ? 'outside_dhaka' : 'inside_dhaka',
+});
 
 const money = (value = 0) =>
   new Intl.NumberFormat('en-BD', {style: 'currency', currency: 'BDT'}).format(
@@ -168,12 +201,24 @@ function DetailSection({
   children: React.ReactNode;
 }) {
   return (
-    <Box component="section">
-      <Typography variant="overline" color="text.secondary" fontWeight={800}>
+    <Paper
+      component="section"
+      variant="outlined"
+      sx={{
+        p: {xs: '16px', sm: '20px'},
+        borderRadius: '12px',
+        minWidth: 0,
+      }}>
+      <Typography
+        component="h3"
+        variant="overline"
+        color="text.secondary"
+        fontWeight={800}
+        sx={{display: 'block', letterSpacing: '0.08em'}}>
         {title}
       </Typography>
-      <Box sx={{mt: 0.75}}>{children}</Box>
-    </Box>
+      <Box sx={{mt: '12px', minWidth: 0}}>{children}</Box>
+    </Paper>
   );
 }
 
@@ -189,13 +234,82 @@ export function OrderDetailsDrawer({
   const [note, setNote] = useState('');
   const [feedback, setFeedback] = useState('');
   const [mustReload, setMustReload] = useState(false);
+  const [editingInfo, setEditingInfo] = useState(false);
+  const [infoDraft, setInfoDraft] = useState<OrderInfoDraft | null>(null);
+  const [updateDoneBy, setUpdateDoneBy] =
+    useState<OrderUpdateChannel>('PhoneCall');
+  const [updateNote, setUpdateNote] = useState('');
+  const [infoFeedback, setInfoFeedback] = useState('');
   const actionPending = useRef(false);
   const detail = useGetFollowUpOrderQuery(orderId, {
     refetchOnMountOrArgChange: true,
   });
   const [transition, transitionState] = useTransitionOrderMutation();
+  const [updateOrderInfo, updateInfoState] = useUpdateOrderInfoMutation();
   const order = detail.currentData?.Data;
   const validActions = order ? getValidOrderTransitions(order.OrderStatus) : [];
+
+  useEffect(() => {
+    if (order && !editingInfo) setInfoDraft(orderInfoDraft(order));
+  }, [order, editingInfo]);
+
+  const changeInfo = (field: keyof OrderInfoDraft, value: string) => {
+    setInfoDraft(current => {
+      if (!current) return current;
+      const next = {...current, [field]: value};
+      if (field === 'DeliveryZone' && value === 'inside_dhaka') {
+        next.Division = 'Dhaka';
+        next.District = 'Dhaka';
+      }
+      return next;
+    });
+  };
+
+  const saveInfo = async () => {
+    if (!order || !infoDraft || updateInfoState.isLoading || mustReload) return;
+    setInfoFeedback('');
+    const phone = infoDraft.PhoneNumber.replace(/[\s-]/g, '').replace(
+      /^\+?88/,
+      '',
+    );
+    const required = [
+      infoDraft.CustomerName,
+      phone,
+      infoDraft.Division,
+      infoDraft.District,
+      infoDraft.Area,
+      infoDraft.PostCode,
+      infoDraft.Address,
+    ];
+    if (required.some(value => !value.trim())) {
+      setInfoFeedback('Complete all required customer and delivery fields.');
+      return;
+    }
+    if (!/^01[3-9]\d{8}$/.test(phone)) {
+      setInfoFeedback('Enter a valid Bangladesh mobile number.');
+      return;
+    }
+    try {
+      await updateOrderInfo({
+        ItemId: order._id,
+        ExpectedVersion: order.Version,
+        ...infoDraft,
+        PhoneNumber: phone,
+        UpdateDoneBy: updateDoneBy,
+        Note: updateNote.trim() || undefined,
+      }).unwrap();
+      setEditingInfo(false);
+      setUpdateNote('');
+      setInfoFeedback('Customer and delivery information updated.');
+    } catch (error) {
+      if (isConflictError(error)) setMustReload(true);
+      setInfoFeedback(
+        isConflictError(error)
+          ? 'This order changed. Reload it before saving your correction.'
+          : 'The order information could not be updated.',
+      );
+    }
+  };
 
   const act = async (status: Exclude<OrderStatus, 'pending'>) => {
     if (!order || actionPending.current || mustReload) return;
@@ -237,40 +351,102 @@ export function OrderDetailsDrawer({
     <Drawer
       anchor="right"
       open
-      onClose={transitionState.isLoading ? undefined : onClose}
+      onClose={
+        transitionState.isLoading || updateInfoState.isLoading
+          ? undefined
+          : onClose
+      }
       PaperProps={{
-        sx: {width: fullScreen ? '100%' : 560, maxWidth: '100vw'},
+        sx: {
+          width: fullScreen ? '100%' : '700px',
+          maxWidth: '100vw',
+          overflow: 'hidden',
+          bgcolor: 'background.default',
+        },
       }}
       aria-label="Order details">
-      <Stack sx={{height: '100%'}}>
-        <Stack
-          direction="row"
-          alignItems="center"
-          justifyContent="space-between"
-          sx={{p: 2.5}}>
-          <Box>
-            <Typography variant="overline" color="text.secondary">
-              Fulfillment record
-            </Typography>
-            <Typography variant="h5" fontWeight={800}>
-              {order?.OrderNumber ?? 'Loading order'}
-            </Typography>
+      <Box
+        sx={{
+          height: '100%',
+          minHeight: 0,
+          display: 'flex',
+          flexDirection: 'column',
+        }}>
+        <Box
+          component="header"
+          sx={{
+            position: 'relative',
+            zIndex: '1',
+            flexShrink: 0,
+            px: {xs: '16px', sm: '24px'},
+            py: {xs: '16px', sm: '20px'},
+            bgcolor: 'background.paper',
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+          }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              justifyContent: 'space-between',
+              gap: '16px',
+            }}>
+            <Box sx={{minWidth: 0, flex: '1 1 auto'}}>
+              <Typography
+                variant="overline"
+                color="text.secondary"
+                fontWeight={800}
+                sx={{display: 'block', letterSpacing: '0.08em'}}>
+                Fulfillment record
+              </Typography>
+              <Typography
+                component="h2"
+                variant="h5"
+                fontWeight={900}
+                sx={{
+                  mt: '4px',
+                  overflowWrap: 'anywhere',
+                  lineHeight: 1.25,
+                }}>
+                {order?.OrderNumber ?? 'Loading order'}
+              </Typography>
+              {order && (
+                <Box
+                  sx={{
+                    mt: '12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: '8px',
+                  }}>
+                  <StatusChip status={order.OrderStatus} />
+                  <Typography variant="caption" color="text.secondary">
+                    Version {order.Version}
+                  </Typography>
+                </Box>
+              )}
+            </Box>
+            <IconButton
+              aria-label="Close order details"
+              onClick={onClose}
+              disabled={transitionState.isLoading || updateInfoState.isLoading}
+              sx={{flexShrink: 0}}>
+              <IconX />
+            </IconButton>
           </Box>
-          <IconButton
-            aria-label="Close order details"
-            onClick={onClose}
-            disabled={transitionState.isLoading}>
-            <IconX />
-          </IconButton>
-        </Stack>
-        <Divider />
+        </Box>
 
-        <Box sx={{p: 2.5, overflowY: 'auto', flex: 1}} aria-live="polite">
+        <Box
+          sx={{
+            px: {xs: '12px', sm: '24px'},
+            py: {xs: '16px', sm: '24px'},
+            overflowY: 'auto',
+            flex: '1 1 auto',
+            minHeight: 0,
+          }}
+          aria-live="polite">
           {detail.isFetching && !order && (
-            <Stack
-              spacing={1.5}
-              role="status"
-              aria-label="Loading order details">
+            <Stack gap="16px" role="status" aria-label="Loading order details">
               <Skeleton height={36} />
               <Skeleton height={110} />
               <Skeleton height={180} />
@@ -284,60 +460,253 @@ export function OrderDetailsDrawer({
             </Alert>
           )}
           {order && !detail.isError && (
-            <Stack spacing={3}>
-              <Stack
-                direction="row"
-                justifyContent="space-between"
-                alignItems="center"
-                gap={1}>
-                <StatusChip status={order.OrderStatus} />
-                <Typography variant="body2" color="text.secondary">
-                  Version {order.Version}
-                </Typography>
-              </Stack>
-
+            <Stack gap="18px">
               <DetailSection title="Customer & delivery">
-                <Stack spacing={0.75}>
-                  <Typography fontWeight={800}>{order.CustomerName}</Typography>
-                  <Link
-                    href={`tel:${order.PhoneNumber.replace(/[^+\d]/g, '')}`}
-                    sx={{display: 'inline-flex', gap: 1}}>
-                    <IconPhone size={18} /> {order.PhoneNumber}
-                  </Link>
-                  <Typography color="text.secondary">
-                    {[
-                      order.Address,
-                      order.Area,
-                      order.District,
-                      order.Division,
-                      order.PostCode,
-                    ]
-                      .filter(Boolean)
-                      .join(', ')}
-                  </Typography>
-                  {order.DeliveryNotes && (
+                <Stack gap="14px">
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'flex-end',
+                      gap: '10px',
+                      flexWrap: 'wrap',
+                    }}>
+                    {!editingInfo ? (
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        disabled={mustReload}
+                        onClick={() => {
+                          setInfoDraft(orderInfoDraft(order));
+                          setInfoFeedback('');
+                          setEditingInfo(true);
+                        }}>
+                        Edit order information
+                      </Button>
+                    ) : (
+                      <>
+                        <Button
+                          size="small"
+                          onClick={() => {
+                            setEditingInfo(false);
+                            setInfoDraft(orderInfoDraft(order));
+                            setInfoFeedback('');
+                          }}
+                          disabled={updateInfoState.isLoading}>
+                          Cancel
+                        </Button>
+                        <Button
+                          size="small"
+                          variant="contained"
+                          onClick={saveInfo}
+                          disabled={updateInfoState.isLoading || mustReload}>
+                          {updateInfoState.isLoading
+                            ? 'Saving...'
+                            : 'Save correction'}
+                        </Button>
+                      </>
+                    )}
+                  </Box>
+                  {infoFeedback && (
                     <Alert
-                      severity="info"
-                      icon={<IconTruckDelivery size={20} />}>
-                      {order.DeliveryNotes}
+                      severity={
+                        infoFeedback.includes('updated') ? 'success' : 'error'
+                      }>
+                      {infoFeedback}
                     </Alert>
+                  )}
+                  {editingInfo && infoDraft ? (
+                    <Box
+                      sx={{
+                        display: 'grid',
+                        gridTemplateColumns: {
+                          xs: 'minmax(0, 1fr)',
+                          sm: 'repeat(2, minmax(0, 1fr))',
+                        },
+                        gap: '16px',
+                      }}>
+                      <TextField
+                        required
+                        label="Customer name"
+                        value={infoDraft.CustomerName}
+                        onChange={event =>
+                          changeInfo('CustomerName', event.target.value)
+                        }
+                      />
+                      <TextField
+                        required
+                        label="Phone number"
+                        value={infoDraft.PhoneNumber}
+                        onChange={event =>
+                          changeInfo('PhoneNumber', event.target.value)
+                        }
+                      />
+                      <FormControl required>
+                        <InputLabel id="delivery-zone-edit-label">
+                          Delivery zone
+                        </InputLabel>
+                        <Select
+                          labelId="delivery-zone-edit-label"
+                          label="Delivery zone"
+                          value={infoDraft.DeliveryZone}
+                          onChange={event =>
+                            changeInfo('DeliveryZone', event.target.value)
+                          }>
+                          <MenuItem value="inside_dhaka">Inside Dhaka</MenuItem>
+                          <MenuItem value="outside_dhaka">
+                            Outside Dhaka
+                          </MenuItem>
+                        </Select>
+                      </FormControl>
+                      <TextField
+                        required
+                        label="Area"
+                        value={infoDraft.Area}
+                        onChange={event =>
+                          changeInfo('Area', event.target.value)
+                        }
+                      />
+                      <TextField
+                        required
+                        label="Division"
+                        value={infoDraft.Division}
+                        disabled={infoDraft.DeliveryZone === 'inside_dhaka'}
+                        onChange={event =>
+                          changeInfo('Division', event.target.value)
+                        }
+                      />
+                      <TextField
+                        required
+                        label="District"
+                        value={infoDraft.District}
+                        disabled={infoDraft.DeliveryZone === 'inside_dhaka'}
+                        onChange={event =>
+                          changeInfo('District', event.target.value)
+                        }
+                      />
+                      <TextField
+                        required
+                        label="Post code"
+                        value={infoDraft.PostCode}
+                        onChange={event =>
+                          changeInfo('PostCode', event.target.value)
+                        }
+                      />
+                      <TextField
+                        required
+                        label="Address"
+                        value={infoDraft.Address}
+                        onChange={event =>
+                          changeInfo('Address', event.target.value)
+                        }
+                        sx={{gridColumn: {sm: '1 / -1'}}}
+                      />
+                      <TextField
+                        label="Delivery notes"
+                        multiline
+                        minRows={2}
+                        value={infoDraft.DeliveryNotes}
+                        onChange={event =>
+                          changeInfo('DeliveryNotes', event.target.value)
+                        }
+                        sx={{gridColumn: {sm: '1 / -1'}}}
+                      />
+                      <FormControl required>
+                        <InputLabel id="update-channel-label">
+                          Confirmed through
+                        </InputLabel>
+                        <Select
+                          labelId="update-channel-label"
+                          label="Confirmed through"
+                          value={updateDoneBy}
+                          onChange={event =>
+                            setUpdateDoneBy(
+                              event.target.value as OrderUpdateChannel,
+                            )
+                          }>
+                          {updateChannels.map(channel => (
+                            <MenuItem key={channel.value} value={channel.value}>
+                              {channel.label}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                      <TextField
+                        label="Update note (optional)"
+                        value={updateNote}
+                        onChange={event =>
+                          setUpdateNote(event.target.value.slice(0, 1000))
+                        }
+                        helperText={`${updateNote.length}/1000 characters`}
+                        sx={{gridColumn: {sm: '1 / -1'}}}
+                      />
+                    </Box>
+                  ) : (
+                    <>
+                      <Typography variant="h6" fontWeight={800}>
+                        {order.CustomerName}
+                      </Typography>
+                      <Link
+                        href={`tel:${order.PhoneNumber.replace(/[^+\d]/g, '')}`}
+                        underline="hover"
+                        sx={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          width: 'fit-content',
+                          overflowWrap: 'anywhere',
+                        }}>
+                        <IconPhone size={18} />
+                        <span>{order.PhoneNumber}</span>
+                      </Link>
+                      <Typography
+                        color="text.secondary"
+                        sx={{overflowWrap: 'anywhere', lineHeight: 1.65}}>
+                        {[
+                          order.Address,
+                          order.Area,
+                          order.District,
+                          order.Division,
+                          order.PostCode,
+                        ]
+                          .filter(Boolean)
+                          .join(', ')}
+                      </Typography>
+                      {order.DeliveryNotes && (
+                        <Alert
+                          severity="info"
+                          icon={<IconTruckDelivery size={20} />}
+                          sx={{mt: '8px'}}>
+                          {order.DeliveryNotes}
+                        </Alert>
+                      )}
+                    </>
                   )}
                 </Stack>
               </DetailSection>
 
               <DetailSection title="Order items">
-                <Stack spacing={1.5}>
+                <Stack gap="12px">
                   {order.Items.map((item, index) => (
                     <Paper
                       key={`${item.ProductId ?? item.ProductName}-${index}`}
                       variant="outlined"
-                      sx={{p: 1.5}}>
-                      <Stack
-                        direction="row"
-                        justifyContent="space-between"
-                        gap={2}>
-                        <Box>
-                          <Typography fontWeight={800}>
+                      sx={{
+                        p: '16px',
+                        borderRadius: '10px',
+                        bgcolor: 'background.default',
+                      }}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          flexDirection: {xs: 'column', sm: 'row'},
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-start',
+                          gap: '10px',
+                        }}>
+                        <Box sx={{minWidth: 0}}>
+                          <Typography
+                            fontWeight={800}
+                            sx={{overflowWrap: 'anywhere'}}>
                             {item.ProductName}
                           </Typography>
                           <Typography variant="body2" color="text.secondary">
@@ -346,20 +715,29 @@ export function OrderDetailsDrawer({
                               .join(' / ')}
                           </Typography>
                         </Box>
-                        <Typography textAlign="right" fontWeight={700}>
-                          {item.Quantity} × {money(item.UnitPrice)}
+                        <Typography
+                          textAlign={{xs: 'left', sm: 'right'}}
+                          fontWeight={800}
+                          sx={{flexShrink: 0, overflowWrap: 'anywhere'}}>
+                          {item.Quantity} x {money(item.UnitPrice)}
                         </Typography>
-                      </Stack>
+                      </Box>
                       {item.CustomOptions &&
                         Object.keys(item.CustomOptions).length > 0 && (
                           <Box
                             component="dl"
                             sx={{
                               display: 'grid',
-                              gridTemplateColumns: '1fr 1fr',
-                              gap: 0.75,
-                              mt: 1.5,
-                              mb: 0,
+                              gridTemplateColumns: {
+                                xs: 'minmax(0, 1fr)',
+                                sm: 'repeat(2, minmax(0, 1fr))',
+                              },
+                              gap: '10px 16px',
+                              mt: '16px',
+                              mb: '0px',
+                              pt: '14px',
+                              borderTop: '1px solid',
+                              borderColor: 'divider',
                             }}>
                             {Object.entries(item.CustomOptions).map(
                               ([key, value]) => (
@@ -374,7 +752,7 @@ export function OrderDetailsDrawer({
                                   <Typography
                                     component="dd"
                                     variant="body2"
-                                    sx={{m: 0, overflowWrap: 'anywhere'}}>
+                                    sx={{m: '0px', overflowWrap: 'anywhere'}}>
                                     {value}
                                   </Typography>
                                 </Box>
@@ -388,46 +766,71 @@ export function OrderDetailsDrawer({
               </DetailSection>
 
               <DetailSection title="Payment summary">
-                <Paper variant="outlined" sx={{p: 2}}>
-                  <Stack spacing={0.75}>
-                    <Stack direction="row" justifyContent="space-between">
-                      <span>Subtotal</span>
-                      <strong>{money(order.Subtotal)}</strong>
-                    </Stack>
+                <Stack gap="10px">
+                  <Box
+                    sx={{
+                      display: 'grid',
+                      gridTemplateColumns: 'minmax(0, 1fr) auto',
+                      gap: '10px 20px',
+                      alignItems: 'baseline',
+                    }}>
+                    <Typography color="text.secondary">Subtotal</Typography>
+                    <Typography fontWeight={700} textAlign="right">
+                      {money(order.Subtotal)}
+                    </Typography>
                     {(order.CouponDiscount ?? 0) > 0 && (
-                      <Stack direction="row" justifyContent="space-between">
-                        <span>Discount</span>
-                        <strong>-{money(order.CouponDiscount)}</strong>
-                      </Stack>
+                      <>
+                        <Typography color="text.secondary">Discount</Typography>
+                        <Typography fontWeight={700} textAlign="right">
+                          -{money(order.CouponDiscount)}
+                        </Typography>
+                      </>
                     )}
-                    <Stack direction="row" justifyContent="space-between">
-                      <span>Delivery charge</span>
-                      <strong>{money(order.ShippingCost)}</strong>
-                    </Stack>
-                    <Divider />
-                    <Stack direction="row" justifyContent="space-between">
-                      <Typography fontWeight={800}>Total</Typography>
-                      <Typography fontWeight={900}>
-                        {money(order.TotalAmount)}
-                      </Typography>
-                    </Stack>
-                    <Alert severity="warning">
-                      Manual payment handling. Payment status:{' '}
-                      {order.PaymentStatus}.
-                    </Alert>
-                  </Stack>
-                </Paper>
+                    <Typography color="text.secondary">
+                      Delivery charge
+                    </Typography>
+                    <Typography fontWeight={700} textAlign="right">
+                      {money(order.ShippingCost)}
+                    </Typography>
+                  </Box>
+                  <Divider sx={{my: '4px'}} />
+                  <Box
+                    sx={{
+                      display: 'grid',
+                      gridTemplateColumns: 'minmax(0, 1fr) auto',
+                      gap: '20px',
+                      alignItems: 'baseline',
+                    }}>
+                    <Typography variant="h6" fontWeight={900}>
+                      Total
+                    </Typography>
+                    <Typography
+                      variant="h6"
+                      fontWeight={900}
+                      textAlign="right"
+                      sx={{overflowWrap: 'anywhere'}}>
+                      {money(order.TotalAmount)}
+                    </Typography>
+                  </Box>
+                  <Alert severity="warning" sx={{mt: '8px'}}>
+                    Manual payment handling. Payment status:{' '}
+                    {order.PaymentStatus}.
+                  </Alert>
+                </Stack>
               </DetailSection>
 
               <DetailSection title="Inventory movements">
                 {order.StockMovements?.length ? (
-                  <Stack spacing={0.75}>
+                  <Stack gap="10px">
                     {order.StockMovements.map(movement => (
-                      <Stack
+                      <Box
                         key={movement.ProductId}
-                        direction="row"
-                        justifyContent="space-between"
-                        gap={2}>
+                        sx={{
+                          display: 'grid',
+                          gridTemplateColumns: 'minmax(0, 1fr) auto',
+                          gap: '16px',
+                          alignItems: 'center',
+                        }}>
                         <Typography
                           variant="body2"
                           sx={{overflowWrap: 'anywhere'}}>
@@ -436,7 +839,7 @@ export function OrderDetailsDrawer({
                         <Typography variant="body2" fontWeight={800}>
                           {movement.Quantity}
                         </Typography>
-                      </Stack>
+                      </Box>
                     ))}
                   </Stack>
                 ) : (
@@ -448,51 +851,103 @@ export function OrderDetailsDrawer({
 
               <DetailSection title="Order history">
                 {order.AuditHistory?.length ? (
-                  <Stack spacing={0}>
+                  <Box>
                     {[...order.AuditHistory].reverse().map((entry, index) => (
                       <Box
                         key={`${entry.At}-${index}`}
                         sx={{
                           position: 'relative',
-                          pl: 3,
-                          pb: 2,
-                          borderLeft:
-                            index === order.AuditHistory!.length - 1 ? 0 : 2,
-                          borderColor: 'divider',
+                          pl: '28px',
+                          pb:
+                            index === order.AuditHistory!.length - 1
+                              ? '0px'
+                              : '22px',
+                          '&::before': {
+                            content: '""',
+                            position: 'absolute',
+                            left: '7px',
+                            top: '15px',
+                            bottom: '0px',
+                            width: '1px',
+                            bgcolor:
+                              index === order.AuditHistory!.length - 1
+                                ? 'transparent'
+                                : 'divider',
+                          },
                         }}>
                         <Box
                           sx={{
                             position: 'absolute',
-                            left: -6,
-                            top: 3,
-                            width: 10,
-                            height: 10,
+                            left: '2px',
+                            top: '5px',
+                            width: '11px',
+                            height: '11px',
                             borderRadius: '50%',
                             bgcolor: 'primary.main',
+                            border: '3px solid',
+                            borderColor: 'background.paper',
+                            boxSizing: 'content-box',
                           }}
                         />
-                        <Typography fontWeight={800}>
-                          {entry.To || 'Created'}
+                        <Typography
+                          fontWeight={800}
+                          sx={{textTransform: 'capitalize'}}>
+                          {entry.EventType === 'order_info_updated'
+                            ? 'Order information updated'
+                            : entry.To || 'Created'}
                         </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {dateTime(entry.At)} · {entry.By}
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{display: 'block', overflowWrap: 'anywhere'}}>
+                          {dateTime(entry.At)} / {entry.By}
                         </Typography>
+                        {entry.UpdateDoneBy && (
+                          <Typography
+                            variant="caption"
+                            color="primary.main"
+                            sx={{display: 'block', mt: '3px'}}>
+                            Confirmed through:{' '}
+                            {updateChannels.find(
+                              channel => channel.value === entry.UpdateDoneBy,
+                            )?.label ?? entry.UpdateDoneBy}
+                            {entry.ChangedFields?.length
+                              ? ` / Changed: ${entry.ChangedFields.join(', ')}`
+                              : ''}
+                          </Typography>
+                        )}
                         {entry.Note && (
-                          <Typography variant="body2" sx={{mt: 0.5}}>
+                          <Typography
+                            variant="body2"
+                            sx={{mt: '6px', overflowWrap: 'anywhere'}}>
                             {entry.Note}
                           </Typography>
                         )}
                       </Box>
                     ))}
-                  </Stack>
+                  </Box>
                 ) : (
                   <Typography variant="body2" color="text.secondary">
                     No audit events available.
                   </Typography>
                 )}
               </DetailSection>
+            </Stack>
+          )}
+        </Box>
 
-              <Divider />
+        {order && !detail.isError && (
+          <Box
+            component="footer"
+            sx={{
+              flexShrink: 0,
+              px: {xs: '12px', sm: '24px'},
+              py: {xs: '14px', sm: '18px'},
+              bgcolor: 'background.paper',
+              borderTop: '1px solid',
+              borderColor: 'divider',
+            }}>
+            <Stack gap="12px">
               {feedback && (
                 <Alert severity={mustReload ? 'error' : 'success'}>
                   {feedback}
@@ -502,12 +957,13 @@ export function OrderDetailsDrawer({
                 <Button
                   startIcon={<IconRefresh size={18} />}
                   onClick={reload}
-                  disabled={detail.isFetching}>
+                  disabled={detail.isFetching}
+                  sx={{alignSelf: {sm: 'flex-start'}}}>
                   Reload latest order
                 </Button>
               )}
               {validActions.length ? (
-                <Stack spacing={1.5}>
+                <>
                   <TextField
                     label="Action note (optional)"
                     multiline
@@ -518,9 +974,20 @@ export function OrderDetailsDrawer({
                     }
                     helperText={`${note.length}/1000 characters`}
                     slotProps={{htmlInput: {maxLength: 1000}}}
-                    disabled={transitionState.isLoading || mustReload}
+                    disabled={
+                      transitionState.isLoading ||
+                      updateInfoState.isLoading ||
+                      editingInfo ||
+                      mustReload
+                    }
                   />
-                  <Stack direction={{xs: 'column', sm: 'row'}} spacing={1}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      flexDirection: {xs: 'column', sm: 'row'},
+                      flexWrap: 'wrap',
+                      gap: '10px',
+                    }}>
                     {validActions.map(status => (
                       <Button
                         key={status}
@@ -533,18 +1000,21 @@ export function OrderDetailsDrawer({
                         }
                         disabled={
                           transitionState.isLoading ||
+                          updateInfoState.isLoading ||
+                          editingInfo ||
                           mustReload ||
                           detail.isFetching
-                        }>
+                        }
+                        sx={{minWidth: {xs: '100%', sm: '160px'}}}>
                         {transitionState.isLoading
-                          ? 'Saving…'
+                          ? 'Saving...'
                           : actionLabels[
                               status as Exclude<OrderStatus, 'pending'>
                             ]}
                       </Button>
                     ))}
-                  </Stack>
-                </Stack>
+                  </Box>
+                </>
               ) : (
                 <Alert severity="info">
                   This order is in a terminal state and needs no further
@@ -552,13 +1022,12 @@ export function OrderDetailsDrawer({
                 </Alert>
               )}
             </Stack>
-          )}
-        </Box>
-      </Stack>
+          </Box>
+        )}
+      </Box>
     </Drawer>
   );
 }
-
 export function OrdersConsole() {
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState<OrderStatusFilter>('all');
