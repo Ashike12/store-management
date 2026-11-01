@@ -1,33 +1,42 @@
-import { CustomButton } from '@components/button/CustomButton';
+import {CustomButton} from '@components/button/CustomButton';
 import CustomTable from '@components/table/CustomTable';
-import { useMemo, useState } from 'react';
+import {useMemo, useState} from 'react';
 import DeleteConfirmationModal from '@components/confirmation-modal/delete-confirmation.modal';
-import UserModal, { IUserForm } from '../components/userModal';
-import { useCreateUserMutation, useDeleteUserMutation, useGetUserQuery, useUpdateUserMutation } from '@core/store/api';
-import { IUser } from '@core/interfaces/api/IUser';
-import { useNavigate } from 'react-router-dom';
+import UserModal, {IUserForm} from '../components/userModal';
+import {
+  useCreateUserMutation,
+  useDeleteUserMutation,
+  useGetUserQuery,
+  useUpdateUserMutation,
+} from '@core/store/api';
+import {IUser} from '@core/interfaces/api/IUser';
+import {useNavigate} from 'react-router-dom';
 
 // Define table columns
 const columns = [
-  { key: "DisplayName", label: "NAME" },
-  { key: "Email", label: "EMAIL" },
-  { key: "Address", label: "ADDRESS" },
-  { key: "Phone", label: "PHONE_NUMBER" },
+  {key: 'DisplayName', label: 'NAME'},
+  {key: 'Email', label: 'EMAIL'},
+  {key: 'Address', label: 'ADDRESS'},
+  {key: 'Phone', label: 'PHONE_NUMBER'},
 ];
 
 const initialFormData: IUserForm = {
-  ItemId: "",
-  FirstName: "",
-  LastName: "",
-  Email: "",
-  Address: "",
-  Phone: "",
-  Password: "",
+  ItemId: '',
+  FirstName: '',
+  LastName: '',
+  Email: '',
+  Address: '',
+  Phone: '',
+  Password: '',
   Active: false,
-}
+};
 
 export default function StoreManagement() {
-  const { data, isLoading, refetch } = useGetUserQuery({ pageNumber: 1, pageSize: 10, itemId: '' });
+  const {data, isLoading, refetch} = useGetUserQuery({
+    pageNumber: 1,
+    pageSize: 10,
+    itemId: '',
+  });
   const [createProduct] = useCreateUserMutation();
   const [updateProduct] = useUpdateUserMutation();
   const [deleteProduct] = useDeleteUserMutation();
@@ -37,8 +46,10 @@ export default function StoreManagement() {
   const [searchText, setSearchText] = useState('');
   const [formData, setFormData] = useState<IUserForm>(initialFormData);
   const navigate = useNavigate();
-  const handleSave = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData((prev) => ({
+  const handleSave = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    setFormData(prev => ({
       ...prev,
       [e.target.name]: e.target.value,
     }));
@@ -54,8 +65,8 @@ export default function StoreManagement() {
           Email: formData.Email,
           Address: formData.Address,
           Phone: formData.Phone,
-          Active: formData.Active
-        }
+          Active: formData.Active,
+        },
       }).unwrap();
       setIsOpen(false);
       setIsUpdate(false);
@@ -68,15 +79,19 @@ export default function StoreManagement() {
           Email: formData.Email,
           Address: formData.Address,
           Phone: formData.Phone,
-          Password: formData.Password
-        }
+          Password: formData.Password,
+        },
       }).unwrap();
       setIsOpen(false);
       refetch();
     }
-  }
+  };
 
-  const handleRowClick = async (row: IUser, isDelete: boolean, isGoDetails?: boolean) => {
+  const handleRowClick = async (
+    row: IUser,
+    isDelete: boolean,
+    isGoDetails?: boolean,
+  ) => {
     setFormData({
       ItemId: row.ItemId,
       FirstName: row.FirstName,
@@ -85,65 +100,67 @@ export default function StoreManagement() {
       Address: row.Address,
       Phone: row.Phone,
       Password: row.Password ?? '',
-      Active: row.Active
+      Active: row.Active,
     });
     if (isDelete) {
       setIsDelete(true);
       // await deleteProduct({id: row.ItemId}).unwrap();
       // refetch();
-    }
-    else if (isGoDetails) {
-      navigate(`/wholesaler/invoice/${row.ItemId}?phoneNumber=${row.Phone}&wholesalerName=${row.FirstName + ' ' + row.LastName}`);
+    } else if (isGoDetails) {
+      navigate(
+        `/wholesaler/invoice/${row.ItemId}?phoneNumber=${row.Phone}&wholesalerName=${row.FirstName + ' ' + row.LastName}`,
+      );
     } else {
       setIsUpdate(true);
       setIsOpen(true);
     }
-  }
+  };
 
   const handleCancel = () => {
     setIsOpen(false);
     setIsUpdate(false);
     setFormData(initialFormData);
-  }
+  };
 
   const handleDelete = async (isConfirm: boolean) => {
     setIsDelete(false);
     if (isConfirm) {
-      await deleteProduct({ id: formData.ItemId }).unwrap();
+      await deleteProduct({id: formData.ItemId}).unwrap();
       refetch();
     }
-  }
+  };
 
   const resetForm = () => {
     setFormData(initialFormData);
     setIsOpen(true);
-  }
+  };
   // Filtered and searched data
   const filteredData = useMemo(() => {
     if (!data?.Data) return [];
 
     return data.Data.filter(item => {
-      const matchesSearch = item.DisplayName.toLowerCase().includes(searchText.toLowerCase());
+      const matchesSearch = item.DisplayName.toLowerCase().includes(
+        searchText.toLowerCase(),
+      );
 
       return matchesSearch;
     });
   }, [data, searchText]);
   return (
     <>
-      <div className='w-full'>
-
-        <div className="p-10 w-full">
-          <div className="flex flex-wrap gap-4 mb-6">
+      <div className="w-full">
+        <div className="w-full p-0 sm:p-3 lg:p-10">
+          <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
             <input
               type="text"
               placeholder="Search by name"
-              className="border p-2 rounded w-full sm:w-1/2"
+              className="min-h-11 w-full rounded-lg border p-3 sm:w-1/2"
               value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
+              onChange={e => setSearchText(e.target.value)}
             />
             <CustomButton
               onClick={() => resetForm()}
-              className='cursor-pointer'
+              className="cursor-pointer"
               text={'ADD_USER'}
               variant={'primary'}
             />
@@ -157,17 +174,27 @@ export default function StoreManagement() {
             rowsPerPage={10}
             isLoading={isLoading}
             emptyState={{
-              title: searchText ? 'No wholesalers match your search' : 'Your wholesaler network starts here',
+              title: searchText
+                ? 'No wholesalers match your search'
+                : 'Your wholesaler network starts here',
               description: searchText
                 ? 'Try a different name or clear the search to see every wholesaler.'
                 : 'Add your first wholesaler to track invoices, payments and outstanding balances.',
               actionLabel: searchText ? undefined : 'Add wholesaler',
               onAction: searchText ? undefined : resetForm,
-            }} />
+            }}
+          />
         </div>
       </div>
       {isOpen && (
-        <UserModal isUpdate={isUpdate} handleSubmit={handleSubmit} formData={formData} isOpen={isOpen} handleFormData={handleSave} handleCancel={handleCancel} />
+        <UserModal
+          isUpdate={isUpdate}
+          handleSubmit={handleSubmit}
+          formData={formData}
+          isOpen={isOpen}
+          handleFormData={handleSave}
+          handleCancel={handleCancel}
+        />
       )}
 
       {isDelete && (

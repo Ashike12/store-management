@@ -41,9 +41,14 @@ const toneClass = {
 function MetricCard({label, value, tone = 'default', prefix}: MetricCardProps) {
   return (
     <Card className="min-w-0">
-      <CardContent>
+      <CardContent
+        sx={{
+          padding: {xs: '16px', sm: '20px'},
+          '&:last-child': {paddingBottom: {xs: '16px', sm: '20px'}},
+        }}>
         <p className="text-sm text-[var(--palette-text-secondary)]">{label}</p>
-        <p className={`mt-2 text-2xl font-bold ${toneClass[tone]}`}>
+        <p
+          className={`mt-1 text-xl font-bold sm:mt-2 sm:text-2xl ${toneClass[tone]}`}>
           {prefix}
           <CountUp end={value} duration={2} separator="," decimals={2} />
         </p>
@@ -95,17 +100,18 @@ const Dashboard = () => {
           <CardContent>
             <h2 className="mb-2 text-lg font-bold">Recent invoices</h2>
             <div className="w-full overflow-x-auto py-4">
-                <CustomTable
-                  isRowClickable={false}
-                  columns={getInvoiceColumns(true)}
-                  hidePagination
-                  data={dashBoardData?.RecentInvoiceData ?? []}
-                  rowsPerPage={10}
-                  emptyState={{
-                    title: 'No invoices yet',
-                    description: 'Your recent wholesaler invoices will appear here.',
-                  }}
-                />
+              <CustomTable
+                isRowClickable={false}
+                columns={getInvoiceColumns(true)}
+                hidePagination
+                data={dashBoardData?.RecentInvoiceData ?? []}
+                rowsPerPage={10}
+                emptyState={{
+                  title: 'No invoices yet',
+                  description:
+                    'Your recent wholesaler invoices will appear here.',
+                }}
+              />
             </div>
           </CardContent>
         </Card>
@@ -274,17 +280,18 @@ const Dashboard = () => {
         <CardContent>
           <h2 className="mb-2 text-lg font-bold">Recent invoices</h2>
           <div className="w-full overflow-x-auto py-4">
-              <CustomTable
-                isRowClickable={false}
-                columns={getInvoiceColumns(false)}
-                hidePagination
-                data={dashBoardData?.RecentInvoiceData ?? []}
-                rowsPerPage={10}
-                emptyState={{
-                  title: 'No invoices yet',
-                  description: 'Recent invoices will appear here as sales are recorded.',
-                }}
-              />
+            <CustomTable
+              isRowClickable={false}
+              columns={getInvoiceColumns(false)}
+              hidePagination
+              data={dashBoardData?.RecentInvoiceData ?? []}
+              rowsPerPage={10}
+              emptyState={{
+                title: 'No invoices yet',
+                description:
+                  'Recent invoices will appear here as sales are recorded.',
+              }}
+            />
           </div>
         </CardContent>
       </Card>

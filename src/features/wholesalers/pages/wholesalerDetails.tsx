@@ -51,7 +51,7 @@ export default function WholesalerDetails() {
     <>
       <div className="w-full">
         <div
-          className="mx-auto mt-10 rounded-xl p-6 shadow-lg"
+          className="mx-auto mt-0 rounded-xl p-4 shadow-sm sm:mt-5 sm:p-6 sm:shadow-lg md:mt-10"
           style={{
             backgroundColor: theme.vars.palette.background.paper,
             color: theme.vars.palette.text.primary,
@@ -176,22 +176,23 @@ export default function WholesalerDetails() {
                 content={' ' + realizedCashMargin + ' tk'}
               />
             </div>
-              <div className="w-full py-8">
-                <CustomTable
-                  isRowClickable={true}
-                  handleRowClick={handleRowClick}
-                  columns={columns}
-                  data={invoiceData || []}
-                  rowsPerPage={10}
-                  isLoading={isLoading}
-                  emptyState={{
-                    title: 'No invoices for this wholesaler',
-                    description: 'Create an invoice to begin tracking purchases, payments and due amounts.',
-                    actionLabel: 'Add invoice',
-                    onAction: addInvoice,
-                  }}
-                />
-              </div>
+            <div className="w-full py-8">
+              <CustomTable
+                isRowClickable={true}
+                handleRowClick={handleRowClick}
+                columns={columns}
+                data={invoiceData || []}
+                rowsPerPage={10}
+                isLoading={isLoading}
+                emptyState={{
+                  title: 'No invoices for this wholesaler',
+                  description:
+                    'Create an invoice to begin tracking purchases, payments and due amounts.',
+                  actionLabel: 'Add invoice',
+                  onAction: addInvoice,
+                }}
+              />
+            </div>
           </div>
         </div>
       </div>
