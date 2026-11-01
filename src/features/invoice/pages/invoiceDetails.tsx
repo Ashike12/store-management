@@ -42,13 +42,17 @@ export default function InvoiceDetails() {
     navigate(`/invoice/${action}/${id}?isUpdate=${action === 'update'}`);
   };
   if (isLoading) {
-    return <div className="w-full p-8"><DetailSkeleton rows={7} /></div>;
+    return (
+      <div className="w-full p-8">
+        <DetailSkeleton rows={7} />
+      </div>
+    );
   }
   return (
     <>
       <div className="w-full">
         <div
-          className="mx-auto mt-10 max-w-3xl rounded-xl p-6 shadow-lg"
+          className="mx-auto mt-0 max-w-3xl rounded-xl p-4 shadow-sm sm:mt-5 sm:p-6 sm:shadow-lg md:mt-10"
           style={{
             backgroundColor: theme.vars.palette.background.paper,
             color: theme.vars.palette.text.primary,
@@ -173,7 +177,7 @@ export default function InvoiceDetails() {
 
             {invoiceData?.ProductSellInfo &&
               invoiceData?.ProductSellInfo.length > 0 && (
-                <div className="w-full p-10">
+                <div className="w-full p-0 sm:p-4 lg:p-10">
                   <CustomTable
                     isRowClickable={false}
                     columns={columns}

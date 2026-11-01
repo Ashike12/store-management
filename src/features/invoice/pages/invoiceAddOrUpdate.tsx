@@ -1,50 +1,63 @@
-import {CustomButton} from "@components/button/CustomButton";
-import TextWrapper from "@components/text/TextWrapper";
+import {CustomButton} from '@components/button/CustomButton';
+import TextWrapper from '@components/text/TextWrapper';
 import {
   ICreateInvoicePayload,
   IInvoice,
   InvoiceDetailsResponse,
   IProductSellInfo,
   IUpdateInvoicePayload,
-} from "@core/interfaces/api/IInvoice";
-import {useGetUserQuery} from "@core/store/api";
-import {useCreateInvoiceMutation, useGetInvoiceQuery, useUpdateInvoiceMutation} from "@core/store/api/invoiceApi";
-import {useGetProductQuery} from "@core/store/api/product";
-import {useTheme} from "@mui/material/styles";
-import {FormControl, InputLabel, MenuItem, Select, Tab, Tabs, TextField} from "@mui/material";
-import {ErrorMessage, FieldArray, Form, Formik, useFormikContext} from "formik";
-import {useNavigate, useParams, useSearchParams} from "react-router-dom";
-import {invoiceValidationSchema} from "../schemas/invoice-form.schema";
-import {useEffect, useMemo, useState} from "react";
+} from '@core/interfaces/api/IInvoice';
+import {useGetUserQuery} from '@core/store/api';
+import {
+  useCreateInvoiceMutation,
+  useGetInvoiceQuery,
+  useUpdateInvoiceMutation,
+} from '@core/store/api/invoiceApi';
+import {useGetProductQuery} from '@core/store/api/product';
+import {useTheme} from '@mui/material/styles';
+import {
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Tab,
+  Tabs,
+  TextField,
+} from '@mui/material';
+import {ErrorMessage, FieldArray, Form, Formik, useFormikContext} from 'formik';
+import {useNavigate, useParams, useSearchParams} from 'react-router-dom';
+import {invoiceValidationSchema} from '../schemas/invoice-form.schema';
+import {useEffect, useMemo, useState} from 'react';
 import {FormSkeleton} from '@components/loaders/AdminSkeleton';
 
 const EMPTY_PRODUCT_ROW: IProductSellInfo = {
-  ItemId: "",
-  ProductId: "",
+  ItemId: '',
+  ProductId: '',
   Quantity: 0,
   SellingPrice: 0,
-  SellingDate: "",
+  SellingDate: '',
 };
 
 const createInvoiceInitialValues: ICreateInvoicePayload = {
   PaymentAmount: 0,
   ProductSellInfo: [{...EMPTY_PRODUCT_ROW}],
-  WholeSalerId: "",
-  InvoiceType: "WHOLESALE",
+  WholeSalerId: '',
+  InvoiceType: 'WHOLESALE',
 };
 
 function DuePaymentAutofill({
   isUpdate,
   dueAmount,
 }: Readonly<{isUpdate: boolean; dueAmount: number}>) {
-  const {values, touched, setFieldValue} = useFormikContext<ICreateInvoicePayload>();
+  const {values, touched, setFieldValue} =
+    useFormikContext<ICreateInvoicePayload>();
 
   useEffect(() => {
     if (isUpdate) {
       return;
     }
 
-    if (values.InvoiceType !== "DUE_PAYMENT") {
+    if (values.InvoiceType !== 'DUE_PAYMENT') {
       return;
     }
 
@@ -56,8 +69,15 @@ function DuePaymentAutofill({
       return;
     }
 
-    setFieldValue("PaymentAmount", dueAmount, false);
-  }, [dueAmount, isUpdate, setFieldValue, touched.PaymentAmount, values.InvoiceType, values.WholeSalerId]);
+    setFieldValue('PaymentAmount', dueAmount, false);
+  }, [
+    dueAmount,
+    isUpdate,
+    setFieldValue,
+    touched.PaymentAmount,
+    values.InvoiceType,
+    values.WholeSalerId,
+  ]);
 
   return null;
 }
@@ -69,24 +89,28 @@ const initialValuesOnUpdate = (
     return createInvoiceInitialValues;
   }
 
-  const productSellInfo = (invoiceDetails.ProductSellInfo || []).map((product: IProductSellInfo) => ({
-    ItemId: product.ItemId,
-    ProductId: product.ProductId,
-    Quantity: product.Quantity,
-    SellingPrice: product.SellingPrice,
-    SellingDate: product.SellingDate,
-  }));
+  const productSellInfo = (invoiceDetails.ProductSellInfo || []).map(
+    (product: IProductSellInfo) => ({
+      ItemId: product.ItemId,
+      ProductId: product.ProductId,
+      Quantity: product.Quantity,
+      SellingPrice: product.SellingPrice,
+      SellingDate: product.SellingDate,
+    }),
+  );
 
-  const currentInvoiceType = invoiceDetails.InvoiceType || "WHOLESALE";
-  const isDuePayment = currentInvoiceType === "DUE_PAYMENT";
+  const currentInvoiceType = invoiceDetails.InvoiceType || 'WHOLESALE';
+  const isDuePayment = currentInvoiceType === 'DUE_PAYMENT';
 
   return {
     PaymentAmount: invoiceDetails.PaymentAmount || 0,
     ProductSellInfo: isDuePayment
       ? []
-      : (productSellInfo.length > 0 ? productSellInfo : [{...EMPTY_PRODUCT_ROW}]),
-    WholeSalerId: invoiceDetails.WholeSalerId || "",
-    InvoiceType: isDuePayment ? "DUE_PAYMENT" : currentInvoiceType,
+      : productSellInfo.length > 0
+        ? productSellInfo
+        : [{...EMPTY_PRODUCT_ROW}],
+    WholeSalerId: invoiceDetails.WholeSalerId || '',
+    InvoiceType: isDuePayment ? 'DUE_PAYMENT' : currentInvoiceType,
   };
 };
 
@@ -94,36 +118,40 @@ export default function InvoiceAddOrUpdate() {
   const theme = useTheme();
   const navigate = useNavigate();
   let {id} = useParams();
-  id = id === "new" ? "" : id;
+  id = id === 'new' ? '' : id;
 
   const [searchParams] = useSearchParams();
-  const isUpdate = searchParams.get("isUpdate") === "true";
-  const preselectedWholesalerId = searchParams.get("wholesalerId") || "";
+  const isUpdate = searchParams.get('isUpdate') === 'true';
+  const preselectedWholesalerId = searchParams.get('wholesalerId') || '';
   const {data: productData, isLoading: isProductLoading} = useGetProductQuery({
     pageNumber: 1,
     pageSize: 1000,
-    itemId: "",
+    itemId: '',
   });
   const {data: userData, isLoading: isUserLoading} = useGetUserQuery({
     pageNumber: 1,
     pageSize: 10,
-    itemId: "",
+    itemId: '',
   });
   const {data: invoiceData, isLoading: isInvoiceLoading} = useGetInvoiceQuery({
     pageNumber: 1,
     pageSize: 10,
-    itemId: id ?? "",
+    itemId: id ?? '',
   });
 
   const [createInvoice] = useCreateInvoiceMutation();
   const [updateInvoice] = useUpdateInvoiceMutation();
-  const [dueWholesalerId, setDueWholesalerId] = useState(preselectedWholesalerId);
+  const [dueWholesalerId, setDueWholesalerId] = useState(
+    preselectedWholesalerId,
+  );
 
-  const editingInvoice = (invoiceData?.Data as InvoiceDetailsResponse | undefined);
+  const editingInvoice = invoiceData?.Data as
+    | InvoiceDetailsResponse
+    | undefined;
 
   useEffect(() => {
     if (isUpdate) {
-      setDueWholesalerId(editingInvoice?.WholeSalerId || "");
+      setDueWholesalerId(editingInvoice?.WholeSalerId || '');
       return;
     }
 
@@ -133,14 +161,17 @@ export default function InvoiceAddOrUpdate() {
   const productList = productData?.Data || [];
   const wholesalerList = userData?.Data || [];
   const {data: wholesalerInvoices} = useGetInvoiceQuery(
-    {pageNumber: 1, pageSize: 10000, itemId: "", wholesalerId: dueWholesalerId},
+    {pageNumber: 1, pageSize: 10000, itemId: '', wholesalerId: dueWholesalerId},
     {skip: !dueWholesalerId},
   );
 
   const currentDueAmount = useMemo(() => {
     const invoices = (wholesalerInvoices?.Data as IInvoice[]) || [];
     const due = invoices.reduce((acc, eachInvoice) => {
-      return acc + ((eachInvoice.TotalAmount || 0) - (eachInvoice.PaymentAmount || 0));
+      return (
+        acc +
+        ((eachInvoice.TotalAmount || 0) - (eachInvoice.PaymentAmount || 0))
+      );
     }, 0);
     return due > 0 ? due : 0;
   }, [wholesalerInvoices?.Data]);
@@ -154,10 +185,12 @@ export default function InvoiceAddOrUpdate() {
   };
 
   const submitInvoice = async (values: ICreateInvoicePayload) => {
-    const isDuePaymentInvoice = values.InvoiceType === "DUE_PAYMENT";
+    const isDuePaymentInvoice = values.InvoiceType === 'DUE_PAYMENT';
     const normalizedInvoiceType = isDuePaymentInvoice
-      ? "DUE_PAYMENT"
-      : (values.WholeSalerId ? "WHOLESALE" : "CONSUMER");
+      ? 'DUE_PAYMENT'
+      : values.WholeSalerId
+        ? 'WHOLESALE'
+        : 'CONSUMER';
 
     const payload: ICreateInvoicePayload = {
       ...values,
@@ -167,7 +200,7 @@ export default function InvoiceAddOrUpdate() {
 
     if (isUpdate) {
       const updatePayload = payload as IUpdateInvoicePayload;
-      updatePayload.ItemId = id ?? "";
+      updatePayload.ItemId = id ?? '';
       await updateInvoice({payload: updatePayload}).unwrap();
     } else {
       await createInvoice({payload}).unwrap();
@@ -185,29 +218,37 @@ export default function InvoiceAddOrUpdate() {
 
   return (
     <div className="w-full">
-      {id !== "" && (
+      {id !== '' && (
         <CustomButton
-          onClick={() => handleRedirection("details")}
+          onClick={() => handleRedirection('details')}
           className="cursor-pointer"
-          sx={{position: "fixed", bottom: 16, right: 16, zIndex: 1200}}
-          text={"DETAILS_INVOICE"}
-          variant={"primary"}
+          sx={{
+            position: 'fixed',
+            bottom: {
+              xs: 'calc(90px + env(safe-area-inset-bottom))',
+              md: '16px',
+            },
+            right: {xs: '12px', md: '16px'},
+            zIndex: 1200,
+          }}
+          text={'DETAILS_INVOICE'}
+          variant={'primary'}
         />
       )}
 
       <div
-        className="max-w-3xl mx-auto p-6 shadow-lg rounded-xl mt-10"
+        className="mx-auto mt-0 max-w-3xl rounded-xl p-4 shadow-sm sm:mt-5 sm:p-6 sm:shadow-lg md:mt-10"
         style={{
           backgroundColor: theme.vars.palette.background.paper,
           color: theme.vars.palette.text.primary,
         }}>
         <h2
-          className="text-2xl font-bold border-b pb-3"
+          className="border-b pb-3 text-2xl font-bold"
           style={{
             color: theme.vars.palette.text.primary,
             borderColor: theme.vars.palette.divider,
           }}>
-          {!isUpdate ? "Invoice Add" : "Invoice Update"}
+          {!isUpdate ? 'Invoice Add' : 'Invoice Update'}
         </h2>
 
         <div className="mt-4 space-y-2">
@@ -217,16 +258,23 @@ export default function InvoiceAddOrUpdate() {
             validationSchema={invoiceValidationSchema}
             onSubmit={submitInvoice}>
             {({values, setFieldValue, isValid, dirty, isSubmitting}) => {
-              const isDuePaymentInvoice = values.InvoiceType === "DUE_PAYMENT";
-              const selectedProducts = values.ProductSellInfo.map(product => product.ProductId);
+              const isDuePaymentInvoice = values.InvoiceType === 'DUE_PAYMENT';
+              const selectedProducts = values.ProductSellInfo.map(
+                product => product.ProductId,
+              );
               const totalAmount = isDuePaymentInvoice
                 ? currentDueAmount
                 : values.ProductSellInfo.reduce((acc, product) => {
                     return acc + product.SellingPrice * product.Quantity;
                   }, 0);
 
-              const getDefaultSellingPrice = (productId: string, wholesalerId: string) => {
-                const selectedProduct = productList.find(product => product.ItemId === productId);
+              const getDefaultSellingPrice = (
+                productId: string,
+                wholesalerId: string,
+              ) => {
+                const selectedProduct = productList.find(
+                  product => product.ItemId === productId,
+                );
                 if (!selectedProduct) {
                   return 0;
                 }
@@ -235,14 +283,16 @@ export default function InvoiceAddOrUpdate() {
                   return selectedProduct.WholeSalerPrice;
                 }
 
-                return selectedProduct.EndUserDiscountedPrice
-                  ?? selectedProduct.EndUserPrice
-                  ?? selectedProduct.WholeSalerPrice
-                  ?? 0;
+                return (
+                  selectedProduct.EndUserDiscountedPrice ??
+                  selectedProduct.EndUserPrice ??
+                  selectedProduct.WholeSalerPrice ??
+                  0
+                );
               };
 
               const updateWholeSaler = (nextWholesalerId: string) => {
-                setFieldValue("WholeSalerId", nextWholesalerId);
+                setFieldValue('WholeSalerId', nextWholesalerId);
                 setDueWholesalerId(nextWholesalerId);
 
                 if (!isDuePaymentInvoice && values.ProductSellInfo.length > 0) {
@@ -250,7 +300,10 @@ export default function InvoiceAddOrUpdate() {
                     if (product.ProductId) {
                       setFieldValue(
                         `ProductSellInfo[${index}].SellingPrice`,
-                        getDefaultSellingPrice(product.ProductId, nextWholesalerId),
+                        getDefaultSellingPrice(
+                          product.ProductId,
+                          nextWholesalerId,
+                        ),
                       );
                     }
                   });
@@ -259,26 +312,36 @@ export default function InvoiceAddOrUpdate() {
 
               return (
                 <Form>
-                  <DuePaymentAutofill isUpdate={isUpdate} dueAmount={currentDueAmount} />
+                  <DuePaymentAutofill
+                    isUpdate={isUpdate}
+                    dueAmount={currentDueAmount}
+                  />
                   <div className="mb-4">
                     <Tabs
-                      value={isDuePaymentInvoice ? "DUE_PAYMENT" : "WHOLESALE"}
+                      value={isDuePaymentInvoice ? 'DUE_PAYMENT' : 'WHOLESALE'}
                       onChange={(_, nextValue: string) => {
                         const switchingFromDueToProduct =
-                          values.InvoiceType === "DUE_PAYMENT" && nextValue !== "DUE_PAYMENT";
+                          values.InvoiceType === 'DUE_PAYMENT' &&
+                          nextValue !== 'DUE_PAYMENT';
 
-                        setFieldValue("InvoiceType", nextValue);
-                        if (nextValue === "DUE_PAYMENT") {
-                          setFieldValue("ProductSellInfo", []);
+                        setFieldValue('InvoiceType', nextValue);
+                        if (nextValue === 'DUE_PAYMENT') {
+                          setFieldValue('ProductSellInfo', []);
                           if (!isUpdate && values.WholeSalerId) {
-                            setFieldValue("PaymentAmount", currentDueAmount, false);
+                            setFieldValue(
+                              'PaymentAmount',
+                              currentDueAmount,
+                              false,
+                            );
                           }
                         } else if (!values.ProductSellInfo.length) {
-                          setFieldValue("ProductSellInfo", [{...EMPTY_PRODUCT_ROW}]);
+                          setFieldValue('ProductSellInfo', [
+                            {...EMPTY_PRODUCT_ROW},
+                          ]);
                         }
 
                         if (!isUpdate && switchingFromDueToProduct) {
-                          setFieldValue("PaymentAmount", 0, false);
+                          setFieldValue('PaymentAmount', 0, false);
                         }
                       }}
                       sx={{
@@ -297,14 +360,22 @@ export default function InvoiceAddOrUpdate() {
                         name="WholeSalerId"
                         label="Wholesaler"
                         value={values.WholeSalerId}
-                        onChange={event => updateWholeSaler(event.target.value)}>
+                        onChange={event =>
+                          updateWholeSaler(event.target.value)
+                        }>
                         {wholesalerList.map(wholesaler => (
-                          <MenuItem key={wholesaler.ItemId} value={wholesaler.ItemId}>
+                          <MenuItem
+                            key={wholesaler.ItemId}
+                            value={wholesaler.ItemId}>
                             {`${wholesaler.DisplayName} - ${wholesaler.Address}`}
                           </MenuItem>
                         ))}
                       </Select>
-                      <ErrorMessage name="WholeSalerId" component="div" className="text-red-500" />
+                      <ErrorMessage
+                        name="WholeSalerId"
+                        component="div"
+                        className="text-red-500"
+                      />
                     </FormControl>
                   </div>
 
@@ -315,7 +386,7 @@ export default function InvoiceAddOrUpdate() {
                         <div>
                           {values.ProductSellInfo.map((product, index) => (
                             <div key={index} className="mb-4">
-                              <div className="flex space-x-4">
+                              <div className="grid grid-cols-1 gap-4 rounded-xl border border-[var(--palette-divider)] p-3 sm:grid-cols-2 lg:grid-cols-3">
                                 <div className="flex-1">
                                   <TextField
                                     label="Product"
@@ -326,19 +397,31 @@ export default function InvoiceAddOrUpdate() {
                                     value={product.ProductId}
                                     onChange={e => {
                                       const productId = e.target.value;
-                                      setFieldValue(`ProductSellInfo[${index}].ProductId`, productId);
+                                      setFieldValue(
+                                        `ProductSellInfo[${index}].ProductId`,
+                                        productId,
+                                      );
                                       setFieldValue(
                                         `ProductSellInfo[${index}].SellingPrice`,
-                                        getDefaultSellingPrice(productId, values.WholeSalerId),
+                                        getDefaultSellingPrice(
+                                          productId,
+                                          values.WholeSalerId,
+                                        ),
                                       );
-                                      setFieldValue(`ProductSellInfo[${index}].Quantity`, 1);
+                                      setFieldValue(
+                                        `ProductSellInfo[${index}].Quantity`,
+                                        1,
+                                      );
                                     }}>
                                     {productList.map(productOption => (
                                       // Prevent duplicate product rows in a single invoice.
                                       <MenuItem
                                         disabled={
-                                          selectedProducts.indexOf(productOption.ItemId) > -1
-                                          && product.ProductId !== productOption.ItemId
+                                          selectedProducts.indexOf(
+                                            productOption.ItemId,
+                                          ) > -1 &&
+                                          product.ProductId !==
+                                            productOption.ItemId
                                         }
                                         key={productOption.ItemId}
                                         value={productOption.ItemId}>
@@ -362,7 +445,10 @@ export default function InvoiceAddOrUpdate() {
                                     variant="outlined"
                                     value={product.SellingPrice}
                                     onChange={e =>
-                                      setFieldValue(`ProductSellInfo[${index}].SellingPrice`, e.target.value)
+                                      setFieldValue(
+                                        `ProductSellInfo[${index}].SellingPrice`,
+                                        e.target.value,
+                                      )
                                     }
                                   />
                                   <ErrorMessage
@@ -381,7 +467,10 @@ export default function InvoiceAddOrUpdate() {
                                     variant="outlined"
                                     value={product.Quantity}
                                     onChange={e =>
-                                      setFieldValue(`ProductSellInfo[${index}].Quantity`, e.target.value)
+                                      setFieldValue(
+                                        `ProductSellInfo[${index}].Quantity`,
+                                        e.target.value,
+                                      )
                                     }
                                   />
                                   <ErrorMessage
@@ -392,13 +481,15 @@ export default function InvoiceAddOrUpdate() {
                                 </div>
 
                                 {values.ProductSellInfo.length > 1 && (
-                                  <CustomButton
-                                    type="button"
-                                    variant="outline"
-                                    size="md"
-                                    text="Remove Product"
-                                    onClick={() => arrayHelpers.remove(index)}
-                                  />
+                                  <div className="sm:col-span-2 lg:col-span-3">
+                                    <CustomButton
+                                      type="button"
+                                      variant="outline"
+                                      size="md"
+                                      text="Remove Product"
+                                      onClick={() => arrayHelpers.remove(index)}
+                                    />
+                                  </div>
                                 )}
                               </div>
                             </div>
@@ -422,8 +513,8 @@ export default function InvoiceAddOrUpdate() {
                     />
                   )}
 
-                  <div className="flex flex-row gap-4 mt-6">
-                    <div className="mb-4 basis-1/2">
+                  <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="mb-0">
                       <TextField
                         label="Payment Amount"
                         name="PaymentAmount"
@@ -431,21 +522,34 @@ export default function InvoiceAddOrUpdate() {
                         fullWidth
                         variant="outlined"
                         value={values.PaymentAmount}
-                        onChange={e => setFieldValue("PaymentAmount", e.target.value)}
+                        onChange={e =>
+                          setFieldValue('PaymentAmount', e.target.value)
+                        }
                       />
-                      <ErrorMessage name="PaymentAmount" component="div" className="text-red-500" />
+                      <ErrorMessage
+                        name="PaymentAmount"
+                        component="div"
+                        className="text-red-500"
+                      />
                     </div>
-                    <div className="basis-1/2 border flex items-center border-transparent-grey-24 rounded-md px-4 mb-4">
-                      <TextWrapper variant={"Body1"} content={"TOTAL_AMOUNT"} />
+                    <div className="border-transparent-grey-24 flex min-h-14 items-center justify-between rounded-md border px-4">
+                      <TextWrapper variant={'Body1'} content={'TOTAL_AMOUNT'} />
                       :
-                      <TextWrapper variant={"Subtitle1Bold"} content={totalAmount} />
+                      <TextWrapper
+                        variant={'Subtitle1Bold'}
+                        content={totalAmount}
+                      />
                     </div>
                   </div>
 
                   {isDuePaymentInvoice && (
-                    <div className="mb-3 rounded-md px-3 py-2" style={{backgroundColor: theme.vars.palette.background.neutral}}>
+                    <div
+                      className="mb-3 rounded-md px-3 py-2"
+                      style={{
+                        backgroundColor: theme.vars.palette.background.neutral,
+                      }}>
                       <TextWrapper
-                        variant={"Body2"}
+                        variant={'Body2'}
                         content={`Due amount is ${currentDueAmount}. You can edit payment amount before submit.`}
                       />
                     </div>
@@ -453,7 +557,9 @@ export default function InvoiceAddOrUpdate() {
 
                   <div className="mt-4">
                     <CustomButton
-                      disabled={!isValid || isSubmitting || (!dirty && !isUpdate)}
+                      disabled={
+                        !isValid || isSubmitting || (!dirty && !isUpdate)
+                      }
                       type="submit"
                       text="Submit Invoice"
                       variant="primary"

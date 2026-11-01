@@ -1,6 +1,6 @@
-import { CustomButton } from '@components/button/CustomButton';
+import {CustomButton} from '@components/button/CustomButton';
 import CustomTable from '@components/table/CustomTable';
-import { IProduct } from '@core/interfaces/api/IProduct';
+import {IProduct} from '@core/interfaces/api/IProduct';
 import {
   useCreateProductMutation,
   useDeleteProductMutation,
@@ -8,13 +8,13 @@ import {
   useGetProductQuery,
   useUpdateProductMutation,
 } from '@core/store/api/product';
-import { SelectChangeEvent } from '@mui/material';
+import {SelectChangeEvent} from '@mui/material';
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
-import { useMemo, useRef, useState } from 'react';
-import ProductModal, { IProductForm } from '../components/productModal';
+import {useMemo, useRef, useState} from 'react';
+import ProductModal, {IProductForm} from '../components/productModal';
 import DeleteConfirmationModal from '@components/confirmation-modal/delete-confirmation.modal';
 import ProductionModal from '../components/productionModal';
-import { PRODUCT_CATEGORY_SUBCATEGORY_MAP } from '@core/config/product-category.constants';
+import {PRODUCT_CATEGORY_SUBCATEGORY_MAP} from '@core/config/product-category.constants';
 import {IconButton, Tooltip} from '@mui/material';
 import {IconPackages, IconQrcode} from '@tabler/icons-react';
 import {useTheme} from '@mui/material/styles';
@@ -24,36 +24,39 @@ import ProductQrManager from '../components/ProductQrManager';
 
 // Define table columns
 const columns = [
-  { key: "ProductName", label: "Name" },
-  { key: "Category", label: "Category" },
-  { key: "SubCategory", label: "Sub Category" },
-  { key: "MakingPrice", label: "MAKING_COST" },
-  { key: "WholeSalerPrice", label: "Wholesaler Price" },
-  { key: "EndUserDiscountedPrice", label: "End User Discounted Price" },
-  { key: "Quantity", label: "QUANTITY" },
+  {key: 'ProductName', label: 'Name'},
+  {key: 'Category', label: 'Category'},
+  {key: 'SubCategory', label: 'Sub Category'},
+  {key: 'MakingPrice', label: 'MAKING_COST'},
+  {key: 'WholeSalerPrice', label: 'Wholesaler Price'},
+  {key: 'EndUserDiscountedPrice', label: 'End User Discounted Price'},
+  {key: 'Quantity', label: 'QUANTITY'},
 ];
 const ALL_OPTION = 'ALL';
 const PRODUCT_PAGE_SIZE = 10;
 
 const initialFormData: IProductForm = {
-  ItemId: "",
-  ProductName: "",
-  Category: "MosquitoNet",
-  SubCategory: "Double",
-  NetHeight: "",
-  Description: "",
-  ImageLinks: "",
-  VideoLink: "",
-  MakingPrice: "",
-  WholeSalerPrice: "",
-  EndUserPrice: "",
-  EndUserDiscountedPrice: "",
-  Quantity: "",
-  MadeByEmployeeId: "",
-}
+  ItemId: '',
+  ProductName: '',
+  Category: 'MosquitoNet',
+  SubCategory: 'Double',
+  NetHeight: '',
+  Description: '',
+  ImageLinks: '',
+  VideoLink: '',
+  MakingPrice: '',
+  WholeSalerPrice: '',
+  EndUserPrice: '',
+  EndUserDiscountedPrice: '',
+  Quantity: '',
+  MadeByEmployeeId: '',
+};
 
-const mapProductToForm = (row: IProduct, includeItemId = true): IProductForm => ({
-  ItemId: includeItemId ? row.ItemId : "",
+const mapProductToForm = (
+  row: IProduct,
+  includeItemId = true,
+): IProductForm => ({
+  ItemId: includeItemId ? row.ItemId : '',
   ProductName: row.ProductName,
   Category: row.Category,
   SubCategory: row.SubCategory,
@@ -69,7 +72,10 @@ const mapProductToForm = (row: IProduct, includeItemId = true): IProductForm => 
   MadeByEmployeeId: '',
 });
 
-const hasCloneIdentityChanged = (currentFormData: IProductForm, baseFormData: IProductForm) =>
+const hasCloneIdentityChanged = (
+  currentFormData: IProductForm,
+  baseFormData: IProductForm,
+) =>
   currentFormData.ProductName !== baseFormData.ProductName ||
   currentFormData.Category !== baseFormData.Category ||
   currentFormData.SubCategory !== baseFormData.SubCategory ||
@@ -89,50 +95,65 @@ export default function StoreManagement() {
     maxMakingPrice: 100000,
     searchTerm: '',
   });
-  const { data, isLoading, refetch } = useGetProductQuery(payload);
-  const [createProduct, { isLoading: isCreating }] = useCreateProductMutation();
-  const [updateProduct, { isLoading: isUpdating }] = useUpdateProductMutation();
+  const {data, isLoading, refetch} = useGetProductQuery(payload);
+  const [createProduct, {isLoading: isCreating}] = useCreateProductMutation();
+  const [updateProduct, {isLoading: isUpdating}] = useUpdateProductMutation();
   const [deleteProduct] = useDeleteProductMutation();
-  const [generateAiSuggestion, { isLoading: isSuggestingDescription }] = useGenerateAiSuggestionMutation();
+  const [generateAiSuggestion, {isLoading: isSuggestingDescription}] =
+    useGenerateAiSuggestionMutation();
   const [isOpen, setIsOpen] = useState(false);
   const [isProductionOpen, setIsProductionOpen] = useState(false);
   const [isDelete, setIsDelete] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
   const [formData, setFormData] = useState<IProductForm>(initialFormData);
-  const [cloneBaseFormData, setCloneBaseFormData] = useState<IProductForm | null>(null);
+  const [cloneBaseFormData, setCloneBaseFormData] =
+    useState<IProductForm | null>(null);
   const createRequestLifecycle = useRef(createInventoryRequestLifecycle());
-  const [inventoryProduct, setInventoryProduct] = useState<IProduct | null>(null);
+  const [inventoryProduct, setInventoryProduct] = useState<IProduct | null>(
+    null,
+  );
   const [qrProduct, setQrProduct] = useState<IProduct | null>(null);
   const [searchText, setSearchText] = useState('');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 100000]);
-  const categoryOptions = [ALL_OPTION, ...Object.keys(PRODUCT_CATEGORY_SUBCATEGORY_MAP)];
+  const categoryOptions = [
+    ALL_OPTION,
+    ...Object.keys(PRODUCT_CATEGORY_SUBCATEGORY_MAP),
+  ];
   const subCategoryOptions = useMemo(() => {
     if (selectedCategory === ALL_OPTION) {
       return [ALL_OPTION];
     }
 
-    const currentSubCategory = PRODUCT_CATEGORY_SUBCATEGORY_MAP[selectedCategory] ?? [];
+    const currentSubCategory =
+      PRODUCT_CATEGORY_SUBCATEGORY_MAP[selectedCategory] ?? [];
     return [ALL_OPTION, ...currentSubCategory];
   }, [selectedCategory]);
 
-  const handleCategoryFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleCategoryFilterChange = (
+    e: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
     const nextCategory = e.target.value;
     const fallbackSubCategory =
-      nextCategory === ALL_OPTION ? ALL_OPTION : (PRODUCT_CATEGORY_SUBCATEGORY_MAP[nextCategory]?.[0] ?? ALL_OPTION);
+      nextCategory === ALL_OPTION
+        ? ALL_OPTION
+        : (PRODUCT_CATEGORY_SUBCATEGORY_MAP[nextCategory]?.[0] ?? ALL_OPTION);
     setSelectedCategory(nextCategory);
     setSelectedSubCategory(fallbackSubCategory);
-    setPayload((prev) => ({
+    setPayload(prev => ({
       ...prev,
       pageNumber: 1,
       category: nextCategory === ALL_OPTION ? '' : nextCategory,
-      subCategory: fallbackSubCategory === ALL_OPTION ? '' : fallbackSubCategory,
+      subCategory:
+        fallbackSubCategory === ALL_OPTION ? '' : fallbackSubCategory,
     }));
   };
 
-  const handleSubCategoryFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleSubCategoryFilterChange = (
+    e: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
     const nextSubCategory = e.target.value;
     setSelectedSubCategory(nextSubCategory);
-    setPayload((prev) => ({
+    setPayload(prev => ({
       ...prev,
       pageNumber: 1,
       subCategory: nextSubCategory === ALL_OPTION ? '' : nextSubCategory,
@@ -142,7 +163,7 @@ export default function StoreManagement() {
   const handleMinPriceChange = (value: string) => {
     const nextMin = Number(value) || 0;
     setPriceRange([nextMin, priceRange[1]]);
-    setPayload((prev) => ({
+    setPayload(prev => ({
       ...prev,
       pageNumber: 1,
       minMakingPrice: nextMin,
@@ -152,7 +173,7 @@ export default function StoreManagement() {
   const handleMaxPriceChange = (value: string) => {
     const nextMax = Number(value) || 0;
     setPriceRange([priceRange[0], nextMax]);
-    setPayload((prev) => ({
+    setPayload(prev => ({
       ...prev,
       pageNumber: 1,
       maxMakingPrice: nextMax,
@@ -161,7 +182,7 @@ export default function StoreManagement() {
 
   const handleSearchChange = (value: string) => {
     setSearchText(value);
-    setPayload((prev) => ({
+    setPayload(prev => ({
       ...prev,
       pageNumber: 1,
       searchTerm: value,
@@ -169,7 +190,7 @@ export default function StoreManagement() {
   };
 
   const handlePageSelection = (page: number) => {
-    setPayload((prev) => ({
+    setPayload(prev => ({
       ...prev,
       pageNumber: page,
     }));
@@ -178,24 +199,30 @@ export default function StoreManagement() {
   const parseImageLinks = (input: string): string[] =>
     input
       .split(/\r?\n|,/)
-      .map((x) => x.trim())
+      .map(x => x.trim())
       .filter(Boolean);
   const handleSave = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string>
+    e:
+      | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+      | SelectChangeEvent<string>,
   ) => {
-    const { name, value } = e.target;
+    const {name, value} = e.target;
     const fieldName = String(name);
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       [fieldName]: value,
-      ...(fieldName === "Category" ? { SubCategory: "" } : {}),
-      ...(fieldName === "Category" && !["MosquitoNet", "MosquitoNetYard"].includes(String(value))
-        ? { NetHeight: "" }
+      ...(fieldName === 'Category' ? {SubCategory: ''} : {}),
+      ...(fieldName === 'Category' &&
+      !['MosquitoNet', 'MosquitoNetYard'].includes(String(value))
+        ? {NetHeight: ''}
         : {}),
     }));
   };
   const handleSubmit = async () => {
-    if (cloneBaseFormData && !hasCloneIdentityChanged(formData, cloneBaseFormData)) {
+    if (
+      cloneBaseFormData &&
+      !hasCloneIdentityChanged(formData, cloneBaseFormData)
+    ) {
       return;
     }
 
@@ -215,7 +242,7 @@ export default function StoreManagement() {
           EndUserPrice: Number(formData.EndUserPrice),
           EndUserDiscountedPrice: Number(formData.EndUserDiscountedPrice),
           Quantity: Number(formData.Quantity),
-        }
+        },
       }).unwrap();
       setIsOpen(false);
       setIsUpdate(false);
@@ -239,14 +266,14 @@ export default function StoreManagement() {
           EndUserDiscountedPrice: Number(formData.EndUserDiscountedPrice),
           Quantity: Number(formData.Quantity),
           MadeByEmployeeId: formData.MadeByEmployeeId || undefined,
-        }
+        },
       }).unwrap();
       setIsOpen(false);
       setCloneBaseFormData(null);
       createRequestLifecycle.current.end();
       refetch();
     }
-  }
+  };
 
   const handleSuggestDescription = async () => {
     try {
@@ -262,13 +289,15 @@ export default function StoreManagement() {
       }).unwrap();
 
       if (response?.Data?.Suggestion) {
-        setFormData((prev) => ({
+        setFormData(prev => ({
           ...prev,
           Description: response.Data.Suggestion,
         }));
       }
     } catch {
-      alert('AI suggestion is not available right now. Please check backend AI configuration.');
+      alert(
+        'AI suggestion is not available right now. Please check backend AI configuration.',
+      );
     }
   };
 
@@ -278,7 +307,7 @@ export default function StoreManagement() {
     setCloneBaseFormData(null);
     setFormData(initialFormData);
     createRequestLifecycle.current.end();
-  }
+  };
 
   const handleRowClick = async (row: IProduct, isDelete: boolean) => {
     setCloneBaseFormData(null);
@@ -291,7 +320,7 @@ export default function StoreManagement() {
       setIsUpdate(true);
       setIsOpen(true);
     }
-  }
+  };
 
   const handleCloneProduct = (row: IProduct) => {
     const clonedFormData = mapProductToForm(row, false);
@@ -306,10 +335,10 @@ export default function StoreManagement() {
   const handleDelete = async (isConfirm: boolean) => {
     setIsDelete(false);
     if (isConfirm) {
-      await deleteProduct({ id: formData.ItemId }).unwrap();
+      await deleteProduct({id: formData.ItemId}).unwrap();
       refetch();
     }
-  }
+  };
 
   const resetForm = () => {
     setFormData(initialFormData);
@@ -318,136 +347,150 @@ export default function StoreManagement() {
     createRequestLifecycle.current.end();
     createRequestLifecycle.current.begin();
     setIsOpen(true);
-  }
+  };
 
-  const isCloneSaveDisabled = !!cloneBaseFormData && !hasCloneIdentityChanged(formData, cloneBaseFormData);
+  const isCloneSaveDisabled =
+    !!cloneBaseFormData &&
+    !hasCloneIdentityChanged(formData, cloneBaseFormData);
 
   const filteredData = useMemo(() => data?.Data || [], [data]);
 
   return (
     <>
-      <div className='w-full'>
-        <div className="p-10 w-full">
-          <div className="flex flex-wrap gap-3 mb-6 items-center">
-            <div className="flex gap-2 items-center w-full flex-wrap">
+      <div className="w-full">
+        <div className="w-full p-0 sm:p-3 lg:p-10">
+          <div className="mb-5 flex flex-col gap-3 sm:mb-6">
+            <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center">
               <input
                 type="text"
                 placeholder="Search by name or description"
-                className="border p-2 rounded w-full sm:w-1/2"
+                className="col-span-2 min-h-11 w-full rounded-lg border p-3 sm:w-1/2"
                 value={searchText}
-                onChange={(e) => handleSearchChange(e.target.value)}
+                onChange={e => handleSearchChange(e.target.value)}
               />
               <CustomButton
                 onClick={() => resetForm()}
-                className='cursor-pointer'
+                className="cursor-pointer"
                 text={'ADD_PRODUCT'}
                 variant={'primary'}
               />
               <CustomButton
                 onClick={() => setIsProductionOpen(true)}
-                className='cursor-pointer'
+                className="cursor-pointer"
                 text={'ADD_PRODUCTION'}
                 variant={'primary'}
               />
             </div>
 
-            <div className="flex gap-2 items-center w-full sm:w-1/2">
+            <div className="grid w-full grid-cols-2 gap-2 sm:w-1/2">
               <input
                 type="number"
-                className="border p-2 mt-5 rounded w-1/2"
+                className="min-h-11 w-full rounded-lg border p-3"
                 placeholder="Min Price"
                 value={priceRange[0]}
-                onChange={(e) => handleMinPriceChange(e.target.value)}
+                onChange={e => handleMinPriceChange(e.target.value)}
               />
               <input
                 type="number"
-                className="border p-2 mt-5 rounded w-1/2"
+                className="min-h-11 w-full rounded-lg border p-3"
                 placeholder="Max Price"
                 value={priceRange[1]}
-                onChange={(e) => handleMaxPriceChange(e.target.value)}
+                onChange={e => handleMaxPriceChange(e.target.value)}
               />
             </div>
-            <div className="flex items-end gap-2">
-              <div className="min-w-[190px]">
-                <p className="text-xs text-text-secondary mb-1">Category</p>
+            <div className="grid w-full grid-cols-2 items-end gap-2 sm:w-auto">
+              <div className="min-w-0 sm:min-w-[190px]">
+                <p className="text-text-secondary mb-1 text-xs">Category</p>
                 <div className="relative">
                   <select
-                    className="h-10 w-full appearance-none rounded-lg border border-components-input-outlined bg-background-default px-3 pr-9 text-sm text-text-primary shadow-sm transition-all duration-200 hover:border-interaction-main focus:border-interaction-main focus:outline-none focus:ring-2 focus:ring-transparent-interaction-24"
+                    className="border-components-input-outlined bg-background-default text-text-primary hover:border-interaction-main focus:border-interaction-main focus:ring-transparent-interaction-24 h-10 w-full appearance-none rounded-lg border px-3 pr-9 text-sm shadow-sm transition-all duration-200 focus:ring-2 focus:outline-none"
                     value={selectedCategory}
-                    onChange={handleCategoryFilterChange}
-                  >
-                    {categoryOptions.map((category) => (
+                    onChange={handleCategoryFilterChange}>
+                    {categoryOptions.map(category => (
                       <option key={category} value={category}>
                         {category}
                       </option>
                     ))}
                   </select>
-                  <KeyboardArrowDownRoundedIcon className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-text-secondary" fontSize="small" />
+                  <KeyboardArrowDownRoundedIcon
+                    className="text-text-secondary pointer-events-none absolute top-1/2 right-2 -translate-y-1/2"
+                    fontSize="small"
+                  />
                 </div>
               </div>
-              <div className="min-w-[190px]">
-                <p className="text-xs text-text-secondary mb-1">Sub Category</p>
+              <div className="min-w-0 sm:min-w-[190px]">
+                <p className="text-text-secondary mb-1 text-xs">Sub Category</p>
                 <div className="relative">
                   <select
-                    className="h-10 w-full appearance-none rounded-lg border border-components-input-outlined bg-background-default px-3 pr-9 text-sm text-text-primary shadow-sm transition-all duration-200 hover:border-interaction-main focus:border-interaction-main focus:outline-none focus:ring-2 focus:ring-transparent-interaction-24"
+                    className="border-components-input-outlined bg-background-default text-text-primary hover:border-interaction-main focus:border-interaction-main focus:ring-transparent-interaction-24 h-10 w-full appearance-none rounded-lg border px-3 pr-9 text-sm shadow-sm transition-all duration-200 focus:ring-2 focus:outline-none"
                     value={selectedSubCategory}
-                    onChange={handleSubCategoryFilterChange}
-                  >
-                    {subCategoryOptions.map((subCategory) => (
+                    onChange={handleSubCategoryFilterChange}>
+                    {subCategoryOptions.map(subCategory => (
                       <option key={subCategory} value={subCategory}>
                         {subCategory}
                       </option>
                     ))}
                   </select>
-                  <KeyboardArrowDownRoundedIcon className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-text-secondary" fontSize="small" />
+                  <KeyboardArrowDownRoundedIcon
+                    className="text-text-secondary pointer-events-none absolute top-1/2 right-2 -translate-y-1/2"
+                    fontSize="small"
+                  />
                 </div>
               </div>
             </div>
           </div>
           <CustomTable
-              showActionButtons={true}
-              showCloneButton={true}
-              handleRowClick={handleRowClick}
-              handleCloneClick={handleCloneProduct}
-              renderRowActions={(row) => (
-                <>
-                  <Tooltip title="Manage product QR">
-                    <IconButton
-                      aria-label={`Manage QR for ${row.ProductName}`}
-                      onClick={() => setQrProduct(row)}
-                      size="small"
-                      className="!ml-2 px-5">
-                      <IconQrcode color={row.QrVerificationEnabled ? theme.vars.palette.success.main : theme.vars.palette.text.secondary} />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Inspect inventory batches">
-                    <IconButton
-                      aria-label={`Inspect inventory for ${row.ProductName}`}
-                      onClick={() => setInventoryProduct(row)}
-                      size="small"
-                      className="!ml-2 px-5">
-                      <IconPackages color={theme.vars.palette.info.main} />
-                    </IconButton>
-                  </Tooltip>
-                </>
-              )}
-              columns={columns}
-              data={filteredData || []}
-              totalCount={data?.TotalCount || 0}
-              rowsPerPage={PRODUCT_PAGE_SIZE}
-              currentPage={payload.pageNumber}
-              isServerPaginated={true}
-              handlePageSelection={handlePageSelection}
-              isLoading={isLoading}
-              emptyState={{
-                title: searchText ? 'No products match your filters' : 'Build your product catalogue',
-                description: searchText
-                  ? 'Try another name, category, subcategory or making-price range.'
-                  : 'Add your first product to manage stock, pricing, batches and QR verification.',
-                actionLabel: searchText ? undefined : 'Add product',
-                onAction: searchText ? undefined : resetForm,
-              }}
-            />
+            showActionButtons={true}
+            showCloneButton={true}
+            handleRowClick={handleRowClick}
+            handleCloneClick={handleCloneProduct}
+            renderRowActions={row => (
+              <>
+                <Tooltip title="Manage product QR">
+                  <IconButton
+                    aria-label={`Manage QR for ${row.ProductName}`}
+                    onClick={() => setQrProduct(row)}
+                    size="small"
+                    className="!ml-2 px-5">
+                    <IconQrcode
+                      color={
+                        row.QrVerificationEnabled
+                          ? theme.vars.palette.success.main
+                          : theme.vars.palette.text.secondary
+                      }
+                    />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Inspect inventory batches">
+                  <IconButton
+                    aria-label={`Inspect inventory for ${row.ProductName}`}
+                    onClick={() => setInventoryProduct(row)}
+                    size="small"
+                    className="!ml-2 px-5">
+                    <IconPackages color={theme.vars.palette.info.main} />
+                  </IconButton>
+                </Tooltip>
+              </>
+            )}
+            columns={columns}
+            data={filteredData || []}
+            totalCount={data?.TotalCount || 0}
+            rowsPerPage={PRODUCT_PAGE_SIZE}
+            currentPage={payload.pageNumber}
+            isServerPaginated={true}
+            handlePageSelection={handlePageSelection}
+            isLoading={isLoading}
+            emptyState={{
+              title: searchText
+                ? 'No products match your filters'
+                : 'Build your product catalogue',
+              description: searchText
+                ? 'Try another name, category, subcategory or making-price range.'
+                : 'Add your first product to manage stock, pricing, batches and QR verification.',
+              actionLabel: searchText ? undefined : 'Add product',
+              onAction: searchText ? undefined : resetForm,
+            }}
+          />
         </div>
       </div>
       {isOpen && (
@@ -465,7 +508,13 @@ export default function StoreManagement() {
         />
       )}
       {isProductionOpen && (
-        <ProductionModal isOpen={isProductionOpen} handleClose={() => { setIsProductionOpen(false); refetch() }} />
+        <ProductionModal
+          isOpen={isProductionOpen}
+          handleClose={() => {
+            setIsProductionOpen(false);
+            refetch();
+          }}
+        />
       )}
 
       {isDelete && (

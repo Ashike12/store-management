@@ -89,7 +89,7 @@ export default function Invoice() {
   return (
     <>
       <div className="w-full">
-        <div className="w-full p-10">
+        <div className="w-full p-0 sm:p-3 lg:p-10">
           {isWholeSaler && (
             <div className="mb-4 rounded-md border p-4">
               <div className="text-sm">Total Due Amount</div>
@@ -98,28 +98,28 @@ export default function Invoice() {
               </div>
             </div>
           )}
-          <div className="mb-6 flex flex-wrap gap-4">
-            <div className="flex cursor-pointer flex-col">
+          <div className="mb-5 grid grid-cols-2 gap-3 sm:mb-6 sm:flex sm:flex-wrap sm:gap-4">
+            <div className="flex min-w-0 cursor-pointer flex-col">
               <label className="mb-1 text-sm">From Date</label>
               <input
                 type="date"
                 value={fromDate}
                 onChange={e => setFromDate(e.target.value)}
-                className="rounded border p-2"
+                className="min-h-11 min-w-0 rounded-lg border p-2"
               />
             </div>
 
-            <div className="flex cursor-pointer flex-col">
+            <div className="flex min-w-0 cursor-pointer flex-col">
               <label className="mb-1 text-sm">To Date</label>
               <input
                 type="date"
                 value={toDate}
                 onChange={e => setToDate(e.target.value)}
-                className="rounded border p-2"
+                className="min-h-11 min-w-0 rounded-lg border p-2"
               />
             </div>
 
-            <div className="flex flex-1 flex-col">
+            <div className="col-span-2 flex flex-1 flex-col">
               <label className="mb-1 text-sm">Search</label>
               <input
                 type="text"
@@ -130,11 +130,11 @@ export default function Invoice() {
                     ? 'Search by invoice no.'
                     : 'Search by wholesaler or invoice no.'
                 }
-                className="w-full rounded border p-2"
+                className="min-h-11 w-full rounded-lg border p-3"
               />
             </div>
             {!isWholeSaler && (
-              <div className="mt-6 flex flex-col">
+              <div className="col-span-2 flex flex-col sm:mt-6">
                 <CustomButton
                   onClick={() => addInvoice()}
                   className="cursor-pointer"
@@ -145,25 +145,35 @@ export default function Invoice() {
             )}
           </div>
           <CustomTable
-              isRowClickable={true}
-              handleRowClick={handleRowClick}
-              columns={getInvoiceColumns(isWholeSaler)}
-              data={filteredData}
-              totalCount={data?.TotalCount}
-              handlePageSelection={handlePageSelection}
-              rowsPerPage={10}
-              isLoading={isLoading}
-              emptyState={{
-                title: searchTerm || fromDate || toDate ? 'No invoices match these filters' : 'No invoices recorded yet',
-                description: searchTerm || fromDate || toDate
+            isRowClickable={true}
+            handleRowClick={handleRowClick}
+            columns={getInvoiceColumns(isWholeSaler)}
+            data={filteredData}
+            totalCount={data?.TotalCount}
+            handlePageSelection={handlePageSelection}
+            rowsPerPage={10}
+            isLoading={isLoading}
+            emptyState={{
+              title:
+                searchTerm || fromDate || toDate
+                  ? 'No invoices match these filters'
+                  : 'No invoices recorded yet',
+              description:
+                searchTerm || fromDate || toDate
                   ? 'Adjust the date range or search text and try again.'
                   : isWholeSaler
                     ? 'Your invoices will appear here after they are created.'
                     : 'Create the first invoice to begin tracking sales and payments.',
-                actionLabel: !isWholeSaler && !searchTerm && !fromDate && !toDate ? 'Add invoice' : undefined,
-                onAction: !isWholeSaler && !searchTerm && !fromDate && !toDate ? addInvoice : undefined,
-              }}
-            />
+              actionLabel:
+                !isWholeSaler && !searchTerm && !fromDate && !toDate
+                  ? 'Add invoice'
+                  : undefined,
+              onAction:
+                !isWholeSaler && !searchTerm && !fromDate && !toDate
+                  ? addInvoice
+                  : undefined,
+            }}
+          />
         </div>
       </div>
     </>
