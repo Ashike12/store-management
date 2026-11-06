@@ -17,6 +17,8 @@ export interface IInvoice {
   GrossProfit?: number;
   RealizedCashMargin?: number;
   InvoiceType: string;
+  SoldByUserId?: string;
+  SoldByUserName?: string;
 }
 
 export interface ICreateInvoicePayload {
@@ -24,6 +26,7 @@ export interface ICreateInvoicePayload {
   WholeSalerId: string;
   InvoiceType: string;
   ProductSellInfo: IProductSellInfo[];
+  SoldByUserId: string;
 }
 
 export interface IUpdateInvoicePayload extends ICreateInvoicePayload {
@@ -31,11 +34,11 @@ export interface IUpdateInvoicePayload extends ICreateInvoicePayload {
 }
 
 export interface IProductSellInfo {
-  ItemId: string;
+  ItemId?: string;
   ProductId: string;
   Quantity: number;
   SellingPrice: number;
-  SellingDate: string;
+  SellingDate?: string;
 }
 
 export interface IProductSellInfoResponse extends IProductSellInfo {
@@ -91,6 +94,79 @@ export interface IInvoiceFinancialSummary {
   OutstandingDue: number;
   CustomerCredit: number;
   CostAtRisk?: number;
+}
+
+export type SalesHistoryPeriod =
+  | 'daily'
+  | 'last7Days'
+  | 'last30Days'
+  | 'currentMonth';
+
+export interface ISalesUser {
+  ItemId: string;
+  DisplayName: string;
+  Email: string;
+  Roles: string[];
+}
+
+export interface IListSalesUsersResponse {
+  IsSuccess: boolean;
+  TotalCount: number;
+  Data: ISalesUser[];
+}
+
+export interface ISalesHistoryRequest {
+  Period: SalesHistoryPeriod;
+  SoldByUserId?: string;
+  Page: number;
+  Size: number;
+}
+
+export interface ISalesHistoryRow {
+  ItemId: string;
+  InvoiceNumber: string;
+  CreatedDate: string;
+  InvoiceType: string;
+  WholeSalerName: string;
+  SoldByUserId: string;
+  SoldByUserName: string;
+  TotalAmount: number;
+  PaymentAmount: number;
+  DueAmount: number;
+  GrossProfit: number;
+}
+
+export interface ISalesByPerson {
+  SoldByUserId: string;
+  SoldByUserName: string;
+  InvoiceCount: number;
+  TotalSales: number;
+}
+
+export interface IDailySalesTrend {
+  Date: string;
+  TotalSales: number;
+  InvoiceCount: number;
+}
+
+export interface ISalesHistorySummary {
+  Period: SalesHistoryPeriod;
+  StartDate: string;
+  EndDateExclusive: string;
+  InvoiceCount: number;
+  TotalSales: number;
+  TotalReceived: number;
+  OutstandingDue: number;
+  GrossProfit: number;
+  SalesByPerson: ISalesByPerson[];
+  DailyTrend: IDailySalesTrend[];
+}
+
+export interface ISalesHistoryResponse {
+  IsSuccess: boolean;
+  TotalCount: number;
+  Data: ISalesHistoryRow[];
+  Summary: ISalesHistorySummary;
 }
 
 export interface IDashboardResponse {

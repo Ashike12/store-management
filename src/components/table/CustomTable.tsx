@@ -172,6 +172,23 @@ const CustomTable = <T extends object>({
                 currentData.map((row, rowIndex) => (
                   <tr
                     key={rowIndex}
+                    tabIndex={isRowClickable ? 0 : undefined}
+                    role={isRowClickable ? 'link' : undefined}
+                    aria-label={
+                      isRowClickable
+                        ? `View ${formatContent(row, columns[0])}`
+                        : undefined
+                    }
+                    onClick={() => selectRow(row)}
+                    onKeyDown={event => {
+                      if (
+                        isRowClickable &&
+                        (event.key === 'Enter' || event.key === ' ')
+                      ) {
+                        event.preventDefault();
+                        selectRow(row);
+                      }
+                    }}
                     style={{transition: 'background-color 120ms ease'}}
                     onMouseEnter={e => {
                       e.currentTarget.style.backgroundColor =
@@ -179,15 +196,14 @@ const CustomTable = <T extends object>({
                     }}
                     onMouseLeave={e => {
                       e.currentTarget.style.backgroundColor = 'transparent';
-                    }}>
+                    }}
+                    className={isRowClickable ? 'cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--palette-primary-main)]' : ''}>
                     {columns.map(col => (
                       <td
                         key={col.key}
                         className={`border px-4 py-2 ${isRowClickable ? 'cursor-pointer' : ''}`}
                         style={{borderColor: tableBorderColor}}
-                        onClick={() =>
-                          isRowClickable && handleRowClick(row, false, true)
-                        }>
+                        >
                         <TextWrapper
                           variant={'Body1'}
                           content={formatContent(row, col)}

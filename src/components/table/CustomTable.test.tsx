@@ -85,4 +85,23 @@ describe('CustomTable states', () => {
       false,
     );
   });
+
+  it('opens a clickable desktop row from the keyboard', () => {
+    const handleRowClick = vi.fn();
+    renderTable({
+      data: [{name: 'Bonafide net', quantity: 12}],
+      isRowClickable: true,
+      handleRowClick,
+    });
+
+    fireEvent.keyDown(screen.getByRole('link', {name: 'View Bonafide net'}), {
+      key: 'Enter',
+    });
+
+    expect(handleRowClick).toHaveBeenCalledWith(
+      {name: 'Bonafide net', quantity: 12},
+      false,
+      true,
+    );
+  });
 });

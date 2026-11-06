@@ -15,6 +15,7 @@ const apiMocks = vi.hoisted(() => ({
   list: vi.fn(),
   detail: vi.fn(),
   transition: vi.fn(),
+  updateInfo: vi.fn(),
   refetchList: vi.fn(),
   refetchDetail: vi.fn(),
   isAdmin: true,
@@ -36,6 +37,7 @@ vi.mock('../src/core/store/api/ordersApi', () => ({
   useListOrdersQuery: apiMocks.list,
   useGetFollowUpOrderQuery: apiMocks.detail,
   useTransitionOrderMutation: () => [apiMocks.transition, {isLoading: false}],
+  useUpdateOrderInfoMutation: () => [apiMocks.updateInfo, {isLoading: false}],
 }));
 
 const order: FollowUpOrder = {
@@ -103,6 +105,9 @@ beforeEach(() => {
     refetch: apiMocks.refetchDetail,
   }));
   apiMocks.transition.mockReturnValue({
+    unwrap: vi.fn().mockResolvedValue({IsSuccess: true, Data: order}),
+  });
+  apiMocks.updateInfo.mockReturnValue({
     unwrap: vi.fn().mockResolvedValue({IsSuccess: true, Data: order}),
   });
   apiMocks.refetchDetail.mockReturnValue({

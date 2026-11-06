@@ -17,6 +17,7 @@ import {
   IconBox,
   IconBriefcase,
   IconBuildingStore,
+  IconChartBar,
   IconFileInvoice,
   IconLayoutDashboard,
   IconMenu2,
@@ -57,6 +58,12 @@ const navigationItems = [
     labelKey: 'INVOICE',
     path: '/invoice',
     Icon: IconFileInvoice,
+  },
+  {
+    type: 'sales-history',
+    labelKey: 'SALES_HISTORY',
+    path: '/sales-history',
+    Icon: IconChartBar,
   },
   {type: 'orders', labelKey: 'ORDERS', path: '/orders', Icon: IconPackage},
   {
