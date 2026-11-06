@@ -11,8 +11,11 @@ import {useGetUserQuery} from '@core/store/api';
 import {
   useCreateInvoiceMutation,
   useGetInvoiceQuery,
+  useListSalesUsersQuery,
   useUpdateInvoiceMutation,
 } from '@core/store/api/invoiceApi';
+import {useAppSelector} from '@core/store/hooks';
+import {selectCurrentUserId} from '@core/store/slices/auth.slice';
 import {useGetProductQuery} from '@core/store/api/product';
 import {useTheme} from '@mui/material/styles';
 import {
@@ -29,6 +32,8 @@ import {useNavigate, useParams, useSearchParams} from 'react-router-dom';
 import {invoiceValidationSchema} from '../schemas/invoice-form.schema';
 import {useEffect, useMemo, useState} from 'react';
 import {FormSkeleton} from '@components/loaders/AdminSkeleton';
+import {resolveInitialSalesUserId} from '../utils/salesUserSelection';
+import {normalizeInvoiceProducts} from '../utils/invoicePayload';
 
 const EMPTY_PRODUCT_ROW: IProductSellInfo = {
   ItemId: '',
@@ -43,6 +48,7 @@ const createInvoiceInitialValues: ICreateInvoicePayload = {
   ProductSellInfo: [{...EMPTY_PRODUCT_ROW}],
   WholeSalerId: '',
   InvoiceType: 'WHOLESALE',
+  SoldByUserId: '',
 };
 
 function DuePaymentAutofill({
@@ -111,12 +117,14 @@ const initialValuesOnUpdate = (
         : [{...EMPTY_PRODUCT_ROW}],
     WholeSalerId: invoiceDetails.WholeSalerId || '',
     InvoiceType: isDuePayment ? 'DUE_PAYMENT' : currentInvoiceType,
+    SoldByUserId: invoiceDetails.SoldByUserId || '',
   };
 };
 
 export default function InvoiceAddOrUpdate() {
   const theme = useTheme();
   const navigate = useNavigate();
+  const currentUserId = useAppSelector(selectCurrentUserId);
   let {id} = useParams();
   id = id === 'new' ? '' : id;
 
@@ -138,6 +146,11 @@ export default function InvoiceAddOrUpdate() {
     pageSize: 10,
     itemId: id ?? '',
   });
+  const {
+    data: salesUsersData,
+    isLoading: isSalesUsersLoading,
+    isError: isSalesUsersError,
+  } = useListSalesUsersQuery();
 
   const [createInvoice] = useCreateInvoiceMutation();
   const [updateInvoice] = useUpdateInvoiceMutation();
@@ -160,6 +173,7 @@ export default function InvoiceAddOrUpdate() {
 
   const productList = productData?.Data || [];
   const wholesalerList = userData?.Data || [];
+  const salesUsers = salesUsersData?.Data || [];
   const {data: wholesalerInvoices} = useGetInvoiceQuery(
     {pageNumber: 1, pageSize: 10000, itemId: '', wholesalerId: dueWholesalerId},
     {skip: !dueWholesalerId},
@@ -176,7 +190,12 @@ export default function InvoiceAddOrUpdate() {
     return due > 0 ? due : 0;
   }, [wholesalerInvoices?.Data]);
 
-  if (isProductLoading || isUserLoading || (isUpdate && isInvoiceLoading)) {
+  if (
+    isProductLoading ||
+    isUserLoading ||
+    isSalesUsersLoading ||
+    (isUpdate && isInvoiceLoading)
+  ) {
     return <FormSkeleton />;
   }
 
@@ -194,8 +213,11 @@ export default function InvoiceAddOrUpdate() {
 
     const payload: ICreateInvoicePayload = {
       ...values,
+      PaymentAmount: Number(values.PaymentAmount),
       InvoiceType: normalizedInvoiceType,
-      ProductSellInfo: isDuePaymentInvoice ? [] : values.ProductSellInfo,
+      ProductSellInfo: isDuePaymentInvoice
+        ? []
+        : normalizeInvoiceProducts(values.ProductSellInfo, isUpdate),
     };
 
     if (isUpdate) {
@@ -213,6 +235,7 @@ export default function InvoiceAddOrUpdate() {
     ? {
         ...createInvoiceInitialValues,
         WholeSalerId: preselectedWholesalerId,
+        SoldByUserId: resolveInitialSalesUserId(currentUserId, salesUsers),
       }
     : initialValuesOnUpdate(editingInvoice);
 
@@ -351,6 +374,40 @@ export default function InvoiceAddOrUpdate() {
                       <Tab value="WHOLESALE" label="Product Invoice" />
                       <Tab value="DUE_PAYMENT" label="Due Payment Invoice" />
                     </Tabs>
+                  </div>
+
+                  <div className="mb-4">
+                    <FormControl fullWidth error={isSalesUsersError}>
+                      <InputLabel id="invoice-seller-label" required>
+                        Sold by
+                      </InputLabel>
+                      <Select
+                        id="invoice-seller"
+                        labelId="invoice-seller-label"
+                        required
+                        name="SoldByUserId"
+                        label="Sold by"
+                        value={values.SoldByUserId}
+                        onChange={event =>
+                          setFieldValue('SoldByUserId', event.target.value)
+                        }>
+                        {salesUsers.map(user => (
+                          <MenuItem key={user.ItemId} value={user.ItemId}>
+                            {user.DisplayName} - {user.Email}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      <ErrorMessage
+                        name="SoldByUserId"
+                        component="div"
+                        className="mt-1 text-sm text-red-500"
+                      />
+                      {isSalesUsersError && (
+                        <div className="mt-1 text-sm text-red-500">
+                          Salespeople could not be loaded. Refresh before saving.
+                        </div>
+                      )}
+                    </FormControl>
                   </div>
 
                   <div className="mb-4">

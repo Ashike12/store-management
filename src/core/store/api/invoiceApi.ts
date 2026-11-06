@@ -2,7 +2,21 @@ import {createApi} from '@reduxjs/toolkit/query/react';
 import {ApiServiceBaseQuery} from './baseQueries';
 import {APP_CONFIG} from '@core/config/config';
 import {IAuthResponse} from '@core/interfaces/api/IAuthResponse';
-import { ICreateInvoicePayload, IDashboardResponse, IInvoice, IInvoiceResponse, IUpdateInvoicePayload } from '@core/interfaces/api/IInvoice';
+import {
+  ICreateInvoicePayload,
+  IDashboardResponse,
+  IListSalesUsersResponse,
+  IInvoiceResponse,
+  ISalesHistoryRequest,
+  ISalesHistoryResponse,
+  IUpdateInvoicePayload,
+} from '@core/interfaces/api/IInvoice';
+
+export const buildInvoiceBusinessRequest = <T,>(name: string, body: T) => ({
+  url: `${APP_CONFIG.businessUrl}/business/${name}`,
+  method: 'POST' as const,
+  body,
+});
 
 export const invoiceApi = createApi({
   reducerPath: 'invoiceApi',
@@ -18,15 +32,7 @@ export const invoiceApi = createApi({
           InvoiceType: mutation.payload.InvoiceType || (mutation.payload.WholeSalerId ? 'WHOLESALE' : 'CONSUMER'),
         },
       }),
-      async onQueryStarted(id, {dispatch, queryFulfilled}) {
-        // `onStart` side-effectdispatch(messageCreated('Fetching post...'))
-        try {
-          const {data} = await queryFulfilled;
-        } catch (err) {
-          // `onError` side-effectdispatch(messageCreated('Error fetching post!'))
-        }
-      },
-      invalidatesTags: (_result, _error) => [{type: 'invoice'}],
+      invalidatesTags: ['invoice'],
     }),
     updateInvoice: builder.mutation<IAuthResponse, {payload: IUpdateInvoicePayload}>({
       query: (mutation) => ({
@@ -34,15 +40,7 @@ export const invoiceApi = createApi({
         method: 'POST',
         body: mutation.payload,
       }),
-      async onQueryStarted(id, {dispatch, queryFulfilled}) {
-        // `onStart` side-effectdispatch(messageCreated('Fetching post...'))
-        try {
-          const {data} = await queryFulfilled;
-        } catch (err) {
-          // `onError` side-effectdispatch(messageCreated('Error fetching post!'))
-        }
-      },
-      invalidatesTags: (_result, _error) => [{type: 'invoice'}],
+      invalidatesTags: ['invoice'],
     }),
     deleteInvoice: builder.mutation<IAuthResponse, {id: string}>({
       query: (mutation) => ({
@@ -52,18 +50,10 @@ export const invoiceApi = createApi({
           ItemId: mutation.id,
         },
       }),
-      async onQueryStarted(id, {dispatch, queryFulfilled}) {
-        // `onStart` side-effectdispatch(messageCreated('Fetching post...'))
-        try {
-          const {data} = await queryFulfilled;
-        } catch (err) {
-          // `onError` side-effectdispatch(messageCreated('Error fetching post!'))
-        }
-      },
-      invalidatesTags: (_result, _error) => [{type: 'invoice'}],
+      invalidatesTags: ['invoice'],
     }),
     getInvoice: builder.query<IInvoiceResponse, {pageNumber: number, pageSize: number, itemId: string, wholesalerId?: string}>({
-      query: (mutation) => ({
+      query: mutation => ({
         url: `${APP_CONFIG.businessUrl}/business/GetInvoice?page=${mutation.pageNumber}&size=${mutation.pageSize}`,
         method: 'POST',
         body: {
@@ -71,23 +61,41 @@ export const invoiceApi = createApi({
           WholesalerId: mutation.wholesalerId,
         },
       }),
-      providesTags: (_result, _error) => [{type: 'invoice'}], // Cache by ID
+      providesTags: ['invoice'], // Cache by ID
       transformResponse: (response: IInvoiceResponse) => {
         return response;
       },
     }),
-    getDashboardData: builder.query<IDashboardResponse, {}>({
-      query: (mutation) => ({
+    getDashboardData: builder.query<IDashboardResponse, Record<string, never>>({
+      query: () => ({
         url: `${APP_CONFIG.businessUrl}/business/GetDashboardData`,
         method: 'POST',
         body: {},
       }),
-      providesTags: (_result, _error) => [{type: 'invoice'}], // Cache by ID
+      providesTags: ['invoice'], // Cache by ID
       transformResponse: (response: IDashboardResponse) => {
         return response;
       },
-    })
+    }),
+    listSalesUsers: builder.query<IListSalesUsersResponse, void>({
+      query: () => buildInvoiceBusinessRequest('ListSalesUsers', {}),
+    }),
+    getSalesHistory: builder.query<
+      ISalesHistoryResponse,
+      ISalesHistoryRequest
+    >({
+      query: payload => buildInvoiceBusinessRequest('GetSalesHistory', payload),
+      providesTags: ['invoice'],
+    }),
   }),
 });
 
-export const {useCreateInvoiceMutation, useUpdateInvoiceMutation, useDeleteInvoiceMutation, useGetInvoiceQuery, useGetDashboardDataQuery} = invoiceApi;
+export const {
+  useCreateInvoiceMutation,
+  useUpdateInvoiceMutation,
+  useDeleteInvoiceMutation,
+  useGetInvoiceQuery,
+  useGetDashboardDataQuery,
+  useListSalesUsersQuery,
+  useGetSalesHistoryQuery,
+} = invoiceApi;

@@ -11,7 +11,7 @@ import BASE_ROUTES from '@core/config/base-routes';
 import { useLocation, useNavigate } from 'react-router-dom';
 import IconCaretDoubleLeft from '@assets/icons/IconCaretDoubleLeft';
 import TextWrapper from '@components/text/TextWrapper';
-import { IconBox, IconBuildingStore, IconFileInvoice, IconLayoutDashboard, IconPackage, IconUserCog, IconBriefcase } from '@tabler/icons-react';
+import { IconBox, IconBuildingStore, IconChartBar, IconFileInvoice, IconLayoutDashboard, IconPackage, IconUserCog, IconBriefcase } from '@tabler/icons-react';
 import IconCaretDoubleRight from '@assets/icons/IconCaretDoubleRight';
 import cn from '@core/utils/cn';
 import {useAppThemeMode} from 'theme/theme-provider';
@@ -108,10 +108,17 @@ const menuItems = [
   },
   {
     type: BASE_ROUTES[4].pathMatch,
-    OutlineIcon: IconPackage,
-    FilledIcon: IconPackage,
+    OutlineIcon: IconChartBar,
+    FilledIcon: IconChartBar,
     text: BASE_ROUTES[4].title,
     path: BASE_ROUTES[4].path,
+  },
+  {
+    type: BASE_ROUTES[5].pathMatch,
+    OutlineIcon: IconPackage,
+    FilledIcon: IconPackage,
+    text: BASE_ROUTES[5].title,
+    path: BASE_ROUTES[5].path,
   },
   {
     type: 'employees',
@@ -180,6 +187,10 @@ export default function LeftSidebar({
 
     if (normalizedType === 'orders') {
       return firstSegment === 'orders';
+    }
+
+    if (normalizedType === 'sales-history') {
+      return firstSegment === 'sales-history';
     }
 
     if (normalizedType === 'employees' || normalizedType === 'employee-portal') {
