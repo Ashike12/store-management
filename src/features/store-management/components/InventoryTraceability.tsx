@@ -15,13 +15,17 @@ import {
   useMediaQuery,
 } from '@mui/material';
 import {alpha, useTheme} from '@mui/material/styles';
-import {IconCopy, IconPackage, IconRefresh, IconUsers, IconX} from '@tabler/icons-react';
+import {IconCopy, IconDownload, IconPackage, IconRefresh, IconUsers, IconX} from '@tabler/icons-react';
 import {useEffect, useState} from 'react';
 import {IProduct, IProductBatch} from '@core/interfaces/api/IProduct';
 import {
+  useLazyListBatchQrCodesQuery,
   useListBatchItemsQuery,
   useListProductBatchesQuery,
 } from '@core/store/api/product';
+import {batchQrFileName, buildBatchQrPdf} from '../utils/batchQrPdf';
+
+const QR_FETCH_PAGE_SIZE = 500;
 
 const PAGE_SIZE = 10;
 
@@ -51,6 +55,9 @@ const InventoryTraceability = ({
     message: string;
     severity: 'success' | 'error';
   } | null>(null);
+
+  const [fetchBatchQrCodes] = useLazyListBatchQrCodesQuery();
+  const [qrPdfBusy, setQrPdfBusy] = useState(false);
 
   const batches = useListProductBatchesQuery(
     {ProductId: product?.ItemId ?? '', Page: batchPage, Size: PAGE_SIZE},
@@ -109,6 +116,44 @@ const InventoryTraceability = ({
         message: 'Could not copy the batch ID. Please copy it manually.',
         severity: 'error',
       });
+    }
+  };
+
+  const downloadBatchQrCodes = async (batch: IProductBatch) => {
+    setQrPdfBusy(true);
+    try {
+      const urls: string[] = [];
+      let page = 1;
+      let total = batch.QuantityReceived;
+      while (urls.length < total) {
+        const response = await fetchBatchQrCodes({
+          BatchId: batch.BatchId,
+          Page: page,
+          Size: QR_FETCH_PAGE_SIZE,
+        }).unwrap();
+        total = response.TotalCount;
+        if (response.Data.length === 0) break;
+        urls.push(...response.Data.map(code => code.QrVerificationUrl));
+        page += 1;
+      }
+      if (urls.length === 0) throw new Error('This batch has no QR codes.');
+      const pdf = await buildBatchQrPdf(urls);
+      pdf.save(batchQrFileName(batch.BatchId));
+      setCopyFeedback({
+        message: `Downloaded ${urls.length} QR code${urls.length === 1 ? '' : 's'}`,
+        severity: 'success',
+      });
+    } catch (error) {
+      const message = (error as {data?: {message?: unknown}})?.data?.message;
+      setCopyFeedback({
+        message:
+          typeof message === 'string'
+            ? message
+            : 'Could not create the QR code PDF. Please try again.',
+        severity: 'error',
+      });
+    } finally {
+      setQrPdfBusy(false);
     }
   };
 
@@ -359,14 +404,32 @@ const InventoryTraceability = ({
                       Do not include the unit suffix shown in the serial numbers below.
                     </Typography>
                   </Box>
-                  <Button
-                    variant="contained"
-                    size="small"
-                    startIcon={<IconCopy size={16} />}
-                    onClick={() => copyBatchId(selectedBatch.BatchId)}
-                    sx={{flexShrink: 0}}>
-                    Copy batch ID
-                  </Button>
+                  <Stack direction="row" gap="8px" flexWrap="wrap" sx={{flexShrink: 0}}>
+                    <Button
+                      variant="contained"
+                      size="small"
+                      startIcon={<IconCopy size={16} />}
+                      onClick={() => copyBatchId(selectedBatch.BatchId)}>
+                      Copy batch ID
+                    </Button>
+                    <Tooltip
+                      title={
+                        product.QrVerificationEnabled
+                          ? 'PDF with one QR per unit, 40 per page'
+                          : 'Enable QR verification for this product first'
+                      }>
+                      <span>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          startIcon={<IconDownload size={16} />}
+                          disabled={!product.QrVerificationEnabled || qrPdfBusy}
+                          onClick={() => downloadBatchQrCodes(selectedBatch)}>
+                          {qrPdfBusy ? 'Preparing PDF…' : 'Download QR codes'}
+                        </Button>
+                      </span>
+                    </Tooltip>
+                  </Stack>
                 </Box>
               )}
 
