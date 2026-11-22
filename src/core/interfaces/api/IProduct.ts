@@ -79,6 +79,17 @@ export interface IBatchItem {
     CreatedDate: string;
 }
 
+export interface IBatchQrCode {
+    UnitIndex: number;
+    QrVerificationUrl: string;
+}
+
+export interface IListBatchQrCodesPayload {
+    BatchId: string;
+    Page: number;
+    Size: number;
+}
+
 export interface IPaginatedResponse<T> {
     IsSuccess: boolean;
     Data: T[];

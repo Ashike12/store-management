@@ -3,6 +3,7 @@ import {APP_CONFIG} from '../src/core/config/config';
 import {
   buildConfigureProductQrRequest,
   buildListBatchItemsRequest,
+  buildListBatchQrCodesRequest,
   buildListProductBatchesRequest,
 } from '../src/core/store/api/product';
 
@@ -22,6 +23,16 @@ describe('product inventory API contracts', () => {
 
     expect(buildListBatchItemsRequest(payload)).toEqual({
       url: `${APP_CONFIG.businessUrl}/business/ListBatchItems`,
+      method: 'POST',
+      body: payload,
+    });
+  });
+
+  it('constructs the admin-only batch QR codes request', () => {
+    const payload = {BatchId: 'batch-1', Page: 1, Size: 500};
+
+    expect(buildListBatchQrCodesRequest(payload)).toEqual({
+      url: `${APP_CONFIG.businessUrl}/business/ListBatchQrCodes`,
       method: 'POST',
       body: payload,
     });

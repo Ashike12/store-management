@@ -15,11 +15,20 @@ const apiMocks = vi.hoisted(() => ({
   items: vi.fn(),
   refetchBatches: vi.fn(),
   refetchItems: vi.fn(),
+  fetchQr: vi.fn(),
+  buildPdf: vi.fn(),
+  savePdf: vi.fn(),
 }));
 
 vi.mock('../src/core/store/api/product', () => ({
   useListProductBatchesQuery: apiMocks.batches,
   useListBatchItemsQuery: apiMocks.items,
+  useLazyListBatchQrCodesQuery: () => [apiMocks.fetchQr],
+}));
+
+vi.mock('../src/features/store-management/utils/batchQrPdf', () => ({
+  buildBatchQrPdf: apiMocks.buildPdf,
+  batchQrFileName: (id: string) => `batch-${id}-qr-codes.pdf`,
 }));
 
 const product: IProduct = {
@@ -54,10 +63,13 @@ const batches = [
   },
 ];
 
-const renderDrawer = () =>
+const renderDrawer = (overrides: Partial<IProduct> = {}) =>
   render(
     <ThemeProvider theme={createTheme()}>
-      <InventoryTraceability product={product} onClose={vi.fn()} />
+      <InventoryTraceability
+        product={{...product, ...overrides}}
+        onClose={vi.fn()}
+      />
     </ThemeProvider>,
   );
 
@@ -115,6 +127,62 @@ afterEach(() => {
 });
 
 describe('InventoryTraceability', () => {
+  describe('download QR codes', () => {
+    const qr = (n: number, start = 1) =>
+      Array.from({length: n}, (_, i) => ({
+        UnitIndex: start + i,
+        QrVerificationUrl: `https://shop.example.com/verify-product/t${start + i}`,
+      }));
+
+    beforeEach(() => {
+      apiMocks.buildPdf.mockResolvedValue({save: apiMocks.savePdf});
+    });
+
+    it('is disabled until QR verification is enabled for the product', async () => {
+      renderDrawer({QrVerificationEnabled: false});
+      expect(
+        await screen.findByRole('button', {name: 'Download QR codes'}),
+      ).toBeDisabled();
+    });
+
+    it('fetches every page of the batch and saves one PDF named after the batch', async () => {
+      apiMocks.fetchQr
+        .mockReturnValueOnce({
+          unwrap: () => Promise.resolve({IsSuccess: true, Data: qr(2), TotalCount: 3}),
+        })
+        .mockReturnValueOnce({
+          unwrap: () => Promise.resolve({IsSuccess: true, Data: qr(1, 3), TotalCount: 3}),
+        });
+      renderDrawer({QrVerificationEnabled: true});
+      fireEvent.click(
+        await screen.findByRole('button', {name: 'Download QR codes'}),
+      );
+      await waitFor(() => expect(apiMocks.savePdf).toHaveBeenCalledWith('batch-BATCH-001-qr-codes.pdf'));
+      expect(apiMocks.fetchQr).toHaveBeenNthCalledWith(1, {BatchId: 'BATCH-001', Page: 1, Size: 500});
+      expect(apiMocks.fetchQr).toHaveBeenNthCalledWith(2, {BatchId: 'BATCH-001', Page: 2, Size: 500});
+      expect(apiMocks.buildPdf).toHaveBeenCalledWith([
+        'https://shop.example.com/verify-product/t1',
+        'https://shop.example.com/verify-product/t2',
+        'https://shop.example.com/verify-product/t3',
+      ]);
+      expect(await screen.findByText('Downloaded 3 QR codes')).toBeInTheDocument();
+    });
+
+    it('shows the server message when the PDF cannot be prepared', async () => {
+      apiMocks.fetchQr.mockReturnValueOnce({
+        unwrap: () => Promise.reject({data: {message: 'Enable QR verification for this product'}}),
+      });
+      renderDrawer({QrVerificationEnabled: true});
+      fireEvent.click(
+        await screen.findByRole('button', {name: 'Download QR codes'}),
+      );
+      expect(
+        await screen.findByText('Enable QR verification for this product'),
+      ).toBeInTheDocument();
+      expect(apiMocks.savePdf).not.toHaveBeenCalled();
+    });
+  });
+
   it('loads batches, selects one, paginates items and copies an admin-only serial', async () => {
     renderDrawer();
 
